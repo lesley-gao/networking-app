@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: networkingapp
+metadata:
+  template: networkingapp@0.1.0
+  
+# Services to deploy
+services:
+  api:
+    project: .
+    language: dotnet
+    host: appservice
+    # Build configuration
+    build:
+      commands:
+        - dotnet restore
+        - dotnet publish --no-restore -c Release -o ./publish
+    # Runtime configuration  
+    config:
+      platform: linux
+      runtime: dotnetcore
+      version: "8.0"
+      
+# Infrastructure configuration
+infra:
+  provider: bicep
+  path: infra/bicep
+  
+# Hooks for additional automation
+hooks:
+  # Pre-deployment hooks
+  predeploy:
+    posix:
+      shell: pwsh
+      run: |
+        echo "Running pre-deployment checks..."
+        # Add any pre-deployment validation scripts here
+        
+  # Post-deployment hooks  
+  postdeploy:
+    posix:
+      shell: pwsh
+      run: |
+        echo "Running post-deployment configuration..."
+        # Add database migrations, seeding, etc.
+        
+# Pipeline configuration for CI/CD
+pipeline:
+  provider: github
+  variables:
+    # Environment variables for the pipeline
+    AZURE_TENANT_ID: ""
+    AZURE_CLIENT_ID: ""
+    AZURE_SUBSCRIPTION_ID: ""
+    
+# Deployment environments
+environments:
+  dev:
+    dotenv: .env.dev
+  test:  
+    dotenv: .env.test
+  prod:
+    dotenv: .env.prod

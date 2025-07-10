@@ -2,6 +2,7 @@ import PaymentForm from './PaymentForm';
 import { Meta, StoryObj } from '@storybook/react-vite';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { within, userEvent } from '@storybook/testing-library';
 
 const stripePromise = loadStripe('pk_test_12345'); // Replace with your test key
 
@@ -28,9 +29,23 @@ export const FilledAndSubmit: Story = {
     </Elements>
   ),
   play: async ({ canvasElement }) => {
-    // Example: fill and submit form (customize as needed)
-    // const canvas = within(canvasElement);
-    // await userEvent.type(canvas.getByLabelText('Card number'), '4242424242424242');
-    // await userEvent.click(canvas.getByRole('button', { name: /pay/i }));
+    const canvas = within(canvasElement);
+
+    // Wait for Stripe Elements to load
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Note: Stripe Elements create iframes that cannot be directly tested
+    // In a real app, we'd use Stripe's test mode and mock the response
+
+    // Find the button and click it
+    try {
+      const submitButton = canvas.getByRole('button', { name: /pay now/i });
+      await userEvent.click(submitButton);
+
+      // In a real test, you would add assertions here
+      // For example, checking for loading indicators or success messages
+    } catch (error) {
+      console.error('Button not found:', error);
+    }
   },
 };

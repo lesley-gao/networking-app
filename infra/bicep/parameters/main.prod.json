@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workloadName": {
+      "value": "netapp"
+    },
+    "location": {
+      "value": "australiaeast"
+    },
+    "environmentName": {
+      "value": "prod"
+    },
+    "ownerName": {
+      "value": "NetworkingApp Production Team"
+    },
+    "ownerEmail": {
+      "value": "prod-team@networkingapp.com"
+    },
+    "tags": {
+      "value": {
+        "project": "Flight Companion Platform",
+        "cost-center": "Production",
+        "department": "Operations"
+      }
+    }
+  }
+}
