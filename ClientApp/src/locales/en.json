@@ -1,0 +1,19 @@
+{
+  "welcome": "Welcome to NetworkingApp!",
+  "login": "Login",
+  "logout": "Logout",
+  "register": "Register",
+  "profile": "Profile",
+  "settings": "Settings",
+  "language": "Language",
+  "theme": "Theme",
+  "search": "Search",
+  "flightCompanion": "Flight Companion",
+  "pickupService": "Pickup Service",
+  "submit": "Submit",
+  "cancel": "Cancel",
+  "error": "An error occurred. Please try again.",
+  "success": "Operation successful!",
+  "communityGuidelines": "Community Guidelines",
+  "termsOfService": "Terms of Service"
+}

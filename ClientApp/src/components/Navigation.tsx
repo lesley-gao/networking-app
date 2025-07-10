@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavigationItem {
   text: string;
@@ -145,6 +146,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           )}
 
           <ThemeToggle />
+          <LanguageSwitcher />
         </Toolbar>
       </AppBar>
 

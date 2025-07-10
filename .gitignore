@@ -162,6 +162,15 @@ coverage*.json
 coverage*.xml
 coverage*.info
 
+# Code Coverage Reports
+CodeCoverage/
+**/coverage/
+**/coverage-reports/
+**/*.lcov
+**/*.cobertura.xml
+coverage-badge.svg
+frontend-coverage-badge.svg
+
 # Visual Studio code coverage results
 *.coverage
 *.coveragexml
