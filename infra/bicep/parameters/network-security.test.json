@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "test"
+    },
+    "location": {
+      "value": "Australia East"
+    },
+    "vnetName": {
+      "value": "vnet-flight-companion-test"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.1.0.0/16"
+    },
+    "appGatewaySubnetPrefix": {
+      "value": "10.1.1.0/24"
+    },
+    "appServiceSubnetPrefix": {
+      "value": "10.1.2.0/24"
+    },
+    "databaseSubnetPrefix": {
+      "value": "10.1.3.0/24"
+    },
+    "managementSubnetPrefix": {
+      "value": "10.1.4.0/24"
+    },
+    "appGatewaySkuName": {
+      "value": "WAF_v2"
+    },
+    "appGatewayCapacity": {
+      "value": 2
+    },
+    "enableDdosProtection": {
+      "value": false
+    },
+    "ddosProtectionPlanId": {
+      "value": ""
+    },
+    "appServiceName": {
+      "value": "app-flight-companion-test"
+    },
+    "sqlServerName": {
+      "value": "sql-flight-companion-test"
+    },
+    "keyVaultName": {
+      "value": "kv-flight-companion-test"
+    },
+    "logAnalyticsWorkspaceId": {
+      "value": ""
+    },
+    "tags": {
+      "value": {
+        "Project": "FlightCompanion",
+        "Environment": "Testing",
+        "Owner": "QATeam",
+        "CostCenter": "Testing"
+      }
+    }
+  }
+}

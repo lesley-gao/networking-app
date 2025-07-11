@@ -55,6 +55,35 @@ param emailSmtpPassword string = ''
 @description('The environment name for the deployment')
 param environmentName string = 'dev'
 
+// ----------------------------------------------------------------------------------------------------
+// Custom Domain & SSL Certificate Parameters
+// ----------------------------------------------------------------------------------------------------
+
+@description('Custom domain name for the application (e.g., flightcompanion.example.com)')
+param customDomainName string = ''
+
+@description('Enable custom domain configuration')
+param enableCustomDomain bool = false
+
+@description('Enable App Service authentication with Azure AD')
+param enableAuthentication bool = false
+
+@description('Azure AD tenant ID for authentication')
+param azureAdTenantId string = ''
+
+@description('Azure AD client ID for authentication')
+param azureAdClientId string = ''
+
+@description('Azure AD client secret for authentication')
+@secure()
+param azureAdClientSecret string = ''
+
+@description('Root domain for DNS zone (e.g., example.com)')
+param rootDomainName string = ''
+
+@description('Enable automatic DNS zone creation and management')
+param enableDnsZoneManagement bool = false
+
 // Merge the standard tags with any provided tags
 var defaultTags = {
   'azd-env-name': environmentName
@@ -156,6 +185,82 @@ module security 'modules/security.bicep' = {
 }
 
 // ----------------------------------------------------------------------------------------------------
+// Storage Module (Using Azure Verified Modules)
+// ----------------------------------------------------------------------------------------------------
+
+module storage 'modules/storage.bicep' = {
+  name: 'storage-${uniqueString(resourceGroup.id)}'
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: allTags
+    resourceToken: resourceToken
+    environmentName: environmentName
+    keyVaultId: security.outputs.keyVaultId
+    userAssignedIdentityId: security.outputs.userAssignedIdentityId
+    appServicePrincipalId: appService.outputs.appServicePrincipalId
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+  }
+  dependsOn: [
+    security
+  ]
+}
+
+// ----------------------------------------------------------------------------------------------------
+// CDN Module (Using Azure Verified Modules)
+// ----------------------------------------------------------------------------------------------------
+
+module cdn 'modules/cdn.bicep' = {
+  name: 'cdn-${uniqueString(resourceGroup.id)}'
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: allTags
+    resourceToken: resourceToken
+    environmentName: environmentName
+    storageAccountId: storage.outputs.storageAccountId
+    storageAccountEndpoint: storage.outputs.primaryEndpoint
+    appServiceId: appService.outputs.appServiceId
+    appServiceHostname: appService.outputs.appServiceHostName
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    enableHttpsRedirect: environmentName == 'prod'
+  }
+  dependsOn: [
+    storage
+    appService
+  ]
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Custom Domain & SSL Configuration Module
+// ----------------------------------------------------------------------------------------------------
+
+module customDomain 'modules/custom-domain.bicep' = if (enableCustomDomain && !empty(customDomainName)) {
+  name: 'custom-domain-${uniqueString(resourceGroup.id)}'
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: allTags
+    resourceToken: resourceToken
+    environmentName: environmentName
+    customDomainName: customDomainName
+    rootDomainName: !empty(rootDomainName) ? rootDomainName : customDomainName
+    appServiceId: appService.outputs.appServiceId
+    appServiceName: appService.outputs.appServiceName
+    appServiceDefaultHostname: appService.outputs.appServiceHostName
+    enableDnsZoneManagement: enableDnsZoneManagement
+    enableAuthentication: enableAuthentication
+    azureAdTenantId: azureAdTenantId
+    azureAdClientId: azureAdClientId
+    azureAdClientSecret: azureAdClientSecret
+  }
+  dependsOn: [
+    appService
+    security
+  ]
+}
+
+// ----------------------------------------------------------------------------------------------------
 // Monitoring Module (Using Azure Verified Modules)
 // ----------------------------------------------------------------------------------------------------
 
@@ -172,6 +277,33 @@ module monitoring 'modules/monitoring.bicep' = {
     logRetentionDays: environmentName == 'dev' ? 7 : (environmentName == 'test' ? 30 : 90)
     dailyQuotaGb: environmentName == 'dev' ? 5 : (environmentName == 'test' ? 10 : 50)
   }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Azure Monitor Alerts Module (Comprehensive Application Health Monitoring)
+// ----------------------------------------------------------------------------------------------------
+
+module alerts 'modules/alerts.bicep' = {
+  name: 'alerts-${uniqueString(resourceGroup.id)}'
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: allTags
+    resourceToken: resourceToken
+    environmentName: environmentName
+    applicationInsightsId: monitoring.outputs.applicationInsightsId
+    sqlDatabaseId: database.outputs.databaseId
+    appServiceId: application.outputs.appServiceId
+    actionGroupId: monitoring.outputs.actionGroupId
+    enableAlerts: true
+    criticalAlertEmail: ownerEmail
+    applicationName: workloadName
+  }
+  dependsOn: [
+    monitoring
+    database
+    application
+  ]
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -196,3 +328,25 @@ output SQL_DATABASE_NAME string = database.outputs.sqlDatabaseName
 
 output APPLICATION_INSIGHTS_NAME string = monitoring.outputs.applicationInsightsName
 output APPLICATION_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
+
+output STORAGE_ACCOUNT_NAME string = storage.outputs.storageAccountName
+output STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoint
+output VERIFICATION_CONTAINER_NAME string = storage.outputs.verificationContainerName
+output STORAGE_KEY_VAULT_REFERENCES object = storage.outputs.keyVaultReferences
+
+output CDN_PROFILE_NAME string = cdn.outputs.cdnProfileName
+output CDN_STATIC_ASSETS_ENDPOINT string = cdn.outputs.staticAssetsCdnEndpointUrl
+output CDN_APP_ENDPOINT string = cdn.outputs.appServiceCdnEndpointUrl
+output CDN_STATIC_ASSETS_HOSTNAME string = cdn.outputs.staticAssetsCdnEndpointHostname
+output CDN_APP_HOSTNAME string = cdn.outputs.appServiceCdnEndpointHostname
+
+// Custom Domain & SSL Outputs
+output CUSTOM_DOMAIN_NAME string = enableCustomDomain ? customDomain.outputs.customDomainName : ''
+output CUSTOM_DOMAIN_URL string = enableCustomDomain ? customDomain.outputs.customDomainUrl : ''
+output CUSTOM_DOMAIN_SSL_THUMBPRINT string = enableCustomDomain ? customDomain.outputs.certificateThumbprint : ''
+output CUSTOM_DOMAIN_SSL_EXPIRATION string = enableCustomDomain ? customDomain.outputs.certificateExpirationDate : ''
+output CUSTOM_DOMAIN_DNS_ZONE string = enableCustomDomain ? customDomain.outputs.dnsZoneName : ''
+output CUSTOM_DOMAIN_NAME_SERVERS array = enableCustomDomain ? customDomain.outputs.dnsZoneNameServers : []
+output CUSTOM_DOMAIN_AUTH_ENABLED bool = enableCustomDomain ? customDomain.outputs.authenticationEnabled : false
+output CUSTOM_DOMAIN_VALIDATION_RECORDS object = enableCustomDomain ? customDomain.outputs.dnsValidationRecords : {}
+output CUSTOM_DOMAIN_SECURITY_CONFIG object = enableCustomDomain ? customDomain.outputs.securityConfiguration : {}

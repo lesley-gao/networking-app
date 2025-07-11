@@ -1,0 +1,320 @@
+name: 🔒 Security & Dependency Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+# Security permissions for vulnerability scanning
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '18.x'
+
+jobs:
+  # =========================================================================
+  # DEPENDENCY VULNERABILITY SCANNING
+  # =========================================================================
+  
+  dependency-scan:
+    name: 🔍 Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+    
+    - name: 🔍 .NET Dependency Scan
+      run: |
+        cd backend
+        dotnet restore
+        
+        # Check for vulnerable packages
+        dotnet list package --vulnerable --include-transitive > vulnerable-packages.txt
+        
+        if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+          echo "❌ Vulnerable .NET packages found:"
+          cat vulnerable-packages.txt
+          echo "::warning::Vulnerable .NET packages detected. Review and update dependencies."
+        else
+          echo "✅ No vulnerable .NET packages found"
+        fi
+    
+    - name: 🔍 NPM Security Audit
+      run: |
+        cd frontend
+        npm ci --silent
+        
+        # Run npm audit
+        npm audit --audit-level=moderate > npm-audit.txt || true
+        
+        if grep -q "found.*vulnerabilities" npm-audit.txt; then
+          echo "⚠️ NPM vulnerabilities found:"
+          cat npm-audit.txt
+          echo "::warning::NPM vulnerabilities detected. Run 'npm audit fix' to resolve."
+        else
+          echo "✅ No NPM vulnerabilities found"
+        fi
+    
+    - name: 📊 Upload Dependency Scan Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-scan-results
+        path: |
+          backend/vulnerable-packages.txt
+          frontend/npm-audit.txt
+        retention-days: 30
+
+  # =========================================================================
+  # CODE SECURITY ANALYSIS
+  # =========================================================================
+  
+  code-security-analysis:
+    name: 🛡️ Code Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🔒 Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: 'csharp,javascript'
+        queries: +security-and-quality
+    
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: 🏗️ Build Backend for Analysis
+      run: |
+        cd backend
+        dotnet restore
+        dotnet build --configuration Release
+    
+    - name: 🟢 Setup Node.js for Frontend Analysis
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+    
+    - name: 🏗️ Build Frontend for Analysis
+      run: |
+        cd frontend
+        npm ci --silent
+        npm run build
+    
+    - name: 🔍 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: '/language:csharp,javascript'
+
+  # =========================================================================
+  # INFRASTRUCTURE SECURITY SCAN
+  # =========================================================================
+  
+  infrastructure-security:
+    name: 🏗️ Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Scan Azure Bicep Templates
+      run: |
+        echo "🔍 Scanning Bicep templates for security issues..."
+        
+        # Install Azure CLI and Bicep
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        az bicep install
+        
+        # Validate Bicep templates
+        cd infra/bicep
+        az bicep build --file main.bicep
+        
+        echo "✅ Bicep template validation completed"
+    
+    - name: 🔒 Security Policy Validation
+      run: |
+        echo "🔍 Validating security policies in Bicep templates..."
+        
+        # Check for required security configurations
+        SECURITY_ISSUES=0
+        
+        # Check if HTTPS only is enforced
+        if grep -r "httpsOnly.*true" infra/bicep/; then
+          echo "✅ HTTPS enforcement found"
+        else
+          echo "⚠️ HTTPS enforcement not found in App Service configuration"
+          SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+        fi
+        
+        # Check for minimum TLS version
+        if grep -r "minTlsVersion" infra/bicep/; then
+          echo "✅ TLS version configuration found"
+        else
+          echo "⚠️ Minimum TLS version not explicitly set"
+          SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+        fi
+        
+        # Check for managed identity usage
+        if grep -r "identity.*type.*SystemAssigned" infra/bicep/; then
+          echo "✅ Managed Identity configuration found"
+        else
+          echo "⚠️ Managed Identity not configured"
+          SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+        fi
+        
+        if [ $SECURITY_ISSUES -gt 0 ]; then
+          echo "::warning::$SECURITY_ISSUES security configuration issues found"
+        else
+          echo "✅ All security policy checks passed"
+        fi
+
+  # =========================================================================
+  # SECRET SCANNING
+  # =========================================================================
+  
+  secret-scanning:
+    name: 🔐 Secret & Credential Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🔍 Scan for Secrets with TruffleHog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+    
+    - name: 🔍 Check for Common Secret Patterns
+      run: |
+        echo "🔍 Scanning for common secret patterns..."
+        
+        SECRET_PATTERNS=(
+          "password\s*=\s*['\"][^'\"]*['\"]"
+          "apikey\s*=\s*['\"][^'\"]*['\"]"
+          "connectionstring\s*=\s*['\"][^'\"]*['\"]"
+          "AKIA[0-9A-Z]{16}"  # AWS Access Key
+          "sk_live_[0-9a-zA-Z]{24}"  # Stripe Live Key
+          "xoxb-[0-9]{11}-[0-9]{11}-[0-9a-zA-Z]{24}"  # Slack Bot Token
+        )
+        
+        SECRETS_FOUND=0
+        
+        for pattern in "${SECRET_PATTERNS[@]}"; do
+          if grep -r -i "$pattern" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=bin --exclude-dir=obj; then
+            echo "⚠️ Potential secret pattern found: $pattern"
+            SECRETS_FOUND=$((SECRETS_FOUND + 1))
+          fi
+        done
+        
+        if [ $SECRETS_FOUND -gt 0 ]; then
+          echo "::warning::$SECRETS_FOUND potential secret patterns found. Review and remove any hardcoded secrets."
+        else
+          echo "✅ No obvious secret patterns detected"
+        fi
+
+  # =========================================================================
+  # DOCKER SECURITY SCAN
+  # =========================================================================
+  
+  container-security:
+    name: 🐳 Container Security Scan
+    runs-on: ubuntu-latest
+    if: false  # Enable when Docker containers are added
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Scan Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+        failure-threshold: warning
+    
+    - name: 🏗️ Build Docker Image
+      run: |
+        docker build -t flight-companion:latest .
+    
+    - name: 🔒 Scan Image for Vulnerabilities
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'flight-companion:latest'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: 📊 Upload Trivy Results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # =========================================================================
+  # SECURITY SUMMARY REPORT
+  # =========================================================================
+  
+  security-summary:
+    name: 📊 Security Summary Report
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security-analysis, infrastructure-security, secret-scanning]
+    if: always()
+    
+    steps:
+    - name: 📊 Generate Security Summary
+      run: |
+        echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Scan Type | Status | Notes |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Dependency Scan | ${{ needs.dependency-scan.result }} | .NET & NPM package vulnerabilities |" >> $GITHUB_STEP_SUMMARY
+        echo "| Code Analysis | ${{ needs.code-security-analysis.result }} | CodeQL security analysis |" >> $GITHUB_STEP_SUMMARY
+        echo "| Infrastructure | ${{ needs.infrastructure-security.result }} | Azure Bicep template security |" >> $GITHUB_STEP_SUMMARY
+        echo "| Secret Scanning | ${{ needs.secret-scanning.result }} | Credential & secret detection |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Recommendations" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔄 Run security scans regularly as part of CI/CD" >> $GITHUB_STEP_SUMMARY
+        echo "- 📊 Review CodeQL security findings in the Security tab" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔐 Ensure all secrets are stored in Azure Key Vault or GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 Keep dependencies updated to latest secure versions" >> $GITHUB_STEP_SUMMARY
+        echo "- 🏗️ Follow Azure security best practices for infrastructure" >> $GITHUB_STEP_SUMMARY
+    
+    - name: 🚨 Security Alert on Failure
+      if: contains(needs.*.result, 'failure')
+      run: |
+        echo "::error::Security scan failures detected. Review results and address issues before deployment."
+        exit 1

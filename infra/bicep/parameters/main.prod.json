@@ -48,8 +48,20 @@
         "cost-center": "Production",
         "department": "Operations",
         "environment": "prod",
-        "criticality": "high"
+        "criticality": "high",
+        "monitoring": "enabled",
+        "alerts": "critical",
+        "compliance": "required"
       }
+    },
+    "enableAlerts": {
+      "value": true
+    },
+    "alertEmailAddress": {
+      "value": "prod-alerts@networkingapp.com"
+    },
+    "alertingEnvironment": {
+      "value": "production"
     },
     "stripeApiKey": {
       "value": ""
@@ -62,6 +74,30 @@
     },
     "emailSmtpPassword": {
       "value": ""
+    },
+    "customDomainName": {
+      "value": "flightcompanion.example.com"
+    },
+    "enableCustomDomain": {
+      "value": true
+    },
+    "enableAuthentication": {
+      "value": true
+    },
+    "azureAdTenantId": {
+      "value": ""
+    },
+    "azureAdClientId": {
+      "value": ""
+    },
+    "azureAdClientSecret": {
+      "value": ""
+    },
+    "rootDomainName": {
+      "value": "example.com"
+    },
+    "enableDnsZoneManagement": {
+      "value": false
     }
   }
 }

@@ -1,5 +1,5 @@
 // ClientApp/src/App.tsx - Fixed Router nesting issue
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom'; // Remove BrowserRouter import
 import { Provider } from 'react-redux';
 import { store } from './store/store';
@@ -8,8 +8,9 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { NotificationSystem } from './components/ui/NotificationSystem';
 import { LoadingOverlay } from './components/ui/Loading';
 import { Layout } from './components/Layout';
-import { useAppSelector } from './store/hooks';
+import { useAppSelector, useAppDispatch } from './store/hooks';
 import { useSignalR } from './hooks/useSignalR';
+import { getCurrentUser } from './store/slices/authSlice';
 
 // Pages
 import FlightCompanion from './components/FlightCompanion';
@@ -18,12 +19,23 @@ import UserProfile from './components/UserProfile';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import TermsOfService from './components/TermsOfService';
 import AdminDashboard from './components/admin/AdminDashboard';
+import Login from './components/Login';
+import Register from './components/Register';
 import { FetchData } from './components/FetchData';
 import SignalRTest from './components/SignalRTest';
 
 // App Content Component (needs access to Redux state)
 const AppContent: React.FC = () => {
+  const dispatch = useAppDispatch();
   const isLoading = useAppSelector((state) => state.ui.isLoading);
+
+  // Initialize authentication on app load
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(getCurrentUser());
+    }
+  }, [dispatch]);
 
   // Initialize SignalR
   useSignalR();
@@ -46,6 +58,8 @@ const AppContent: React.FC = () => {
           <Route path="/community-guidelines" element={<CommunityGuidelines />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/fetch-data" element={<FetchData />} />
           <Route path="/signalr-test" element={<SignalRTest />} />
         </Routes>

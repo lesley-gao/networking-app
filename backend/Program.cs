@@ -11,8 +11,14 @@ using NetworkingApp.Services;
 using NetworkingApp.Hubs; // Add this using statement
 using Stripe;
 using Microsoft.AspNetCore.DataProtection; // Add this using directive
+using NetworkingApp.Configuration; // Add this for logging configuration
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure comprehensive logging early in the pipeline
+builder.Services.AddComprehensiveLogging(builder.Configuration, builder.Environment);
+builder.Services.AddStructuredLoggingServices();
 
 // Stripe configuration
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
@@ -32,22 +38,6 @@ builder.Services.AddApplicationInsightsTelemetry(options =>
     options.EnablePerformanceCounterCollectionModule = true;
     options.EnableRequestTrackingTelemetryModule = true;
     options.EnableDependencyTrackingTelemetryModule = true;
-});
-
-// Configure Application Insights logging
-builder.Services.AddLogging(logging =>
-{
-    logging.AddApplicationInsights(
-        configureTelemetryConfiguration: (config) =>
-            config.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights"),
-        configureApplicationInsightsLoggerOptions: (options) => { }
-    );
-    
-    // Set log levels
-    logging.SetMinimumLevel(LogLevel.Information);
-    logging.AddFilter("Microsoft", LogLevel.Warning);
-    logging.AddFilter("System", LogLevel.Warning);
-    logging.AddFilter("NetworkingApp", LogLevel.Information);
 });
 
 // Configure ASP.NET Core Identity
@@ -138,6 +128,7 @@ builder.Services.AddScoped<IDataProtectionService, DataProtectionService>(); // 
 builder.Services.AddScoped<PaymentService>(); // Register PaymentService
 builder.Services.AddScoped<IEmergencyService, EmergencyService>(); // Register EmergencyService
 builder.Services.AddScoped<ITelemetryService, ApplicationInsightsTelemetryService>(); // Register TelemetryService
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>(); // Register BlobStorageService
 
 // Configure Email Service
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
@@ -182,7 +173,8 @@ builder.Services.AddDataProtection()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline with comprehensive logging
+app.UseComprehensiveLogging();
 
 // Add error handling middleware (should be one of the first middlewares)
 app.UseMiddleware<ErrorHandlingMiddleware>();

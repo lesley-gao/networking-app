@@ -17,7 +17,16 @@ param(
     [switch]$SkipTests,
     
     [Parameter(Mandatory = $false)]
-    [switch]$Force
+    [switch]$Force,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$SkipNetworkSecurity,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$NetworkSecurityOnly,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$SubscriptionId
 )
 
 # Set error action preference
@@ -46,6 +55,9 @@ Write-Info "========================================="
 Write-Info "  NetworkingApp Azure Deployment"
 Write-Info "  Environment: $Environment"
 Write-Info "  Location: $Location"
+if ($NetworkSecurityOnly) {
+    Write-Info "  Mode: Network Security Only"
+}
 Write-Info "========================================="
 
 try {
@@ -148,20 +160,80 @@ try {
         Pop-Location
     }
     
+    # Get subscription ID if not provided
+    if (-not $SubscriptionId) {
+        Write-Info "Getting current subscription..."
+        $currentSubscription = az account show --output json | ConvertFrom-Json
+        $SubscriptionId = $currentSubscription.id
+        Write-Info "Using subscription: $($currentSubscription.name)"
+    }
+    
     # Deploy infrastructure and application
     Write-Info "Deploying to Azure..."
+    
+    # Deploy network security infrastructure first (if not skipped)
+    if (-not $SkipNetworkSecurity) {
+        Write-Info "Deploying network security infrastructure..."
+        
+        $networkSecurityScript = Join-Path $PSScriptRoot "Deploy-NetworkSecurity.ps1"
+        if (Test-Path $networkSecurityScript) {
+            try {
+                & $networkSecurityScript -Environment $Environment -SubscriptionId $SubscriptionId
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "Network security deployment encountered issues but continuing..."
+                }
+                else {
+                    Write-Success "Network security infrastructure deployed successfully"
+                }
+            }
+            catch {
+                Write-Warning "Network security deployment failed: $($_.Exception.Message)"
+                Write-Warning "Continuing with main deployment..."
+            }
+        }
+        else {
+            Write-Warning "Network security deployment script not found at: $networkSecurityScript"
+        }
+    }
+    
+    # If network security only mode, exit here
+    if ($NetworkSecurityOnly) {
+        Write-Success "Network security deployment completed!"
+        return
+    }
     
     $deployArgs = @("up", "--environment", $Environment)
     if ($Force) {
         $deployArgs += "--force"
     }
-    
+
     azd @deployArgs
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to deploy to Azure"
     }
-    
+
     Write-Success "Deployment completed successfully!"
+    
+    # Validate network security deployment
+    if (-not $SkipNetworkSecurity) {
+        Write-Info "Validating network security configuration..."
+        
+        $networkTestScript = Join-Path $PSScriptRoot "Test-NetworkSecurity.ps1"
+        if (Test-Path $networkTestScript) {
+            try {
+                & $networkTestScript -Environment $Environment -SubscriptionId $SubscriptionId
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Network security validation passed"
+                }
+                else {
+                    Write-Warning "Network security validation completed with warnings"
+                }
+            }
+            catch {
+                Write-Warning "Network security validation failed: $($_.Exception.Message)"
+            }
+        }
+    }
     
     # Get deployment outputs
     Write-Info "Retrieving deployment information..."

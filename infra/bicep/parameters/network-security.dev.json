@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "dev"
+    },
+    "location": {
+      "value": "Australia East"
+    },
+    "vnetName": {
+      "value": "vnet-flight-companion-dev"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.0.0.0/16"
+    },
+    "appGatewaySubnetPrefix": {
+      "value": "10.0.1.0/24"
+    },
+    "appServiceSubnetPrefix": {
+      "value": "10.0.2.0/24"
+    },
+    "databaseSubnetPrefix": {
+      "value": "10.0.3.0/24"
+    },
+    "managementSubnetPrefix": {
+      "value": "10.0.4.0/24"
+    },
+    "appGatewaySkuName": {
+      "value": "Standard_v2"
+    },
+    "appGatewayCapacity": {
+      "value": 1
+    },
+    "enableDdosProtection": {
+      "value": false
+    },
+    "ddosProtectionPlanId": {
+      "value": ""
+    },
+    "appServiceName": {
+      "value": "app-flight-companion-dev"
+    },
+    "sqlServerName": {
+      "value": "sql-flight-companion-dev"
+    },
+    "keyVaultName": {
+      "value": "kv-flight-companion-dev"
+    },
+    "logAnalyticsWorkspaceId": {
+      "value": ""
+    },
+    "tags": {
+      "value": {
+        "Project": "FlightCompanion",
+        "Environment": "Development",
+        "Owner": "DevTeam",
+        "CostCenter": "Development"
+      }
+    }
+  }
+}

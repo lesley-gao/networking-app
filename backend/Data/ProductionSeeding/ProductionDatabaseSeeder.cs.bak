@@ -1,0 +1,310 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using NetworkingApp.Data;
+using NetworkingApp.Models;
+using NetworkingApp.Models.DTOs;
+
+namespace NetworkingApp.Data.ProductionSeeding
+{
+    /// <summary>
+    /// Production database seeder for essential data initialization
+    /// Only seeds critical production data - no test/sample data
+    /// </summary>
+    public static class ProductionDatabaseSeeder
+    {
+        /// <summary>
+        /// Seeds essential production data
+        /// </summary>
+        /// <param name="context">Database context</param>
+        /// <param name="userManager">User manager for identity operations</param>
+        /// <param name="roleManager">Role manager for role operations</param>
+        /// <returns>True if seeding completed successfully</returns>
+        public static async Task<bool> SeedEssentialDataAsync(
+            ApplicationDbContext context,
+            UserManager<User> userManager,
+            RoleManager<IdentityRole<int>> roleManager)
+        {
+            try
+            {
+                // Ensure database is created
+                await context.Database.EnsureCreatedAsync();
+
+                // Seed in specific order due to dependencies
+                await SeedRolesAsync(roleManager);
+                await SeedAdminUserAsync(userManager);
+                await SeedSystemSettingsAsync(context);
+                await SeedNotificationTemplatesAsync(context);
+                await SeedVerificationTypesAsync(context);
+
+                await context.SaveChangesAsync();
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log error (in production, use proper logging)
+                Console.WriteLine($"Production seeding failed: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Seeds essential user roles for the application
+        /// </summary>
+        private static async Task SeedRolesAsync(RoleManager<IdentityRole<int>> roleManager)
+        {
+            var roles = new[]
+            {
+                "Administrator",
+                "User",
+                "Support",
+                "Moderator"
+            };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    var identityRole = new IdentityRole<int>(role);
+                    await roleManager.CreateAsync(identityRole);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Seeds the default administrator user
+        /// </summary>
+        private static async Task SeedAdminUserAsync(UserManager<User> userManager)
+        {
+            const string adminEmail = "admin@flightcompanion.com";
+            
+            var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+            if (existingAdmin != null)
+            {
+                return; // Admin already exists
+            }
+
+            var adminUser = new User
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FirstName = "System",
+                LastName = "Administrator",
+                PhoneNumberConfirmed = true,
+                DateOfBirth = new DateTime(1990, 1, 1),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            // In production, use a strong password and consider using Azure Key Vault
+            var result = await userManager.CreateAsync(adminUser, "Admin@123!Production");
+            
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Administrator");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+        }
+
+        /// <summary>
+        /// Seeds essential system settings
+        /// </summary>
+        private static async Task SeedSystemSettingsAsync(ApplicationDbContext context)
+        {
+            if (await context.UserSettings.AnyAsync())
+            {
+                return; // Settings already exist
+            }
+
+            var systemSettings = new[]
+            {
+                new UserSettings
+                {
+                    UserId = 1, // Admin user
+                    EmailNotifications = true,
+                    PushNotifications = true,
+                    SmsNotifications = false,
+                    PrivacyLevel = "Standard",
+                    LocationSharing = true,
+                    MatchPreferences = "{}",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }
+            };
+
+            await context.UserSettings.AddRangeAsync(systemSettings);
+        }
+
+        /// <summary>
+        /// Seeds essential notification templates
+        /// </summary>
+        private static async Task SeedNotificationTemplatesAsync(ApplicationDbContext context)
+        {
+            if (await context.Notifications.AnyAsync())
+            {
+                return; // Templates already exist
+            }
+
+            // These are system-level notification templates
+            var notificationTemplates = new[]
+            {
+                new Notification
+                {
+                    UserId = 1, // System/Admin user
+                    Title = "Welcome to Flight Companion",
+                    Message = "Welcome to Flight Companion! Your account has been successfully created.",
+                    Type = "System",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Notification
+                {
+                    UserId = 1,
+                    Title = "Account Verification Required",
+                    Message = "Please verify your account to access all features.",
+                    Type = "Verification",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Notification
+                {
+                    UserId = 1,
+                    Title = "New Flight Companion Match",
+                    Message = "You have a new potential flight companion match!",
+                    Type = "Match",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Notification
+                {
+                    UserId = 1,
+                    Title = "Pickup Request Received",
+                    Message = "You have received a new pickup request.",
+                    Type = "Pickup",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Notification
+                {
+                    UserId = 1,
+                    Title = "Payment Processed",
+                    Message = "Your payment has been successfully processed.",
+                    Type = "Payment",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            await context.Notifications.AddRangeAsync(notificationTemplates);
+        }
+
+        /// <summary>
+        /// Seeds essential verification document types
+        /// </summary>
+        private static async Task SeedVerificationTypesAsync(ApplicationDbContext context)
+        {
+            if (await context.VerificationDocuments.AnyAsync())
+            {
+                return; // Verification types already exist
+            }
+
+            var verificationTypes = new[]
+            {
+                new VerificationDocument
+                {
+                    UserId = 1, // System reference
+                    DocumentType = "GovernmentID",
+                    Status = "Template",
+                    DocumentUrl = "/templates/government-id",
+                    UploadedAt = DateTime.UtcNow,
+                    ReviewedAt = DateTime.UtcNow
+                },
+                new VerificationDocument
+                {
+                    UserId = 1,
+                    DocumentType = "DriversLicense",
+                    Status = "Template",
+                    DocumentUrl = "/templates/drivers-license",
+                    UploadedAt = DateTime.UtcNow,
+                    ReviewedAt = DateTime.UtcNow
+                },
+                new VerificationDocument
+                {
+                    UserId = 1,
+                    DocumentType = "Passport",
+                    Status = "Template",
+                    DocumentUrl = "/templates/passport",
+                    UploadedAt = DateTime.UtcNow,
+                    ReviewedAt = DateTime.UtcNow
+                },
+                new VerificationDocument
+                {
+                    UserId = 1,
+                    DocumentType = "StudentID",
+                    Status = "Template",
+                    DocumentUrl = "/templates/student-id",
+                    UploadedAt = DateTime.UtcNow,
+                    ReviewedAt = DateTime.UtcNow
+                }
+            };
+
+            await context.VerificationDocuments.AddRangeAsync(verificationTypes);
+        }
+
+        /// <summary>
+        /// Validates that essential production data exists
+        /// </summary>
+        /// <param name="context">Database context</param>
+        /// <returns>True if all essential data exists</returns>
+        public static async Task<bool> ValidateProductionDataAsync(ApplicationDbContext context)
+        {
+            try
+            {
+                // Check essential tables have data
+                var hasUsers = await context.Users.AnyAsync();
+                var hasRoles = await context.Roles.AnyAsync();
+                var hasAdminUser = await context.Users.AnyAsync(u => u.Email == "admin@flightcompanion.com");
+
+                if (!hasUsers || !hasRoles || !hasAdminUser)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets production data statistics
+        /// </summary>
+        /// <param name="context">Database context</param>
+        /// <returns>Dictionary with data counts</returns>
+        public static async Task<Dictionary<string, int>> GetProductionDataStatsAsync(ApplicationDbContext context)
+        {
+            return new Dictionary<string, int>
+            {
+                ["Users"] = await context.Users.CountAsync(),
+                ["Roles"] = await context.Roles.CountAsync(),
+                ["UserSettings"] = await context.UserSettings.CountAsync(),
+                ["Notifications"] = await context.Notifications.CountAsync(),
+                ["VerificationDocuments"] = await context.VerificationDocuments.CountAsync(),
+                ["FlightCompanionRequests"] = await context.FlightCompanionRequests.CountAsync(),
+                ["FlightCompanionOffers"] = await context.FlightCompanionOffers.CountAsync(),
+                ["PickupRequests"] = await context.PickupRequests.CountAsync(),
+                ["PickupOffers"] = await context.PickupOffers.CountAsync(),
+                ["Payments"] = await context.Payments.CountAsync(),
+                ["Ratings"] = await context.Ratings.CountAsync(),
+                ["Messages"] = await context.Messages.CountAsync()
+            };
+        }
+    }
+}

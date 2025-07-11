@@ -9,11 +9,14 @@ import {
   ListItem,
   ListItemText,
   Box,
+  Button,
   useMediaQuery,
   useTheme as useMuiTheme,
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { clearAuth } from '../store/slices/authSlice';
 import { ThemeToggle } from './ThemeToggle';
 
 export const NavMenu: React.FC = () => {
@@ -21,18 +24,34 @@ export const NavMenu: React.FC = () => {
   const theme = useMuiTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-const navigationItems = [
-  { text: 'Home', path: '/' },
-  { text: 'Flight Companion', path: '/flight-companion' },
-  { text: 'Airport Pickup', path: '/pickup' },
-  { text: 'Profile', path: '/profile' }, // Add this
-  { text: 'Counter', path: '/counter' },
-  { text: 'Fetch Data', path: '/fetch-data' },
-];
+  const authenticatedItems = [
+    { text: 'Home', path: '/' },
+    { text: 'Flight Companion', path: '/flight-companion' },
+    { text: 'Airport Pickup', path: '/pickup' },
+    { text: 'Profile', path: '/profile' },
+    { text: 'Fetch Data', path: '/fetch-data' },
+  ];
+
+  const unauthenticatedItems = [
+    { text: 'Home', path: '/' },
+    { text: 'Flight Companion', path: '/flight-companion' },
+    { text: 'Airport Pickup', path: '/pickup' },
+  ];
+
+  const navigationItems = isAuthenticated ? authenticatedItems : unauthenticatedItems;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleLogout = () => {
+    dispatch(clearAuth());
+    navigate('/');
   };
 
   const drawer = (
@@ -52,6 +71,21 @@ const navigationItems = [
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
+        {!isAuthenticated && (
+          <>
+            <ListItem component={Link} to="/login" sx={{ color: 'inherit', textDecoration: 'none' }}>
+              <ListItemText primary="Login" />
+            </ListItem>
+            <ListItem component={Link} to="/register" sx={{ color: 'inherit', textDecoration: 'none' }}>
+              <ListItemText primary="Register" />
+            </ListItem>
+          </>
+        )}
+        {isAuthenticated && (
+          <ListItem button onClick={handleLogout}>
+            <ListItemText primary="Logout" />
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -87,7 +121,7 @@ const navigationItems = [
           </Typography>
 
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               {navigationItems.map((item) => (
                 <Typography
                   key={item.text}
@@ -107,6 +141,41 @@ const navigationItems = [
                   {item.text}
                 </Typography>
               ))}
+              
+              {!isAuthenticated ? (
+                <>
+                  <Button
+                    component={Link}
+                    to="/login"
+                    color="inherit"
+                    sx={{ ml: 1 }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    color="inherit"
+                    variant="outlined"
+                    sx={{ ml: 1 }}
+                  >
+                    Register
+                  </Button>
+                </>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ color: 'inherit' }}>
+                    Welcome, {user?.firstName || 'User'}
+                  </Typography>
+                  <Button
+                    color="inherit"
+                    onClick={handleLogout}
+                    sx={{ ml: 1 }}
+                  >
+                    Logout
+                  </Button>
+                </Box>
+              )}
             </Box>
           )}
 

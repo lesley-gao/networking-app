@@ -87,7 +87,7 @@ export const getCurrentUser = createAsyncThunk(
         return rejectWithValue('noToken');
       }
 
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/user/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

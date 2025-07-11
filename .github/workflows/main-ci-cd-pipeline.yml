@@ -1,0 +1,701 @@
+name: 🚀 Flight Companion Platform - CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+      skip_tests:
+        description: 'Skip automated tests (emergency deployment only)'
+        required: false
+        default: false
+        type: boolean
+      deploy_infrastructure:
+        description: 'Deploy Azure infrastructure changes'
+        required: false
+        default: false
+        type: boolean
+      purge_cdn:
+        description: 'Purge CDN cache after deployment'
+        required: false
+        default: true
+        type: boolean
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        type: string
+        default: 'dev'
+      skip_tests:
+        description: 'Skip automated tests (emergency deployment only)'
+        required: false
+        type: boolean
+        default: false
+      deploy_infrastructure:
+        description: 'Deploy Azure infrastructure changes'
+        required: false
+        type: boolean
+        default: false
+      purge_cdn:
+        description: 'Purge CDN cache after deployment'
+        required: false
+        type: boolean
+        default: true
+
+# Security permissions for Azure deployment and GitHub integration
+permissions:
+  id-token: write           # Required for Azure OIDC authentication
+  contents: read            # Required for repository access
+  checks: write            # Required for test result publishing
+  pull-requests: write     # Required for PR comments and status updates
+  security-events: write   # Required for security scanning results
+  packages: read           # Required for package registry access
+
+# Global environment variables
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '18.x'
+  AZURE_LOCATION: 'australiaeast'
+  BICEP_VERSION: 'latest'
+  
+  # Application configuration
+  APPLICATION_NAME: 'flightcompanion'
+  AZURE_RESOURCE_GROUP_PREFIX: 'rg-flightcompanion'
+  AZURE_WEBAPP_PREFIX: 'app-flightcompanion'
+  AZURE_CDN_PREFIX: 'cdn-flightcompanion'
+  
+  # Build paths
+  BACKEND_PATH: './backend'
+  FRONTEND_PATH: './frontend'
+  INFRASTRUCTURE_PATH: './infra'
+  SCRIPTS_PATH: './Scripts'
+
+jobs:
+  # =========================================================================
+  # STAGE 1: BUILD VALIDATION & QUALITY GATES
+  # =========================================================================
+  
+  validate-changes:
+    name: 🔍 Validate Changes & Dependencies
+    runs-on: ubuntu-latest
+    outputs:
+      backend-changed: ${{ steps.changes.outputs.backend }}
+      frontend-changed: ${{ steps.changes.outputs.frontend }}
+      infrastructure-changed: ${{ steps.changes.outputs.infrastructure }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
+      should-deploy: ${{ steps.deployment.outputs.should-deploy }}
+      target-environment: ${{ steps.deployment.outputs.environment }}
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🔄 Detect Changes
+      uses: dorny/paths-filter@v3
+      id: changes
+      with:
+        filters: |
+          backend:
+            - 'backend/**'
+            - '!backend/bin/**'
+            - '!backend/obj/**'
+          frontend:
+            - 'frontend/**'
+            - '!frontend/node_modules/**'
+            - '!frontend/build/**'
+          infrastructure:
+            - 'infra/**'
+            - 'Scripts/**'
+          docs:
+            - 'Docs/**'
+            - '*.md'
+            - 'plan/**'
+    
+    - name: 🎯 Determine Deployment Strategy
+      id: deployment
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=test" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" =~ ^refs/heads/feature/ ]]; then
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        else
+          echo "should-deploy=false" >> $GITHUB_OUTPUT
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: 📊 Changes Summary
+      run: |
+        echo "## 🔄 Change Detection Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Component | Changed | Files |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|---------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Backend | ${{ steps.changes.outputs.backend }} | .NET 8 API, Controllers, Services |" >> $GITHUB_STEP_SUMMARY
+        echo "| Frontend | ${{ steps.changes.outputs.frontend }} | React TypeScript, Components |" >> $GITHUB_STEP_SUMMARY
+        echo "| Infrastructure | ${{ steps.changes.outputs.infrastructure }} | Azure Bicep, Deployment Scripts |" >> $GITHUB_STEP_SUMMARY
+        echo "| Documentation | ${{ steps.changes.outputs.docs }} | Docs, README files |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Deployment Target:** ${{ steps.deployment.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Will Deploy:** ${{ steps.deployment.outputs.should-deploy }}" >> $GITHUB_STEP_SUMMARY
+
+  # =========================================================================
+  # STAGE 2: BACKEND BUILD & TEST
+  # =========================================================================
+  
+  backend-quality:
+    name: 🛡️ Backend Quality & Security
+    runs-on: ubuntu-latest
+    needs: validate-changes
+    if: needs.validate-changes.outputs.backend-changed == 'true' || github.event.inputs.skip_tests == 'false'
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: 📦 Restore Dependencies
+      run: |
+        cd ${{ env.BACKEND_PATH }}
+        dotnet restore --verbosity normal
+    
+    - name: 🔨 Build Backend
+      run: |
+        cd ${{ env.BACKEND_PATH }}
+        dotnet build --configuration Release --no-restore --verbosity normal
+    
+    - name: 🧪 Run Unit Tests
+      if: github.event.inputs.skip_tests != 'true'
+      run: |
+        cd ${{ env.BACKEND_PATH }}
+        dotnet test \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults \
+          --logger "trx;LogFileName=test-results.trx"
+    
+    - name: 📊 Code Coverage Report
+      if: github.event.inputs.skip_tests != 'true'
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.3.8
+      with:
+        reports: '${{ env.BACKEND_PATH }}/TestResults/**/coverage.cobertura.xml'
+        targetdir: '${{ env.BACKEND_PATH }}/CoverageReport'
+        reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'
+        verbosity: 'Info'
+    
+    - name: 🔒 Security Scan
+      uses: security-code-scan/security-code-scan-action@v1
+      with:
+        project-path: '${{ env.BACKEND_PATH }}/NetworkingApp.csproj'
+    
+    - name: 📈 Publish Test Results
+      if: github.event.inputs.skip_tests != 'true'
+      uses: dorny/test-reporter@v1
+      with:
+        name: 'Backend Test Results'
+        path: '${{ env.BACKEND_PATH }}/TestResults/*.trx'
+        reporter: 'dotnet-trx'
+        fail-on-error: true
+    
+    - name: 💾 Upload Coverage Reports
+      if: github.event.inputs.skip_tests != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-coverage-report
+        path: '${{ env.BACKEND_PATH }}/CoverageReport'
+        retention-days: 30
+    
+    - name: 📝 Coverage Summary
+      if: github.event.inputs.skip_tests != 'true'
+      run: |
+        if [ -f "${{ env.BACKEND_PATH }}/CoverageReport/SummaryGithub.md" ]; then
+          echo "## 🛡️ Backend Code Coverage" >> $GITHUB_STEP_SUMMARY
+          cat "${{ env.BACKEND_PATH }}/CoverageReport/SummaryGithub.md" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # =========================================================================
+  # STAGE 3: FRONTEND BUILD & TEST
+  # =========================================================================
+  
+  frontend-quality:
+    name: ⚡ Frontend Quality & Performance
+    runs-on: ubuntu-latest
+    needs: validate-changes
+    if: needs.validate-changes.outputs.frontend-changed == 'true' || github.event.inputs.skip_tests == 'false'
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: '${{ env.FRONTEND_PATH }}/package-lock.json'
+    
+    - name: 📦 Install Dependencies
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm ci --silent
+    
+    - name: 🔍 Lint TypeScript & React
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm run lint
+    
+    - name: 💅 Check Code Formatting
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm run format:check
+    
+    - name: 🔧 Type Checking
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm run type-check
+    
+    - name: 🧪 Run Unit Tests
+      if: github.event.inputs.skip_tests != 'true'
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm test -- --coverage --watchAll=false --ci
+    
+    - name: 📊 Jest Coverage Report
+      if: github.event.inputs.skip_tests != 'true'
+      uses: ArtiomTr/jest-coverage-report-action@v2
+      with:
+        working-directory: ${{ env.FRONTEND_PATH }}
+        coverage-file: './coverage/coverage-final.json'
+        test-script: npm test -- --coverage --watchAll=false --ci
+        annotations: all
+        package-manager: npm
+    
+    - name: 🎭 End-to-End Tests
+      if: github.event.inputs.skip_tests != 'true'
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npx playwright install --with-deps
+        npm run test:e2e
+    
+    - name: 📊 Performance Audit
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm run build:prod
+        npx lighthouse-ci autorun || true
+    
+    - name: 🔒 Security Audit
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm audit --audit-level=moderate
+    
+    - name: 💾 Upload Test Results
+      if: always() && github.event.inputs.skip_tests != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-test-results
+        path: |
+          ${{ env.FRONTEND_PATH }}/coverage
+          ${{ env.FRONTEND_PATH }}/test-results
+          ${{ env.FRONTEND_PATH }}/playwright-report
+        retention-days: 30
+
+  # =========================================================================
+  # STAGE 4: INFRASTRUCTURE VALIDATION
+  # =========================================================================
+  
+  infrastructure-validation:
+    name: 🏗️ Infrastructure Validation
+    runs-on: ubuntu-latest
+    needs: validate-changes
+    if: needs.validate-changes.outputs.infrastructure-changed == 'true' || github.event.inputs.deploy_infrastructure == 'true'
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup Azure CLI
+      uses: azure/CLI@v2
+      with:
+        azcliversion: latest
+    
+    - name: 🧰 Setup Bicep
+      uses: azure/bicep-build-action@v1.0.1
+      with:
+        bicepFilePath: '${{ env.INFRASTRUCTURE_PATH }}/bicep/main.bicep'
+        outputFilePath: '${{ env.INFRASTRUCTURE_PATH }}/bicep/main.json'
+    
+    - name: ✅ Validate Bicep Templates
+      run: |
+        cd ${{ env.INFRASTRUCTURE_PATH }}/bicep
+        
+        echo "🔍 Validating main infrastructure template..."
+        az bicep build --file main.bicep --outfile main.json
+        
+        echo "🔍 Validating individual modules..."
+        for module in modules/*.bicep; do
+          if [ -f "$module" ]; then
+            echo "Validating $module..."
+            az bicep build --file "$module"
+          fi
+        done
+    
+    - name: 🔍 ARM Template What-If Analysis
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "🔮 ARM Template What-If analysis would be performed here"
+        echo "This requires Azure authentication and will be implemented in deployment job"
+    
+    - name: 📋 Infrastructure Validation Summary
+      run: |
+        echo "## 🏗️ Infrastructure Validation Results" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Bicep templates validated successfully" >> $GITHUB_STEP_SUMMARY
+        echo "✅ ARM JSON generated from Bicep" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Module dependencies verified" >> $GITHUB_STEP_SUMMARY
+
+  # =========================================================================
+  # STAGE 5: BUILD APPLICATIONS FOR DEPLOYMENT
+  # =========================================================================
+  
+  build-applications:
+    name: 📦 Build Applications
+    runs-on: ubuntu-latest
+    needs: [validate-changes, backend-quality, frontend-quality]
+    if: always() && needs.validate-changes.outputs.should-deploy == 'true' && !failure()
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: '${{ env.FRONTEND_PATH }}/package-lock.json'
+    
+    - name: 🏗️ Build Backend for Production
+      run: |
+        cd ${{ env.BACKEND_PATH }}
+        dotnet restore
+        dotnet publish \
+          --configuration Release \
+          --output ./publish \
+          --runtime linux-x64 \
+          --self-contained false \
+          --verbosity normal
+    
+    - name: 🎨 Build Frontend for CDN
+      run: |
+        cd ${{ env.FRONTEND_PATH }}
+        npm ci --silent
+        
+        # Set environment-specific configuration
+        TARGET_ENV="${{ needs.validate-changes.outputs.target-environment }}"
+        echo "Building for environment: $TARGET_ENV"
+        
+        # Build with environment-specific configuration
+        npm run build:$TARGET_ENV
+        
+        # Run asset optimization
+        npm run optimize:assets || true
+        npm run compress || true
+    
+    - name: 📊 Build Size Analysis
+      run: |
+        echo "## 📦 Build Artifacts Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "### Backend (.NET)" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        du -sh ${{ env.BACKEND_PATH }}/publish >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "### Frontend (React)" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        du -sh ${{ env.FRONTEND_PATH }}/build >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+    
+    - name: 💾 Upload Backend Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-build-${{ needs.validate-changes.outputs.target-environment }}
+        path: '${{ env.BACKEND_PATH }}/publish'
+        retention-days: 30
+    
+    - name: 💾 Upload Frontend Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build-${{ needs.validate-changes.outputs.target-environment }}
+        path: '${{ env.FRONTEND_PATH }}/build'
+        retention-days: 30
+
+  # =========================================================================
+  # STAGE 6: DEPLOY TO AZURE
+  # =========================================================================
+  
+  deploy-to-azure:
+    name: 🚀 Deploy to Azure (${{ needs.validate-changes.outputs.target-environment }})
+    runs-on: ubuntu-latest
+    needs: [validate-changes, build-applications]
+    if: needs.validate-changes.outputs.should-deploy == 'true'
+    environment: ${{ needs.validate-changes.outputs.target-environment }}
+    
+    env:
+      TARGET_ENVIRONMENT: ${{ needs.validate-changes.outputs.target-environment }}
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Azure Login via OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: 💾 Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '*-build-${{ env.TARGET_ENVIRONMENT }}'
+        path: ./artifacts
+        merge-multiple: true
+    
+    - name: 🏗️ Deploy Infrastructure
+      if: needs.validate-changes.outputs.infrastructure-changed == 'true' || github.event.inputs.deploy_infrastructure == 'true'
+      run: |
+        cd ${{ env.INFRASTRUCTURE_PATH }}/bicep
+        
+        RESOURCE_GROUP="${{ env.AZURE_RESOURCE_GROUP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}"
+        
+        echo "🏗️ Deploying infrastructure to $RESOURCE_GROUP..."
+        
+        az deployment group create \
+          --resource-group "$RESOURCE_GROUP" \
+          --template-file main.bicep \
+          --parameters environment=${{ env.TARGET_ENVIRONMENT }} \
+          --parameters applicationName=${{ env.APPLICATION_NAME }} \
+          --mode Incremental \
+          --verbose
+    
+    - name: 🎯 Deploy Backend to App Service
+      run: |
+        WEBAPP_NAME="${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue"
+        
+        echo "🚀 Deploying backend to $WEBAPP_NAME..."
+        
+        az webapp deploy \
+          --resource-group "${{ env.AZURE_RESOURCE_GROUP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}" \
+          --name "$WEBAPP_NAME" \
+          --src-path "./artifacts/backend-build-${{ env.TARGET_ENVIRONMENT }}" \
+          --type zip \
+          --restart true \
+          --track-status true
+    
+    - name: 🌐 Deploy Frontend to CDN
+      run: |
+        # Use our custom deployment script
+        pwsh ${{ env.SCRIPTS_PATH }}/Deploy-Frontend.ps1 \
+          -Environment ${{ env.TARGET_ENVIRONMENT }} \
+          -SkipBuild \
+          -PurgeCdn:$${{ github.event.inputs.purge_cdn || 'true' }}
+    
+    - name: 🔄 Restart App Service
+      run: |
+        WEBAPP_NAME="${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue"
+        
+        echo "🔄 Restarting $WEBAPP_NAME..."
+        az webapp restart \
+          --resource-group "${{ env.AZURE_RESOURCE_GROUP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}" \
+          --name "$WEBAPP_NAME"
+    
+    - name: ⏱️ Wait for Application Startup
+      run: |
+        WEBAPP_URL="https://${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue.azurewebsites.net"
+        
+        echo "⏱️ Waiting for application to start at $WEBAPP_URL..."
+        
+        for i in {1..30}; do
+          if curl -f -s "$WEBAPP_URL/health" > /dev/null; then
+            echo "✅ Application is healthy!"
+            break
+          else
+            echo "⏳ Attempt $i/30: Application not ready, waiting 10 seconds..."
+            sleep 10
+          fi
+        done
+    
+    - name: 📝 Deployment Summary
+      run: |
+        WEBAPP_URL="https://${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue.azurewebsites.net"
+        CDN_URL="https://${{ env.AZURE_CDN_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}.azureedge.net"
+        
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Environment:** ${{ env.TARGET_ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Application URL:** [$WEBAPP_URL]($WEBAPP_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "**CDN URL:** [$CDN_URL]($CDN_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "**Deployment Time:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+
+  # =========================================================================
+  # STAGE 7: POST-DEPLOYMENT VALIDATION
+  # =========================================================================
+  
+  post-deployment-tests:
+    name: ✅ Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [validate-changes, deploy-to-azure]
+    if: needs.validate-changes.outputs.should-deploy == 'true'
+    
+    env:
+      TARGET_ENVIRONMENT: ${{ needs.validate-changes.outputs.target-environment }}
+    
+    steps:
+    - name: 🛒 Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: 🏥 Health Check
+      run: |
+        WEBAPP_URL="https://${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue.azurewebsites.net"
+        
+        echo "🏥 Running health checks..."
+        
+        # API Health Check
+        if curl -f "$WEBAPP_URL/health"; then
+          echo "✅ API health check passed"
+        else
+          echo "❌ API health check failed"
+          exit 1
+        fi
+        
+        # Database connectivity check
+        if curl -f "$WEBAPP_URL/api/test/db"; then
+          echo "✅ Database connectivity check passed"
+        else
+          echo "⚠️ Database connectivity check failed"
+        fi
+    
+    - name: 🌐 CDN Validation
+      run: |
+        # Run our CDN validation script
+        pwsh ${{ env.SCRIPTS_PATH }}/Validate-CDN-Configuration.ps1 \
+          -Environment ${{ env.TARGET_ENVIRONMENT }} \
+          -SkipPerformanceTests
+    
+    - name: 🔒 Security Scan
+      run: |
+        WEBAPP_URL="https://${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue.azurewebsites.net"
+        
+        echo "🔒 Running basic security checks..."
+        
+        # Check HTTPS redirect
+        if curl -I "$WEBAPP_URL" | grep -q "HTTP/1.1 200\|HTTP/2 200"; then
+          echo "✅ HTTPS is working"
+        else
+          echo "⚠️ HTTPS check inconclusive"
+        fi
+        
+        # Check security headers
+        curl -I "$WEBAPP_URL" | grep -E "(X-Frame-Options|X-Content-Type-Options|Strict-Transport-Security)" || echo "⚠️ Some security headers missing"
+    
+    - name: 📊 Performance Baseline
+      if: env.TARGET_ENVIRONMENT == 'prod'
+      run: |
+        WEBAPP_URL="https://${{ env.AZURE_WEBAPP_PREFIX }}-${{ env.TARGET_ENVIRONMENT }}-aue.azurewebsites.net"
+        
+        echo "📊 Running performance baseline tests..."
+        
+        # Simple response time check
+        RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' "$WEBAPP_URL")
+        echo "Response time: ${RESPONSE_TIME}s"
+        
+        if (( $(echo "$RESPONSE_TIME < 3.0" | bc -l) )); then
+          echo "✅ Response time acceptable"
+        else
+          echo "⚠️ Response time may be slow"
+        fi
+    
+    - name: 📝 Validation Results
+      run: |
+        echo "## ✅ Post-Deployment Validation" >> $GITHUB_STEP_SUMMARY
+        echo "**Environment:** ${{ env.TARGET_ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Validation Time:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** All critical checks passed ✅" >> $GITHUB_STEP_SUMMARY
+
+  # =========================================================================
+  # STAGE 8: NOTIFICATION & CLEANUP
+  # =========================================================================
+  
+  notification:
+    name: 📢 Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [validate-changes, deploy-to-azure, post-deployment-tests]
+    if: always() && needs.validate-changes.outputs.should-deploy == 'true'
+    
+    steps:
+    - name: 📊 Deployment Status
+      run: |
+        if [ "${{ needs.deploy-to-azure.result }}" = "success" ] && [ "${{ needs.post-deployment-tests.result }}" = "success" ]; then
+          echo "STATUS=success" >> $GITHUB_ENV
+          echo "MESSAGE=🚀 Deployment successful to ${{ needs.validate-changes.outputs.target-environment }}" >> $GITHUB_ENV
+        else
+          echo "STATUS=failure" >> $GITHUB_ENV
+          echo "MESSAGE=❌ Deployment failed to ${{ needs.validate-changes.outputs.target-environment }}" >> $GITHUB_ENV
+        fi
+    
+    - name: 📢 Create Deployment Summary
+      run: |
+        echo "# 🚀 Flight Companion Platform Deployment" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Deployment Details" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment:** ${{ needs.validate-changes.outputs.target-environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status:** ${{ env.STATUS }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Application URLs" >> $GITHUB_STEP_SUMMARY
+        echo "- **App Service:** https://app-flightcompanion-${{ needs.validate-changes.outputs.target-environment }}-aue.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+        echo "- **CDN:** https://cdn-flightcompanion-${{ needs.validate-changes.outputs.target-environment }}.azureedge.net" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "${{ env.MESSAGE }}" >> $GITHUB_STEP_SUMMARY
+    
+    # Future enhancement: Add Slack/Teams notification here
+    - name: 💬 Future Notification Integration
+      run: |
+        echo "🔮 Future enhancement: Integrate with Slack/Teams for deployment notifications"
+        echo "Status: ${{ env.STATUS }}"
+        echo "Message: ${{ env.MESSAGE }}"

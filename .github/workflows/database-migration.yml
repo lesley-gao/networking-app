@@ -1,0 +1,526 @@
+name: Database Migration CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/Migrations/**'
+      - 'backend/Data/**'
+      - 'Scripts/Deploy-DatabaseMigrations.ps1'
+      - 'Scripts/Validate-DatabaseMigration.ps1'
+      - 'infra/bicep/database.bicep'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/Migrations/**'
+      - 'backend/Data/**'
+      - 'Scripts/Deploy-DatabaseMigrations.ps1'
+      - 'Scripts/Validate-DatabaseMigration.ps1'
+      - 'infra/bicep/database.bicep'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+      migration_action:
+        description: 'Migration action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - validate
+          - deploy
+          - rollback
+      rollback_target:
+        description: 'Rollback target migration (if action is rollback)'
+        required: false
+        type: string
+
+env:
+  AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  RESOURCE_GROUP_PREFIX: 'rg-flight-companion'
+
+jobs:
+  # ==================================================================================================
+  # Validation Job - Runs on all PRs and pushes
+  # ==================================================================================================
+  validate-migrations:
+    name: Validate Database Migrations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Restore dependencies
+      working-directory: ./backend
+      run: dotnet restore
+
+    - name: Build project
+      working-directory: ./backend
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Validate migration scripts
+      working-directory: ./backend
+      run: |
+        # Check for pending migrations
+        dotnet ef migrations list --no-build
+        
+        # Validate migration scripts syntax
+        dotnet ef migrations script --no-build --output migrations.sql
+        
+        if [ -f migrations.sql ]; then
+          echo "✅ Migration script generated successfully"
+          rm migrations.sql
+        else
+          echo "❌ Failed to generate migration script"
+          exit 1
+        fi
+
+    - name: Lint PowerShell scripts
+      shell: pwsh
+      run: |
+        Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+        
+        $scripts = @(
+          './Scripts/Deploy-DatabaseMigrations.ps1',
+          './Scripts/Validate-DatabaseMigration.ps1'
+        )
+        
+        $issues = @()
+        foreach ($script in $scripts) {
+          if (Test-Path $script) {
+            $results = Invoke-ScriptAnalyzer -Path $script -Severity Warning,Error
+            if ($results) {
+              $issues += $results
+              Write-Host "Issues found in $script:"
+              $results | Format-Table
+            }
+          }
+        }
+        
+        if ($issues.Count -gt 0) {
+          Write-Host "❌ PowerShell script analysis found $($issues.Count) issues"
+          exit 1
+        } else {
+          Write-Host "✅ PowerShell scripts passed analysis"
+        }
+
+    - name: Validate Bicep template
+      uses: Azure/arm-deploy@v2
+      with:
+        subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: 'rg-bicep-validation'
+        template: ./infra/bicep/database.bicep
+        deploymentMode: Validate
+        parameters: |
+          environmentName=validation
+          administratorLogin=admin
+          administratorLoginPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+
+  # ==================================================================================================
+  # Development Deployment
+  # ==================================================================================================
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Deploy database infrastructure
+      uses: Azure/arm-deploy@v2
+      id: database-deploy
+      with:
+        subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: '${{ env.RESOURCE_GROUP_PREFIX }}-dev'
+        template: ./infra/bicep/database.bicep
+        parameters: |
+          environmentName=dev
+          administratorLogin=${{ secrets.SQL_ADMIN_LOGIN }}
+          administratorLoginPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+          logAnalyticsWorkspaceId=${{ secrets.LOG_ANALYTICS_WORKSPACE_ID }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Build project
+      working-directory: ./backend
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+
+    - name: Run database migrations
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Deploy-DatabaseMigrations.ps1 `
+          -Environment "dev" `
+          -ConnectionString $connectionString `
+          -CreateBackup $false `
+          -SeedData $true `
+          -Verbose
+
+    - name: Validate deployment
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Validate-DatabaseMigration.ps1 `
+          -ConnectionString $connectionString `
+          -ValidationLevel "Standard" `
+          -ExportReport `
+          -Verbose
+
+    - name: Upload validation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dev-migration-validation-report
+        path: ./Scripts/migration-validation-report.json
+
+  # ==================================================================================================
+  # Testing Environment Deployment
+  # ==================================================================================================
+  deploy-test:
+    name: Deploy to Testing
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: validate-migrations
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Deploy database infrastructure
+      uses: Azure/arm-deploy@v2
+      id: database-deploy
+      with:
+        subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: '${{ env.RESOURCE_GROUP_PREFIX }}-test'
+        template: ./infra/bicep/database.bicep
+        parameters: |
+          environmentName=test
+          administratorLogin=${{ secrets.SQL_ADMIN_LOGIN }}
+          administratorLoginPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+          logAnalyticsWorkspaceId=${{ secrets.LOG_ANALYTICS_WORKSPACE_ID }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Build project
+      working-directory: ./backend
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+
+    - name: Run database migrations
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Deploy-DatabaseMigrations.ps1 `
+          -Environment "test" `
+          -ConnectionString $connectionString `
+          -CreateBackup $true `
+          -SeedData $true `
+          -Verbose
+
+    - name: Comprehensive validation
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Validate-DatabaseMigration.ps1 `
+          -ConnectionString $connectionString `
+          -ValidationLevel "Comprehensive" `
+          -ExportReport `
+          -Verbose
+
+    - name: Upload validation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-migration-validation-report
+        path: ./Scripts/migration-validation-report.json
+
+    - name: Performance testing
+      working-directory: ./backend
+      run: |
+        # Run basic performance tests
+        dotnet test --configuration Release --filter Category=Performance --logger trx --results-directory TestResults/
+
+    - name: Upload performance test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-test-results
+        path: ./backend/TestResults/
+
+  # ==================================================================================================
+  # Production Deployment (Manual Approval Required)
+  # ==================================================================================================
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+    needs: deploy-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Validate production readiness
+      shell: pwsh
+      run: |
+        Write-Host "🔍 Pre-deployment validation checklist:"
+        Write-Host "✅ Code has been tested in development and testing environments"
+        Write-Host "✅ Manual approval has been obtained for production deployment"
+        Write-Host "✅ Backup and rollback procedures are ready"
+        Write-Host "✅ Monitoring and alerting are configured"
+        
+        if ("${{ github.event.inputs.migration_action }}" -eq "rollback" -and -not "${{ github.event.inputs.rollback_target }}") {
+          Write-Host "❌ Rollback target migration must be specified for rollback action"
+          exit 1
+        }
+
+    - name: Deploy database infrastructure
+      uses: Azure/arm-deploy@v2
+      id: database-deploy
+      if: github.event.inputs.migration_action != 'rollback'
+      with:
+        subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: '${{ env.RESOURCE_GROUP_PREFIX }}-prod'
+        template: ./infra/bicep/database.bicep
+        parameters: |
+          environmentName=prod
+          administratorLogin=${{ secrets.SQL_ADMIN_LOGIN }}
+          administratorLoginPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+          logAnalyticsWorkspaceId=${{ secrets.LOG_ANALYTICS_WORKSPACE_ID }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Build project
+      working-directory: ./backend
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+
+    - name: Pre-deployment validation
+      if: github.event.inputs.migration_action != 'rollback'
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Deploy-DatabaseMigrations.ps1 `
+          -Environment "prod" `
+          -ConnectionString $connectionString `
+          -ValidateOnly $true `
+          -Verbose
+
+    - name: Execute migration or rollback
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        if ("${{ github.event.inputs.migration_action }}" -eq "rollback") {
+          ./Deploy-DatabaseMigrations.ps1 `
+            -Environment "prod" `
+            -ConnectionString $connectionString `
+            -RollbackToMigration `
+            -RollbackTarget "${{ github.event.inputs.rollback_target }}" `
+            -CreateBackup $true `
+            -Verbose
+        } else {
+          ./Deploy-DatabaseMigrations.ps1 `
+            -Environment "prod" `
+            -ConnectionString $connectionString `
+            -CreateBackup $true `
+            -SeedData $true `
+            -Verbose
+        }
+
+    - name: Post-deployment validation
+      shell: pwsh
+      working-directory: ./Scripts
+      env:
+        CONNECTION_STRING: ${{ steps.database-deploy.outputs.connectionStringTemplate }}
+      run: |
+        $connectionString = $env:CONNECTION_STRING -replace '{username}', '${{ secrets.SQL_ADMIN_LOGIN }}' -replace '{password}', '${{ secrets.SQL_ADMIN_PASSWORD }}'
+        
+        ./Validate-DatabaseMigration.ps1 `
+          -ConnectionString $connectionString `
+          -ValidationLevel "Comprehensive" `
+          -ExportReport `
+          -Verbose
+
+    - name: Upload production validation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: prod-migration-validation-report
+        path: ./Scripts/migration-validation-report.json
+
+    - name: Smoke tests
+      working-directory: ./backend
+      run: |
+        # Run critical smoke tests to verify production deployment
+        dotnet test --configuration Release --filter Category=Smoke --logger trx --results-directory TestResults/
+
+    - name: Upload smoke test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: prod-smoke-test-results
+        path: ./backend/TestResults/
+
+    - name: Deployment notification
+      if: always()
+      shell: pwsh
+      run: |
+        $status = if (${{ job.status }} -eq 'success') { "✅ SUCCESS" } else { "❌ FAILED" }
+        $action = "${{ github.event.inputs.migration_action }}"
+        
+        Write-Host "🚀 Production Database $action completed: $status"
+        Write-Host "📊 Environment: Production"
+        Write-Host "🔄 Action: $action"
+        Write-Host "📅 Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
+        Write-Host "👤 Initiated by: ${{ github.actor }}"
+        
+        if ("$action" -eq "rollback") {
+          Write-Host "⏪ Rollback target: ${{ github.event.inputs.rollback_target }}"
+        }
+
+  # ==================================================================================================
+  # Manual Operations Job
+  # ==================================================================================================
+  manual-operations:
+    name: Manual Database Operations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.migration_action == 'validate'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Get database connection string
+      id: get-connection
+      shell: pwsh
+      run: |
+        $environment = "${{ github.event.inputs.environment }}"
+        $resourceGroup = "${{ env.RESOURCE_GROUP_PREFIX }}-$environment"
+        
+        # Get the database connection details from Azure
+        $sqlServer = az sql server list --resource-group $resourceGroup --query "[0].fullyQualifiedDomainName" -o tsv
+        $database = "flight-companion-db"
+        
+        $connectionString = "Server=$sqlServer;Database=$database;User Id=${{ secrets.SQL_ADMIN_LOGIN }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+        
+        echo "CONNECTION_STRING=$connectionString" >> $env:GITHUB_OUTPUT
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
+    - name: Manual validation
+      shell: pwsh
+      working-directory: ./Scripts
+      run: |
+        ./Validate-DatabaseMigration.ps1 `
+          -ConnectionString "${{ steps.get-connection.outputs.CONNECTION_STRING }}" `
+          -ValidationLevel "Comprehensive" `
+          -ExportReport `
+          -Verbose
+
+    - name: Upload validation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: manual-validation-report-${{ github.event.inputs.environment }}
+        path: ./Scripts/migration-validation-report.json

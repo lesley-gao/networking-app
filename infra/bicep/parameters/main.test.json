@@ -47,8 +47,19 @@
         "project": "Flight Companion Platform",
         "cost-center": "Testing",
         "department": "QA",
-        "environment": "test"
+        "environment": "test",
+        "monitoring": "enabled",
+        "alerts": "enabled"
       }
+    },
+    "enableAlerts": {
+      "value": true
+    },
+    "alertEmailAddress": {
+      "value": "test-alerts@networkingapp.com"
+    },
+    "alertingEnvironment": {
+      "value": "testing"
     },
     "stripeApiKey": {
       "value": ""
@@ -61,6 +72,30 @@
     },
     "emailSmtpPassword": {
       "value": ""
+    },
+    "customDomainName": {
+      "value": "test.flightcompanion.example.com"
+    },
+    "enableCustomDomain": {
+      "value": true
+    },
+    "enableAuthentication": {
+      "value": false
+    },
+    "azureAdTenantId": {
+      "value": ""
+    },
+    "azureAdClientId": {
+      "value": ""
+    },
+    "azureAdClientSecret": {
+      "value": ""
+    },
+    "rootDomainName": {
+      "value": "example.com"
+    },
+    "enableDnsZoneManagement": {
+      "value": false
     }
   }
 }

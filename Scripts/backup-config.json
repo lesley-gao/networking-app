@@ -1,0 +1,599 @@
+{
+  "_description": "Backup Configuration File - This JSON file contains all configuration settings for backup and disaster recovery operations",
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-07-11",
+    "description": "Flight Companion Platform Backup and Disaster Recovery Configuration",
+    "lastUpdated": "2025-07-11",
+    "updatedBy": "System Administrator"
+  },
+  "azure": {
+    "subscriptionId": "${AZURE_SUBSCRIPTION_ID}",
+    "tenantId": "${AZURE_TENANT_ID}",
+    "regions": {
+      "primary": "australiaeast",
+      "secondary": "australiasoutheast"
+    }
+  },
+  "resourceGroups": {
+    "production": "FlightCompanion-Prod",
+    "test": "FlightCompanion-Test",
+    "dr": "FlightCompanion-DR",
+    "backup": "FlightCompanion-Backup"
+  },
+  "databases": {
+    "primary": {
+      "serverName": "fc-sql-australiaeast",
+      "databaseName": "FlightCompanionDB",
+      "resourceGroup": "FlightCompanion-Prod",
+      "region": "australiaeast",
+      "tier": "Standard",
+      "size": "S2",
+      "backupRetention": 35,
+      "geoRedundantBackup": true,
+      "pointInTimeRestore": true,
+      "longTermRetention": {
+        "weeklyRetention": "P4W",
+        "monthlyRetention": "P12M",
+        "yearlyRetention": "P7Y",
+        "weekOfYear": 1
+      }
+    },
+    "test": {
+      "serverName": "fc-sql-test",
+      "databaseName": "FlightCompanionDB-Test",
+      "resourceGroup": "FlightCompanion-Test",
+      "region": "australiaeast",
+      "tier": "Basic",
+      "size": "Basic"
+    },
+    "dr": {
+      "serverName": "fc-sql-dr-australiasoutheast",
+      "databaseName": "FlightCompanionDB-DR",
+      "resourceGroup": "FlightCompanion-DR",
+      "region": "australiasoutheast",
+      "tier": "Standard",
+      "size": "S2"
+    }
+  },
+  "storage": {
+    "backupAccount": {
+      "name": "fcbackupstorage",
+      "resourceGroup": "FlightCompanion-Prod",
+      "region": "australiaeast",
+      "sku": "Standard_GRS",
+      "tier": "Hot",
+      "versioning": {
+        "enabled": true,
+        "retentionDays": 90
+      },
+      "softDelete": {
+        "enabled": true,
+        "retentionDays": 30
+      },
+      "crossRegionReplication": true
+    },
+    "drAccount": {
+      "name": "fcdrbackupstorage",
+      "resourceGroup": "FlightCompanion-DR",
+      "region": "australiasoutheast",
+      "sku": "Standard_GRS",
+      "tier": "Hot"
+    },
+    "containers": {
+      "scheduledBackups": {
+        "name": "scheduled-backups",
+        "retentionDays": 35,
+        "accessTier": "Hot"
+      },
+      "manualBackups": {
+        "name": "manual-backups",
+        "retentionDays": 30,
+        "accessTier": "Hot"
+      },
+      "emergencyBackups": {
+        "name": "emergency-backups",
+        "retentionDays": 90,
+        "accessTier": "Cool"
+      },
+      "configurationBackups": {
+        "name": "configuration-backups",
+        "retentionDays": 90,
+        "accessTier": "Cool"
+      },
+      "appServiceBackups": {
+        "name": "app-service-backups",
+        "retentionDays": 30,
+        "accessTier": "Hot"
+      },
+      "testResults": {
+        "name": "test-results",
+        "retentionDays": 365,
+        "accessTier": "Cool"
+      },
+      "auditLogs": {
+        "name": "audit-logs",
+        "retentionDays": 2555,
+        "accessTier": "Archive"
+      }
+    }
+  },
+  "appServices": {
+    "primary": {
+      "name": "FlightCompanionApp",
+      "resourceGroup": "FlightCompanion-Prod",
+      "region": "australiaeast",
+      "plan": "FlightCompanionPlan",
+      "tier": "Standard",
+      "size": "S1",
+      "slots": ["staging", "backup"],
+      "backup": {
+        "enabled": true,
+        "frequency": "Daily",
+        "retentionDays": 30,
+        "startTime": "02:30",
+        "timeZone": "New Zealand Standard Time",
+        "storageAccount": "fcbackupstorage",
+        "container": "app-service-backups"
+      }
+    },
+    "dr": {
+      "name": "FlightCompanionApp-DR",
+      "resourceGroup": "FlightCompanion-DR",
+      "region": "australiasoutheast",
+      "plan": "FlightCompanionPlan-DR",
+      "tier": "Standard",
+      "size": "S1"
+    }
+  },
+  "keyVault": {
+    "name": "FlightCompanionKeyVault",
+    "resourceGroup": "FlightCompanion-Prod",
+    "region": "australiaeast",
+    "secrets": {
+      "BackupStorageConnectionString": "Connection string for backup storage account",
+      "DRStorageConnectionString": "Connection string for DR storage account", 
+      "SqlAdminLogin": "SQL Server administrator login",
+      "SqlAdminPassword": "SQL Server administrator password",
+      "BackupNotificationWebhook": "Webhook URL for backup notifications",
+      "ApplicationInsightsConnectionString": "Application Insights connection string"
+    },
+    "backup": {
+      "enabled": true,
+      "frequency": "Daily",
+      "retentionDays": 90
+    }
+  },
+  "automation": {
+    "account": {
+      "name": "fc-automation",
+      "resourceGroup": "FlightCompanion-Backup",
+      "region": "australiaeast",
+      "sku": "Basic"
+    },
+    "runbooks": {
+      "dailyBackup": {
+        "name": "DailyBackupOrchestration",
+        "type": "PowerShell",
+        "description": "Daily backup orchestration for Flight Companion platform",
+        "schedule": {
+          "frequency": "Daily",
+          "startTime": "02:00",
+          "timeZone": "New Zealand Standard Time"
+        }
+      },
+      "weeklyValidation": {
+        "name": "WeeklyBackupValidation",
+        "type": "PowerShell",
+        "description": "Weekly backup integrity validation",
+        "schedule": {
+          "frequency": "Weekly",
+          "dayOfWeek": "Tuesday",
+          "startTime": "03:00",
+          "timeZone": "New Zealand Standard Time"
+        }
+      },
+      "monthlyTest": {
+        "name": "MonthlyDRTest",
+        "type": "PowerShell",
+        "description": "Monthly disaster recovery testing",
+        "schedule": {
+          "frequency": "Monthly",
+          "dayOfWeek": "Tuesday",
+          "weekOfMonth": "First",
+          "startTime": "04:00",
+          "timeZone": "New Zealand Standard Time"
+        }
+      },
+      "quarterlySimulation": {
+        "name": "QuarterlyDRSimulation",
+        "type": "PowerShell",
+        "description": "Quarterly full disaster recovery simulation",
+        "schedule": {
+          "frequency": "Quarterly",
+          "months": [1, 4, 7, 10],
+          "dayOfWeek": "Tuesday",
+          "weekOfMonth": "First",
+          "startTime": "05:00",
+          "timeZone": "New Zealand Standard Time"
+        }
+      }
+    }
+  },
+  "monitoring": {
+    "logAnalytics": {
+      "workspaceName": "fc-logs-backup",
+      "resourceGroup": "FlightCompanion-Backup",
+      "region": "australiaeast",
+      "retentionDays": 90,
+      "dailyQuotaGB": 1
+    },
+    "applicationInsights": {
+      "name": "fc-backup-insights",
+      "resourceGroup": "FlightCompanion-Backup",
+      "region": "australiaeast",
+      "applicationType": "web"
+    },
+    "alerts": {
+      "actionGroup": {
+        "name": "fc-backup-alerts",
+        "shortName": "FCBackup",
+        "enabled": true,
+        "emailReceivers": [
+          {
+            "name": "Operations Team",
+            "emailAddress": "operations@flightcompanion.com"
+          },
+          {
+            "name": "DevOps Lead",
+            "emailAddress": "devops@flightcompanion.com"
+          }
+        ],
+        "webhookReceivers": [
+          {
+            "name": "Slack Operations",
+            "serviceUri": "${SLACK_WEBHOOK_URL}"
+          }
+        ]
+      },
+      "rules": [
+        {
+          "name": "Database Backup Failure",
+          "description": "Alert when database backup fails",
+          "severity": "Critical",
+          "frequency": "PT5M",
+          "threshold": {
+            "operator": "GreaterThan",
+            "value": 0
+          },
+          "metricName": "BackupJobFailure",
+          "enabled": true
+        },
+        {
+          "name": "Backup Storage Capacity",
+          "description": "Alert when backup storage exceeds 80% capacity",
+          "severity": "Warning",
+          "frequency": "PT1H",
+          "threshold": {
+            "operator": "GreaterThan",
+            "value": 80
+          },
+          "metricName": "StorageCapacityPercent",
+          "enabled": true
+        },
+        {
+          "name": "DR Test Failure",
+          "description": "Alert when disaster recovery test fails",
+          "severity": "High",
+          "frequency": "PT15M",
+          "threshold": {
+            "operator": "GreaterThan",
+            "value": 0
+          },
+          "metricName": "DRTestFailure",
+          "enabled": true
+        },
+        {
+          "name": "Backup Duration Exceeded",
+          "description": "Alert when backup takes longer than expected",
+          "severity": "Warning",
+          "frequency": "PT30M",
+          "threshold": {
+            "operator": "GreaterThan",
+            "value": 60
+          },
+          "metricName": "BackupDurationMinutes",
+          "enabled": true
+        }
+      ]
+    }
+  },
+  "schedule": {
+    "timeZone": "New Zealand Standard Time",
+    "operations": {
+      "dailyBackup": {
+        "time": "02:00",
+        "frequency": "Daily",
+        "enabled": true,
+        "retryAttempts": 3,
+        "retryInterval": "PT30M"
+      },
+      "weeklyValidation": {
+        "time": "03:00",
+        "dayOfWeek": "Tuesday",
+        "frequency": "Weekly",
+        "enabled": true,
+        "retryAttempts": 2,
+        "retryInterval": "PT1H"
+      },
+      "monthlyTest": {
+        "time": "04:00",
+        "dayOfWeek": "Tuesday",
+        "weekOfMonth": "First",
+        "frequency": "Monthly",
+        "enabled": true,
+        "retryAttempts": 1,
+        "retryInterval": "PT2H"
+      },
+      "quarterlySimulation": {
+        "time": "05:00",
+        "dayOfWeek": "Tuesday",
+        "weekOfMonth": "First",
+        "months": [1, 4, 7, 10],
+        "frequency": "Quarterly",
+        "enabled": true,
+        "retryAttempts": 1,
+        "retryInterval": "PT4H"
+      },
+      "cleanup": {
+        "time": "01:00",
+        "frequency": "Daily",
+        "enabled": true,
+        "operations": ["expired-backups", "test-databases", "temp-files"]
+      }
+    }
+  },
+  "retention": {
+    "policies": {
+      "databaseBackups": {
+        "shortTerm": 35,
+        "longTerm": {
+          "weekly": "P4W",
+          "monthly": "P12M", 
+          "yearly": "P7Y"
+        }
+      },
+      "appServiceBackups": 30,
+      "configurationBackups": 90,
+      "testResults": 365,
+      "auditLogs": 2555,
+      "monitoringLogs": 90,
+      "keyVaultBackups": 90
+    },
+    "cleanupRules": {
+      "testDatabases": {
+        "maxAge": "P1D",
+        "pattern": "*-DrTest-*"
+      },
+      "tempFiles": {
+        "maxAge": "PT1H",
+        "pattern": "temp-*"
+      },
+      "failedBackups": {
+        "maxAge": "P7D",
+        "status": "Failed"
+      }
+    }
+  },
+  "notifications": {
+    "channels": {
+      "email": {
+        "enabled": true,
+        "recipients": [
+          "operations@flightcompanion.com",
+          "devops@flightcompanion.com"
+        ],
+        "severity": ["Critical", "High", "Warning"]
+      },
+      "slack": {
+        "enabled": true,
+        "webhook": "${SLACK_WEBHOOK_URL}",
+        "channel": "#operations-alerts",
+        "severity": ["Critical", "High"]
+      },
+      "sms": {
+        "enabled": false,
+        "numbers": [],
+        "severity": ["Critical"]
+      }
+    },
+    "templates": {
+      "backupSuccess": {
+        "title": "✅ Backup Completed Successfully",
+        "color": "good",
+        "fields": ["Operation", "Duration", "Size", "Location"]
+      },
+      "backupFailure": {
+        "title": "❌ Backup Failed",
+        "color": "danger",
+        "fields": ["Operation", "Error", "Timestamp", "Action Required"]
+      },
+      "drTestSuccess": {
+        "title": "✅ DR Test Passed",
+        "color": "good",
+        "fields": ["Test Type", "RTO", "RPO", "Duration"]
+      },
+      "drTestFailure": {
+        "title": "❌ DR Test Failed",
+        "color": "danger",
+        "fields": ["Test Type", "Error", "Impact", "Next Steps"]
+      }
+    }
+  },
+  "security": {
+    "encryption": {
+      "atRest": {
+        "enabled": true,
+        "keyManagement": "Microsoft-managed",
+        "keyVault": "FlightCompanionKeyVault"
+      },
+      "inTransit": {
+        "enabled": true,
+        "minimumTlsVersion": "TLS1_2"
+      }
+    },
+    "access": {
+      "rbac": {
+        "enabled": true,
+        "roles": {
+          "backupOperator": "Backup Operator",
+          "backupReader": "Backup Reader",
+          "drCoordinator": "Site Recovery Operator"
+        }
+      },
+      "networking": {
+        "allowAzureServices": true,
+        "privateEndpoints": {
+          "enabled": false,
+          "subnets": []
+        },
+        "firewallRules": {
+          "enabled": true,
+          "allowedIPs": []
+        }
+      }
+    },
+    "audit": {
+      "enabled": true,
+      "logAllOperations": true,
+      "retentionDays": 2555,
+      "storageAccount": "fcbackupstorage",
+      "container": "audit-logs"
+    }
+  },
+  "compliance": {
+    "requirements": {
+      "gdpr": {
+        "enabled": true,
+        "dataProtection": true,
+        "rightToErasure": true,
+        "dataPortability": true
+      },
+      "nzPrivacyAct": {
+        "enabled": true,
+        "notificationRequirements": true,
+        "dataMinimization": true
+      },
+      "pciDss": {
+        "enabled": true,
+        "dataEncryption": true,
+        "accessControls": true,
+        "monitoring": true
+      }
+    },
+    "reporting": {
+      "frequency": "Monthly",
+      "recipients": ["compliance@flightcompanion.com"],
+      "metrics": [
+        "backupSuccessRate",
+        "recoveryTimeObjective",
+        "recoveryPointObjective",
+        "testingCompliance",
+        "securityIncidents"
+      ]
+    }
+  },
+  "testing": {
+    "scenarios": {
+      "databaseCorruption": {
+        "frequency": "Monthly",
+        "rto": "1 hour",
+        "rpo": "15 minutes",
+        "automated": true
+      },
+      "regionFailure": {
+        "frequency": "Quarterly",
+        "rto": "4 hours",
+        "rpo": "1 hour",
+        "automated": false
+      },
+      "applicationFailure": {
+        "frequency": "Monthly",
+        "rto": "30 minutes",
+        "rpo": "5 minutes",
+        "automated": true
+      },
+      "storageFailure": {
+        "frequency": "Quarterly",
+        "rto": "2 hours",
+        "rpo": "30 minutes",
+        "automated": false
+      }
+    },
+    "validation": {
+      "backupIntegrity": {
+        "frequency": "Weekly",
+        "sampleSize": 5,
+        "successThreshold": 95
+      },
+      "restoreCapability": {
+        "frequency": "Monthly",
+        "timeLimit": "PT2H",
+        "successThreshold": 100
+      },
+      "performanceBaseline": {
+        "frequency": "Monthly",
+        "metrics": ["restoreTime", "backupTime", "dataIntegrity"],
+        "thresholds": {
+          "restoreTimeMax": "PT1H",
+          "backupTimeMax": "PT30M",
+          "dataIntegrityMin": 100
+        }
+      }
+    }
+  },
+  "thresholds": {
+    "performance": {
+      "maxBackupDuration": 60,
+      "maxRestoreDuration": 120,
+      "minSuccessRate": 95,
+      "maxConsecutiveFailures": 3
+    },
+    "capacity": {
+      "storageUtilizationWarning": 80,
+      "storageUtilizationCritical": 90,
+      "databaseSizeWarning": "100GB",
+      "databaseSizeCritical": "500GB"
+    },
+    "availability": {
+      "rtoTarget": {
+        "critical": "1 hour",
+        "important": "4 hours",
+        "standard": "24 hours"
+      },
+      "rpoTarget": {
+        "critical": "15 minutes",
+        "important": "1 hour", 
+        "standard": "4 hours"
+      }
+    }
+  },
+  "documentation": {
+    "runbooks": {
+      "databaseRecovery": "AutomatedBackupAndDisasterRecovery.md#database-emergency-recovery-runbook",
+      "applicationRecovery": "AutomatedBackupAndDisasterRecovery.md#application-service-recovery-runbook",
+      "fullDrProcedure": "AutomatedBackupAndDisasterRecovery.md#full-disaster-recovery",
+      "backupValidation": "AutomatedBackupAndDisasterRecovery.md#backup-validation-tests"
+    },
+    "contacts": {
+      "primary": "operations@flightcompanion.com",
+      "secondary": "devops@flightcompanion.com",
+      "escalation": "management@flightcompanion.com"
+    },
+    "repositories": {
+      "scripts": "https://github.com/lesley-gao/networking-app/tree/main/Scripts",
+      "infrastructure": "https://github.com/lesley-gao/networking-app/tree/main/infra",
+      "documentation": "https://github.com/lesley-gao/networking-app/tree/main/Docs"
+    }
+  }
+}

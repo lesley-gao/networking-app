@@ -20,6 +20,8 @@ namespace NetworkingApp.Services
         void TrackCustomEvent(string eventName, Dictionary<string, string>? properties = null, Dictionary<string, double>? metrics = null);
         void TrackPageView(string pageName, Dictionary<string, string>? properties = null);
         void TrackRequest(string name, DateTimeOffset startTime, TimeSpan duration, string responseCode, bool success);
+        void TrackVerificationDocumentUploaded(int userId, string fileName, long fileSize);
+        void TrackVerificationDocumentProcessed(int userId, string fileName, bool approved, string? reason = null);
     }
 
     /// <summary>
@@ -192,6 +194,46 @@ namespace NetworkingApp.Services
             _telemetryClient.TrackRequest(requestTelemetry);
             _logger.LogDebug("Request tracked: {RequestName} - Duration: {Duration}ms, Success: {Success}", 
                 name, duration.TotalMilliseconds, success);
+        }
+
+        public void TrackVerificationDocumentUploaded(int userId, string fileName, long fileSize)
+        {
+            var eventProperties = new Dictionary<string, string>
+            {
+                ["UserId"] = userId.ToString(),
+                ["FileName"] = fileName,
+                ["FileSize"] = fileSize.ToString(),
+                ["EventCategory"] = "Verification"
+            };
+
+            var eventMetrics = new Dictionary<string, double>
+            {
+                ["FileSizeBytes"] = fileSize
+            };
+
+            _telemetryClient.TrackEvent("VerificationDocumentUploaded", eventProperties, eventMetrics);
+            _logger.LogInformation("Verification document upload tracked for user {UserId}: {FileName} ({FileSize} bytes)", 
+                userId, fileName, fileSize);
+        }
+
+        public void TrackVerificationDocumentProcessed(int userId, string fileName, bool approved, string? reason = null)
+        {
+            var eventProperties = new Dictionary<string, string>
+            {
+                ["UserId"] = userId.ToString(),
+                ["FileName"] = fileName,
+                ["Approved"] = approved.ToString(),
+                ["EventCategory"] = "Verification"
+            };
+
+            if (!string.IsNullOrEmpty(reason))
+            {
+                eventProperties["Reason"] = reason;
+            }
+
+            _telemetryClient.TrackEvent("VerificationDocumentProcessed", eventProperties);
+            _logger.LogInformation("Verification document processing tracked for user {UserId}: {FileName} - {Status}", 
+                userId, fileName, approved ? "Approved" : "Rejected");
         }
     }
 

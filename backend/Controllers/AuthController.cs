@@ -77,7 +77,24 @@ namespace NetworkingApp.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenService.GenerateToken(user, roles);
-            return Ok(new { token });
+            
+            // Return both user data and token
+            return Ok(new { 
+                token,
+                user = new {
+                    id = user.Id,
+                    email = user.Email,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    phoneNumber = user.PhoneNumber,
+                    preferredLanguage = user.PreferredLanguage,
+                    isVerified = user.IsVerified,
+                    emergencyContact = user.EmergencyContact,
+                    emergencyPhone = user.EmergencyPhone,
+                    rating = user.Rating,
+                    totalRatings = user.TotalRatings
+                }
+            });
         }
 
         /// <summary>

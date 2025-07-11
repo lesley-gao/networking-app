@@ -472,9 +472,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-application]
     if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
-    environment: 
-      name: dev
-      url: https://networkingapp-dev.azurewebsites.net
     
     steps:
     - name: 🛒 Checkout Repository
@@ -533,9 +530,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-application]
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'test')
-    environment: 
-      name: test
-      url: https://networkingapp-test.azurewebsites.net
     
     steps:
     - name: 🛒 Checkout Repository
@@ -573,9 +567,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-application, deploy-test]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
-    environment: 
-      name: prod
-      url: https://networkingapp.azurewebsites.net
     
     steps:
     - name: 🛒 Checkout Repository

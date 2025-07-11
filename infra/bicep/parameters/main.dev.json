@@ -47,7 +47,9 @@
         "project": "Flight Companion Platform",
         "cost-center": "Development",
         "department": "Engineering",
-        "environment": "dev"
+        "environment": "dev",
+        "monitoring": "enabled",
+        "alerts": "enabled"
       }
     },
     "stripeApiKey": {
@@ -61,6 +63,39 @@
     },
     "emailSmtpPassword": {
       "value": ""
+    },
+    "customDomainName": {
+      "value": ""
+    },
+    "enableCustomDomain": {
+      "value": false
+    },
+    "enableAuthentication": {
+      "value": false
+    },
+    "azureAdTenantId": {
+      "value": ""
+    },
+    "azureAdClientId": {
+      "value": ""
+    },
+    "azureAdClientSecret": {
+      "value": ""
+    },
+    "rootDomainName": {
+      "value": ""
+    },
+    "enableDnsZoneManagement": {
+      "value": false
+    },
+    "enableAlerts": {
+      "value": true
+    },
+    "alertEmailAddress": {
+      "value": "dev-alerts@networkingapp.com"
+    },
+    "alertingEnvironment": {
+      "value": "development"
     }
   }
 }

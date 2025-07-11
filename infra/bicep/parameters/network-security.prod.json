@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "prod"
+    },
+    "location": {
+      "value": "Australia East"
+    },
+    "vnetName": {
+      "value": "vnet-flight-companion-prod"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.2.0.0/16"
+    },
+    "appGatewaySubnetPrefix": {
+      "value": "10.2.1.0/24"
+    },
+    "appServiceSubnetPrefix": {
+      "value": "10.2.2.0/24"
+    },
+    "databaseSubnetPrefix": {
+      "value": "10.2.3.0/24"
+    },
+    "managementSubnetPrefix": {
+      "value": "10.2.4.0/24"
+    },
+    "appGatewaySkuName": {
+      "value": "WAF_v2"
+    },
+    "appGatewayCapacity": {
+      "value": 3
+    },
+    "enableDdosProtection": {
+      "value": true
+    },
+    "ddosProtectionPlanId": {
+      "value": ""
+    },
+    "appServiceName": {
+      "value": "app-flight-companion-prod"
+    },
+    "sqlServerName": {
+      "value": "sql-flight-companion-prod"
+    },
+    "keyVaultName": {
+      "value": "kv-flight-companion-prod"
+    },
+    "logAnalyticsWorkspaceId": {
+      "value": ""
+    },
+    "tags": {
+      "value": {
+        "Project": "FlightCompanion",
+        "Environment": "Production",
+        "Owner": "PlatformTeam",
+        "CostCenter": "Production",
+        "BusinessUnit": "FlightCompanion",
+        "DataClassification": "Confidential"
+      }
+    }
+  }
+}
