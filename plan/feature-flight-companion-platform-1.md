@@ -224,11 +224,11 @@ This implementation plan provides a step-by-step approach to building the Flight
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-083 | Create Azure Resource Group and configure service principal for GitHub Actions deployment | | |
-| TASK-084 | Set up Azure App Service with .NET 8 runtime and configure deployment slots for staging/production | | |
-| TASK-085 | Configure Azure SQL Database with proper DTU sizing and backup retention policies | | |
-| TASK-086 | Set up Azure Key Vault and migrate application secrets from appsettings.json | | |
-| TASK-087 | Configure Application Insights for application monitoring, logging, and performance tracking | | |
+| TASK-083 | Create Azure Resource Group and configure service principal for GitHub Actions deployment | ✅ | 2025-07-11 |
+| TASK-084 | Set up Azure App Service with .NET 8 runtime and configure deployment slots for staging/production | ✅ | 2025-07-11 |
+| TASK-085 | Configure Azure SQL Database with proper DTU sizing and backup retention policies | ✅ | 2025-07-11 |
+| TASK-086 | Set up Azure Key Vault and migrate application secrets from appsettings.json | ✅ | 2025-07-11 |
+| TASK-087 | Configure Application Insights for application monitoring, logging, and performance tracking | ✅ | 2025-07-11 |
 | TASK-088 | Set up Azure Blob Storage for user verification document uploads with secure access policies | | |
 | TASK-089 | Configure Azure CDN for static asset delivery and React build optimization | | |
 | TASK-090 | Implement GitHub Actions CI/CD pipeline with automated testing and deployment stages | | |

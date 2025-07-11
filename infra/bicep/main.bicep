@@ -33,6 +33,28 @@ param tags object = {}
 param ownerName string = ''
 param ownerEmail string = ''
 
+// ----------------------------------------------------------------------------------------------------
+// Application Secret Parameters (Optional - will be set via parameter files)
+// ----------------------------------------------------------------------------------------------------
+
+@description('Stripe API secret key for payment processing')
+@secure()
+param stripeApiKey string = ''
+
+@description('Stripe publishable key for client-side payment processing')
+param stripePublishableKey string = ''
+
+@description('Stripe webhook secret for payment event verification')
+@secure()
+param stripeWebhookSecret string = ''
+
+@description('SMTP password for email service configuration')
+@secure()
+param emailSmtpPassword string = ''
+
+@description('The environment name for the deployment')
+param environmentName string = 'dev'
+
 // Merge the standard tags with any provided tags
 var defaultTags = {
   'azd-env-name': environmentName
@@ -118,8 +140,15 @@ module security 'modules/security.bicep' = {
     location: location
     tags: allTags
     resourceToken: resourceToken
+    environmentName: environmentName
     appServicePrincipalId: appService.outputs.appServicePrincipalId
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+    applicationInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
+    applicationInsightsInstrumentationKey: monitoring.outputs.applicationInsightsInstrumentationKey
+    stripeApiKey: stripeApiKey
+    stripePublishableKey: stripePublishableKey
+    stripeWebhookSecret: stripeWebhookSecret
+    emailSmtpPassword: emailSmtpPassword
   }
   dependsOn: [
     monitoring
@@ -137,6 +166,11 @@ module monitoring 'modules/monitoring.bicep' = {
     location: location
     tags: allTags
     resourceToken: resourceToken
+    environmentName: environmentName
+    alertEmailAddress: ownerEmail
+    samplingPercentage: environmentName == 'dev' ? 50 : 100
+    logRetentionDays: environmentName == 'dev' ? 7 : (environmentName == 'test' ? 30 : 90)
+    dailyQuotaGb: environmentName == 'dev' ? 5 : (environmentName == 'test' ? 10 : 50)
   }
 }
 
@@ -154,6 +188,8 @@ output APP_SERVICE_URL string = appService.outputs.appServiceUrl
 
 output KEY_VAULT_NAME string = security.outputs.keyVaultName
 output KEY_VAULT_ENDPOINT string = security.outputs.keyVaultEndpoint
+output KEY_VAULT_REFERENCES object = security.outputs.keyVaultReferences
+output MANAGED_IDENTITY_CLIENT_ID string = security.outputs.userAssignedIdentityClientId
 
 output SQL_SERVER_NAME string = database.outputs.sqlServerName
 output SQL_DATABASE_NAME string = database.outputs.sqlDatabaseName

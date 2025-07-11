@@ -17,12 +17,50 @@
     "ownerEmail": {
       "value": "dev-team@networkingapp.com"
     },
+    "enableDeploymentSlots": {
+      "value": true
+    },
+    "appServicePlanSku": {
+      "value": {
+        "dev": {
+          "name": "B1",
+          "tier": "Basic",
+          "capacity": 1
+        },
+        "test": {
+          "name": "S1",
+          "tier": "Standard",
+          "capacity": 1
+        },
+        "prod": {
+          "name": "P1v3",
+          "tier": "PremiumV3",
+          "capacity": 2
+        }
+      }
+    },
+    "enableGeoRedundantBackup": {
+      "value": false
+    },
     "tags": {
       "value": {
         "project": "Flight Companion Platform",
         "cost-center": "Development",
-        "department": "Engineering"
+        "department": "Engineering",
+        "environment": "dev"
       }
+    },
+    "stripeApiKey": {
+      "value": ""
+    },
+    "stripePublishableKey": {
+      "value": ""
+    },
+    "stripeWebhookSecret": {
+      "value": ""
+    },
+    "emailSmtpPassword": {
+      "value": ""
     }
   }
 }

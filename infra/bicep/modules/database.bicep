@@ -21,6 +21,15 @@ param dbSubnetId string
 @description('Key Vault ID for storing database connection strings.')
 param keyVaultId string
 
+@description('Environment name (dev, test, prod)')
+param environmentName string
+
+@description('Enable geo-redundant backup storage (recommended for production)')
+param enableGeoRedundantBackup bool = false
+
+@description('Log Analytics Workspace ID for diagnostics')
+param logAnalyticsWorkspaceId string = ''
+
 // ----------------------------------------------------------------------------------------------------
 // Variables
 // ----------------------------------------------------------------------------------------------------
@@ -31,6 +40,57 @@ var privateEndpointName = 'pe-sql-${resourceToken}'
 
 // Generate a random password for the SQL Server admin
 var sqlAdminLogin = 'sqladmin'
+
+// Environment-specific database configuration
+var databaseConfig = {
+  dev: {
+    sku: {
+      name: 'Basic'
+      tier: 'Basic'
+      capacity: 5
+    }
+    maxSizeBytes: 2147483648 // 2 GB
+    backupStorageRedundancy: 'Local'
+    zoneRedundant: false
+    readScale: 'Disabled'
+    shortTermRetentionDays: 7
+    longTermRetentionWeeklyPolicy: 'Disabled'
+    longTermRetentionMonthlyPolicy: 'Disabled'
+    longTermRetentionYearlyPolicy: 'Disabled'
+  }
+  test: {
+    sku: {
+      name: 'S1'
+      tier: 'Standard'
+      capacity: 20
+    }
+    maxSizeBytes: 10737418240 // 10 GB
+    backupStorageRedundancy: 'Local'
+    zoneRedundant: false
+    readScale: 'Disabled'
+    shortTermRetentionDays: 14
+    longTermRetentionWeeklyPolicy: 'P4W'
+    longTermRetentionMonthlyPolicy: 'Disabled'
+    longTermRetentionYearlyPolicy: 'Disabled'
+  }
+  prod: {
+    sku: {
+      name: 'S3'
+      tier: 'Standard'
+      capacity: 100
+    }
+    maxSizeBytes: 107374182400 // 100 GB
+    backupStorageRedundancy: enableGeoRedundantBackup ? 'Geo' : 'Zone'
+    zoneRedundant: true
+    readScale: 'Enabled'
+    shortTermRetentionDays: 35
+    longTermRetentionWeeklyPolicy: 'P12W'
+    longTermRetentionMonthlyPolicy: 'P12M'
+    longTermRetentionYearlyPolicy: 'P5Y'
+  }
+}
+
+var currentConfig = databaseConfig[environmentName]
 
 // ----------------------------------------------------------------------------------------------------
 // SQL Server
@@ -62,20 +122,43 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
   name: sqlDatabaseName
   location: location
   tags: tags
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-    capacity: 5
-  }
+  sku: currentConfig.sku
   properties: {
     collation: 'SQL_Latin1_General_CP1_CI_AS'
-    maxSizeBytes: 2147483648 // 2 GB
+    maxSizeBytes: currentConfig.maxSizeBytes
     catalogCollation: 'SQL_Latin1_General_CP1_CI_AS'
-    zoneRedundant: false
-    readScale: 'Disabled'
-    requestedBackupStorageRedundancy: 'Local'
+    zoneRedundant: currentConfig.zoneRedundant
+    readScale: currentConfig.readScale
+    requestedBackupStorageRedundancy: currentConfig.backupStorageRedundancy
     maintenanceConfigurationId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default'
     isLedgerOn: false
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Short-term Backup Retention Policy
+// ----------------------------------------------------------------------------------------------------
+
+resource shortTermRetentionPolicy 'Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies@2023-05-01-preview' = {
+  parent: sqlDatabase
+  name: 'default'
+  properties: {
+    retentionDays: currentConfig.shortTermRetentionDays
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Long-term Backup Retention Policy (Production only)
+// ----------------------------------------------------------------------------------------------------
+
+resource longTermRetentionPolicy 'Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies@2023-05-01-preview' = if (environmentName == 'prod') {
+  parent: sqlDatabase
+  name: 'default'
+  properties: {
+    weeklyRetention: currentConfig.longTermRetentionWeeklyPolicy
+    monthlyRetention: currentConfig.longTermRetentionMonthlyPolicy
+    yearlyRetention: currentConfig.longTermRetentionYearlyPolicy
+    weekOfYear: 1
   }
 }
 
@@ -161,18 +244,26 @@ resource sqlAdAdministrator 'Microsoft.Sql/servers/administrators@2023-05-01-pre
 // Diagnostic Settings
 // ----------------------------------------------------------------------------------------------------
 
-resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'diag-${sqlDatabaseName}'
-  scope: sqlDatabase
+resource sqlServerDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
+  name: 'diag-${sqlServerName}'
+  scope: sqlServer
   properties: {
-    workspaceId: '' // This will be populated from the monitoring module
+    workspaceId: logAnalyticsWorkspaceId
     logs: [
+      {
+        categoryGroup: 'audit'
+        enabled: true
+        retentionPolicy: {
+          enabled: true
+          days: environmentName == 'prod' ? 90 : 30
+        }
+      }
       {
         categoryGroup: 'allLogs'
         enabled: true
         retentionPolicy: {
           enabled: true
-          days: 30
+          days: environmentName == 'prod' ? 90 : 30
         }
       }
     ]
@@ -182,10 +273,77 @@ resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-0
         enabled: true
         retentionPolicy: {
           enabled: true
-          days: 30
+          days: environmentName == 'prod' ? 90 : 30
         }
       }
     ]
+  }
+}
+
+resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(logAnalyticsWorkspaceId)) {
+  name: 'diag-${sqlDatabaseName}'
+  scope: sqlDatabase
+  properties: {
+    workspaceId: logAnalyticsWorkspaceId
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: true
+          days: environmentName == 'prod' ? 90 : 30
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'Basic'
+        enabled: true
+        retentionPolicy: {
+          enabled: true
+          days: environmentName == 'prod' ? 90 : 30
+        }
+      }
+      {
+        category: 'InstanceAndAppAdvanced'
+        enabled: environmentName == 'prod'
+        retentionPolicy: {
+          enabled: true
+          days: environmentName == 'prod' ? 90 : 30
+        }
+      }
+    ]
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Database Auditing
+// ----------------------------------------------------------------------------------------------------
+
+resource sqlServerAuditingSettings 'Microsoft.Sql/servers/auditingSettings@2023-05-01-preview' = {
+  parent: sqlServer
+  name: 'default'
+  properties: {
+    state: 'Enabled'
+    isAzureMonitorTargetEnabled: !empty(logAnalyticsWorkspaceId)
+    retentionDays: environmentName == 'prod' ? 90 : 30
+    auditActionsAndGroups: [
+      'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'
+      'FAILED_DATABASE_AUTHENTICATION_GROUP'
+      'BATCH_COMPLETED_GROUP'
+    ]
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Transparent Data Encryption
+// ----------------------------------------------------------------------------------------------------
+
+resource transparentDataEncryption 'Microsoft.Sql/servers/databases/transparentDataEncryption@2023-05-01-preview' = {
+  parent: sqlDatabase
+  name: 'current'
+  properties: {
+    state: 'Enabled'
   }
 }
 
@@ -211,3 +369,6 @@ output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output sqlDatabaseName string = sqlDatabase.name
 output sqlDatabaseId string = sqlDatabase.id
 output privateEndpointId string = privateEndpoint.id
+output connectionStringSecretUri string = connectionStringSecret.properties.secretUri
+output databaseSku object = currentConfig.sku
+output backupRetentionDays int = currentConfig.shortTermRetentionDays

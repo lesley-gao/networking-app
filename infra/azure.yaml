@@ -48,6 +48,28 @@ hooks:
 pipeline:
   provider: github
   variables:
+    # Azure authentication using service principal
+    AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+    AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+    AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+    
+    # Environment configuration
+    AZURE_ENV_NAME: ${{ secrets.AZURE_ENV_NAME }}
+    AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
+    
+# Environment configuration
+environments:
+  dev:
+    location: australiaeast
+    subscription: ${AZURE_SUBSCRIPTION_ID}
+  test:
+    location: australiaeast  
+    subscription: ${AZURE_SUBSCRIPTION_ID}
+  prod:
+    location: australiaeast
+    subscription: ${AZURE_SUBSCRIPTION_ID}
     # Environment variables for the pipeline
     AZURE_TENANT_ID: ""
     AZURE_CLIENT_ID: ""

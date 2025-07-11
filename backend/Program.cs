@@ -22,6 +22,34 @@ StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Application Insights
+builder.Services.AddApplicationInsightsTelemetry(options =>
+{
+    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights");
+    options.EnableAdaptiveSampling = true;
+    options.EnableQuickPulseMetricStream = true;
+    options.EnableEventCounterCollectionModule = true;
+    options.EnablePerformanceCounterCollectionModule = true;
+    options.EnableRequestTrackingTelemetryModule = true;
+    options.EnableDependencyTrackingTelemetryModule = true;
+});
+
+// Configure Application Insights logging
+builder.Services.AddLogging(logging =>
+{
+    logging.AddApplicationInsights(
+        configureTelemetryConfiguration: (config) =>
+            config.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights"),
+        configureApplicationInsightsLoggerOptions: (options) => { }
+    );
+    
+    // Set log levels
+    logging.SetMinimumLevel(LogLevel.Information);
+    logging.AddFilter("Microsoft", LogLevel.Warning);
+    logging.AddFilter("System", LogLevel.Warning);
+    logging.AddFilter("NetworkingApp", LogLevel.Information);
+});
+
 // Configure ASP.NET Core Identity
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
@@ -109,6 +137,7 @@ builder.Services.AddScoped<IRoleService, RoleService>(); // Register RoleService
 builder.Services.AddScoped<IDataProtectionService, DataProtectionService>(); // Register DataProtectionService
 builder.Services.AddScoped<PaymentService>(); // Register PaymentService
 builder.Services.AddScoped<IEmergencyService, EmergencyService>(); // Register EmergencyService
+builder.Services.AddScoped<ITelemetryService, ApplicationInsightsTelemetryService>(); // Register TelemetryService
 
 // Configure Email Service
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));

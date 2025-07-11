@@ -1,4 +1,4 @@
-name: Deploy NetworkingApp to Azure
+name: 🚀 Deploy NetworkingApp to Azure
 
 on:
   push:
@@ -23,6 +23,12 @@ on:
 permissions:
   id-token: write
   contents: read
+
+env:
+  AZURE_WEBAPP_NAME: app-networkingapp-${{ github.event.inputs.environment || 'dev' }}-aue
+  AZURE_WEBAPP_PACKAGE_PATH: ./backend/publish
+  DOTNET_VERSION: 8.0.x
+  NODE_VERSION: 18.x
 
 jobs:
   # Build and test job
