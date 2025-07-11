@@ -1,5 +1,5 @@
 import PaymentHistory from './PaymentHistory';
-import { Meta, StoryObj } from '@storybook/react-vite';
+import { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
 import { Provider } from 'react-redux';
@@ -64,7 +64,7 @@ const MockTemplate: React.FC<{ userId: string }> = ({ userId }) => {
 const meta: Meta<typeof PaymentHistory> = {
   title: 'Components/PaymentHistory',
   component: PaymentHistory,
-  decorators: [(Story, { args }) => <MockTemplate {...args} />],
+  decorators: [(Story: any, { args }: { args: any }) => <MockTemplate {...args} />],
 };
 export default meta;
 
@@ -74,7 +74,7 @@ export const Default: Story = {
   args: {
     userId: 'user_1',
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
 
     // Wait for data to load

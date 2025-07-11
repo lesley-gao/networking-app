@@ -1,5 +1,5 @@
 import PaymentForm from './PaymentForm';
-import { Meta, StoryObj } from '@storybook/react-vite';
+import { Meta, StoryObj } from '@storybook/react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { within, userEvent } from '@storybook/testing-library';
@@ -28,7 +28,7 @@ export const FilledAndSubmit: Story = {
       <PaymentForm paymentIntentClientSecret="test_client_secret" />
     </Elements>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
 
     // Wait for Stripe Elements to load

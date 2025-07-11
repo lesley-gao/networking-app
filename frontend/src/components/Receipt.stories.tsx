@@ -1,5 +1,5 @@
 import Receipt from './Receipt';
-import { Meta, StoryObj } from '@storybook/react-vite';
+import { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
 
@@ -54,7 +54,7 @@ export const WithPdfDownload: Story = {
       pdfUrl: 'https://example.com/receipt.pdf',
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
 
     // Check if receipt details are displayed

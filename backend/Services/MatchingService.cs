@@ -171,6 +171,7 @@ namespace NetworkingApp.Services
             FlightCompanionRequest request, 
             FlightCompanionOffer offer)
         {
+            await Task.CompletedTask; // Placeholder for async operation
             var score = new CompatibilityScore();
 
             // 1. User Reputation Score (30% of total)
@@ -211,6 +212,7 @@ namespace NetworkingApp.Services
             PickupRequest request, 
             PickupOffer offer)
         {
+            await Task.CompletedTask; // Placeholder for async operation
             var score = new CompatibilityScore();
 
             // 1. User Reputation Score (35% of total)
