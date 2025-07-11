@@ -35,6 +35,7 @@ namespace NetworkingApp.Controllers
         {
             // TODO: Save file to Azure Blob Storage, store metadata in DB
             // For now, just return NotImplemented
+            await Task.CompletedTask; // Placeholder for async operation
             return StatusCode(501, "Document upload not yet implemented.");
         }
 
@@ -46,6 +47,7 @@ namespace NetworkingApp.Controllers
         public async Task<IActionResult> GetStatus()
         {
             // TODO: Return verification status and document info for current user
+            await Task.CompletedTask; // Placeholder for async operation
             return StatusCode(501, "Verification status not yet implemented.");
         }
 
@@ -57,6 +59,7 @@ namespace NetworkingApp.Controllers
         public async Task<IActionResult> ListPending()
         {
             // TODO: Return all unapproved/unrejected documents
+            await Task.CompletedTask; // Placeholder for async operation
             return StatusCode(501, "Pending list not yet implemented.");
         }
 
@@ -68,6 +71,7 @@ namespace NetworkingApp.Controllers
         public async Task<IActionResult> Review(int id, [FromBody] VerificationReviewDto dto)
         {
             // TODO: Approve/reject document, notify user
+            await Task.CompletedTask; // Placeholder for async operation
             return StatusCode(501, "Review not yet implemented.");
         }
     }

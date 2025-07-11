@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react-vite';
+import { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
 import UserProfile from './UserProfile';
@@ -21,7 +21,7 @@ export const Default: Story = {
       role: 'User',
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
 
     // Check if user info is displayed correctly
@@ -70,7 +70,7 @@ export const EditMode: Story = {
       role: 'Admin',
     },
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // Switch to edit mode
     const editButton = await canvas.getByRole('button', { name: /edit/i });

@@ -1,7 +1,7 @@
 // ClientApp/src/stories/FlightCompanionForm.stories.tsx
 import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
-import { fn } from 'storybook/test';  // Use fn instead of action
+import { fn } from '@storybook/test';  // Use fn instead of action
 import { FlightCompanionForm } from '../components/forms/FlightCompanionForm';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';

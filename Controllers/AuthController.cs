@@ -110,7 +110,7 @@ namespace NetworkingApp.Controllers
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             // Compose reset link (to be handled by frontend)
             var resetLink = $"{dto.ResetUrlBase}?email={user.Email}&token={System.Net.WebUtility.UrlEncode(token)}";
-            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, user.UserName);
+            await _emailService.SendPasswordResetEmailAsync(user.Email!, user.UserName!, resetLink);
             return Ok(new { message = "If the email is registered, a reset link will be sent." });
         }
     }

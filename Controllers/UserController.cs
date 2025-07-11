@@ -120,7 +120,7 @@ namespace NetworkingApp.Controllers
                 var profile = new UserProfileResponse
                 {
                     Id = user.Id,
-                    Email = user.Email,
+                    Email = user.Email ?? string.Empty,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.PhoneNumber,
@@ -214,7 +214,7 @@ namespace NetworkingApp.Controllers
                 var updatedProfile = new UserProfileResponse
                 {
                     Id = user.Id,
-                    Email = user.Email,
+                    Email = user.Email ?? string.Empty,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.PhoneNumber,

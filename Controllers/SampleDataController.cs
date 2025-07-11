@@ -28,9 +28,9 @@ namespace NetworkingApp.Controllers
 
         public class WeatherForecast
         {
-            public string DateFormatted { get; set; }
+            public required string DateFormatted { get; set; }
             public int TemperatureC { get; set; }
-            public string Summary { get; set; }
+            public required string Summary { get; set; }
 
             public int TemperatureF
             {

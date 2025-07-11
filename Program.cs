@@ -124,7 +124,12 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<NetworkingApp.Models.JwtSettings>() ?? new NetworkingApp.Models.JwtSettings();
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<NetworkingApp.Models.JwtSettings>() ?? new NetworkingApp.Models.JwtSettings
+    {
+        Issuer = "default-issuer",
+        Audience = "default-audience", 
+        SecretKey = "default-secret-key-minimum-32-characters-long"
+    };
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -133,7 +138,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings.Issuer,
         ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings.SecretKey ?? string.Empty)),
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
         ClockSkew = TimeSpan.Zero
     };
 });

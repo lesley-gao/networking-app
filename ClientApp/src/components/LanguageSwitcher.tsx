@@ -10,7 +10,7 @@ const languages = [
 
 export const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language.split('-')[0];
+  const currentLang = i18n.language?.split('-')[0] || 'en';
 
   const handleChange = (event: SelectChangeEvent) => {
     i18n.changeLanguage(event.target.value as string);
