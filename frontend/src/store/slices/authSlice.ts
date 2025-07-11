@@ -63,14 +63,16 @@ export const loginUser = createAsyncThunk(
 
       if (!response.ok) {
         const error = await response.text();
-        return rejectWithValue(error);
+        // Return error key for localization
+        return rejectWithValue(error || 'loginFailed');
       }
 
       const data = await response.json();
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
-      return rejectWithValue('Login failed. Please try again.');
+      // Return error key for localization
+      return rejectWithValue('loginFailed');
     }
   }
 );
@@ -81,7 +83,8 @@ export const getCurrentUser = createAsyncThunk(
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        return rejectWithValue('No token found');
+        // Return error key for localization
+        return rejectWithValue('noToken');
       }
 
       const response = await fetch('/api/users/profile', {
@@ -91,13 +94,15 @@ export const getCurrentUser = createAsyncThunk(
       });
 
       if (!response.ok) {
-        return rejectWithValue('Failed to get user profile');
+        // Return error key for localization
+        return rejectWithValue('getUserProfileFailed');
       }
 
       const user = await response.json();
       return { user, token };
     } catch (error) {
-      return rejectWithValue('Failed to get user profile');
+      // Return error key for localization
+      return rejectWithValue('getUserProfileFailed');
     }
   }
 );

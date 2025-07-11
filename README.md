@@ -20,23 +20,27 @@ A community-focused networking platform designed for Chinese professionals in Au
 
 2. **Setup backend**
    ```bash
+   cd backend
    dotnet restore
    dotnet build
+   cd ..
    ```
 
 3. **Setup frontend**
    ```bash
-   cd ClientApp
+   cd frontend
    npm install
-   npm start
+   cd ..
    ```
 
 4. **Run the application**
    ```bash
    # Terminal 1: Start backend
+   cd backend
    dotnet run
    
-   # Terminal 2: Start frontend (in ClientApp directory)
+   # Terminal 2: Start frontend (in new terminal)
+   cd frontend
    npm start
    ```
 
@@ -65,6 +69,7 @@ For detailed deployment instructions, see [Infrastructure Documentation](./infra
 - **Tailwind CSS** for utility-first styling
 - **Redux Toolkit** for state management
 - **Storybook** for component documentation and testing
+- **Playwright** for end-to-end testing
 
 ### Backend
 - **.NET 8** Web API with minimal APIs
@@ -72,6 +77,7 @@ For detailed deployment instructions, see [Infrastructure Documentation](./infra
 - **SQLite** for local development, **Azure SQL** for production
 - **ASP.NET Core Identity** for authentication
 - **SignalR** for real-time notifications
+- **Stripe** integration for payment processing
 
 ### Infrastructure
 - **Azure App Service** for hosting
@@ -84,32 +90,71 @@ For detailed deployment instructions, see [Infrastructure Documentation](./infra
 
 ```
 NetworkingApp/
-├── 📁 ClientApp/                 # React TypeScript frontend
+├── 📁 backend/                   # .NET 8 Web API
+│   ├── 📁 Controllers/           # Web API controllers
+│   ├── 📁 Data/                  # Database context and migrations
+│   ├── 📁 Models/                # Data models and DTOs
+│   ├── 📁 Services/              # Business logic services
+│   ├── 📁 Hubs/                  # SignalR hubs
+│   ├── 📁 Tests/                 # Unit and integration tests
+│   ├── 📁 Filters/               # Request/response filters
+│   ├── 📁 Middleware/            # Custom middleware
+│   ├── 📁 Templates/             # Email templates
+│   ├── 📁 Scripts/               # PowerShell deployment scripts
+│   ├── 📁 Infrastructure/        # Additional infrastructure code
+│   ├── 📁 Pages/                 # Razor pages
+│   ├── 📁 Properties/            # Project properties
+│   ├── 📁 bin/                   # Build output
+│   ├── 📁 obj/                   # Build intermediates
+│   ├── 📄 Program.cs             # Application entry point
+│   ├── 📄 NetworkingApp.csproj   # .NET project file
+│   ├── 📄 NetworkingApp.sln      # Solution file
+│   ├── 📄 appsettings.json       # App configuration
+│   ├── 📄 appsettings.Development.json # Development config
+│   ├── 📄 coverlet.runsettings   # Code coverage configuration
+│   └── 📄 FlightCompanion.db     # SQLite database (dev)
+├── 📁 frontend/                  # React TypeScript frontend
 │   ├── 📁 public/                # Static assets
 │   ├── 📁 src/
 │   │   ├── 📁 components/        # React components
 │   │   ├── 📁 store/             # Redux store and slices
-│   │   ├── 📁 styles/            # CSS and theme files
+│   │   ├── 📁 hooks/             # Custom React hooks
+│   │   ├── 📁 services/          # API services
+│   │   ├── 📁 themes/            # Theme providers
+│   │   ├── 📁 utils/             # Utility functions
+│   │   ├── 📁 locales/           # Internationalization files
 │   │   └── 📁 stories/           # Storybook stories
+│   ├── 📁 e2e/                   # End-to-end tests
+│   ├── 📁 .storybook/            # Storybook configuration
+│   ├── 📁 scss/                  # SCSS stylesheets
 │   ├── 📄 package.json           # Frontend dependencies
-│   └── 📄 tailwind.config.js     # Tailwind configuration
-├── 📁 Controllers/               # Web API controllers
-├── 📁 Data/                      # Database context and migrations
-├── 📁 Models/                    # Data models and DTOs
-├── 📁 Services/                  # Business logic services
-├── 📁 Hubs/                      # SignalR hubs
-├── 📁 Tests/                     # Unit and integration tests
+│   ├── 📄 package-lock.json      # Locked dependencies
+│   ├── 📄 tailwind.config.js     # Tailwind configuration
+│   ├── 📄 tsconfig.json          # TypeScript configuration
+│   ├── 📄 vite.config.mjs        # Vite build configuration
+│   ├── 📄 playwright.config.ts   # Playwright test configuration
+│   ├── 📄 jest.config.json       # Jest test configuration
+│   └── 📄 postcss.config.js      # PostCSS configuration
 ├── 📁 infra/                     # Azure infrastructure as code
 │   ├── 📁 bicep/                 # Bicep templates
 │   │   ├── 📄 main.bicep         # Main infrastructure template
 │   │   ├── 📁 modules/           # Modular Bicep templates
 │   │   └── 📁 parameters/        # Environment-specific parameters
 │   └── 📄 README.md              # Infrastructure documentation
-├── 📁 scripts/                   # Deployment and utility scripts
-├── 📁 .github/workflows/         # GitHub Actions CI/CD
+├── 📁 Docs/                      # Project documentation
+│   ├── 📄 AuthControllerAPI.md   # API documentation
+│   ├── 📄 DataProtection.md      # Security documentation
+│   ├── 📄 UserVerificationWorkflow.md
+│   └── 📄 TASK-*.md              # Implementation task summaries
+├── 📁 plan/                      # Project planning documents
+├── 📁 spec/                      # Technical specifications
+├── 📁 .github/                   # GitHub configuration
+│   └── 📁 workflows/             # GitHub Actions CI/CD
+├── 📁 .vscode/                   # VS Code settings
 ├── 📄 azure.yaml                 # Azure Developer CLI configuration
-├── 📄 Program.cs                 # Application entry point
-└── 📄 NetworkingApp.csproj       # .NET project file
+├── 📄 bicepconfig.json           # Bicep configuration
+├── 📄 .gitignore                 # Git ignore rules
+└── 📄 README.md                  # This file
 ```
 
 ## 🔧 Development
@@ -118,50 +163,88 @@ NetworkingApp/
 
 #### Backend (.NET)
 ```bash
+cd backend
+
+# Development
 dotnet run                        # Run the application
-dotnet test                       # Run tests
+dotnet watch run                  # Run with hot reload
+dotnet build                      # Build the project
+dotnet test                       # Run all tests
+
+# Database
 dotnet ef migrations add <name>   # Add database migration
 dotnet ef database update         # Update database
+dotnet ef database drop           # Drop database (caution!)
+
+# Code Coverage
+dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 ```
 
 #### Frontend (React)
 ```bash
-npm start                         # Start development server
+cd frontend
+
+# Development
+npm start                         # Start development server (Vite)
+npm run dev                       # Alternative start command
 npm run build                     # Build for production
-npm test                          # Run tests
-npm run lint                      # Lint code
-npm run storybook                 # Start Storybook
-npm run build-storybook          # Build Storybook
+npm run preview                   # Preview production build
+
+# Testing
+npm test                          # Run unit tests (Jest)
+npm run test:watch                # Run tests in watch mode
+npm run test:e2e                  # Run end-to-end tests (Playwright)
+npm run test:e2e:ui               # Run e2e tests with UI
+
+# Code Quality
+npm run lint                      # Lint code (ESLint)
+npm run lint:fix                  # Fix linting issues
+npm run format                    # Format code (Prettier)
+
+# Storybook
+npm run storybook                 # Start Storybook dev server
+npm run build-storybook           # Build Storybook for production
 ```
 
-#### Infrastructure
+#### Infrastructure & Deployment
 ```bash
-# Validate Bicep templates
+# Bicep template validation
 az deployment group validate --resource-group <rg> --template-file infra/bicep/main.bicep
 
-# Deploy using PowerShell script
-.\scripts\Deploy-ToAzure.ps1 -Environment dev
+# Deploy using PowerShell scripts (from backend directory)
+cd backend
+.\Scripts\Deploy-ToAzure.ps1 -Environment dev
+.\Scripts\Generate-CodeCoverage.ps1
 
 # Deploy using Azure Developer CLI
 azd up --environment dev
+azd deploy                        # Deploy without provisioning
+azd down                          # Tear down resources
 ```
 
-### Code Quality
+### Code Quality Tools
 
 The project includes comprehensive tooling for code quality:
 
-- **ESLint** and **Prettier** for frontend code formatting
-- **StyleCop** and **EditorConfig** for backend code standards
+#### Frontend
+- **ESLint** and **Prettier** for code formatting and linting
+- **TypeScript** for type safety
+- **Jest** and **React Testing Library** for unit testing
+- **Playwright** for end-to-end testing
 - **Storybook** for component documentation and visual testing
-- **Jest** and **React Testing Library** for frontend testing
-- **MSTest** and **Moq** for backend testing
+
+#### Backend
+- **StyleCop** and **EditorConfig** for code standards
+- **MSTest** and **Moq** for unit testing
+- **Entity Framework** in-memory provider for integration testing
+- **Coverlet** for code coverage analysis
 
 ## 🎨 Storybook
 
 Access the component library and documentation:
 
 ```bash
-cd ClientApp
+cd frontend
 npm run storybook
 ```
 
@@ -174,6 +257,7 @@ Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 - **Role-based Authorization** (User, Helper, Admin)
 - **Data Protection** for sensitive information encryption
 - **HTTPS enforcement** across all environments
+- **Input validation** and **XSS protection**
 
 ## 💰 Payment Integration
 
@@ -181,6 +265,7 @@ Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 - **Escrow system** for holding funds until service completion
 - **Dispute resolution** with admin intervention
 - **Payment history** and receipt generation
+- **Webhook handling** for payment events
 
 ## 🌐 Deployment Environments
 
@@ -188,16 +273,19 @@ Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 - Local development with hot reload
 - SQLite database for quick setup
 - Relaxed security for development productivity
+- Detailed logging and debugging
 
 ### Test (`test`)
 - Azure-hosted for integration testing
 - Azure SQL Database
 - Production-like configuration
+- Automated testing pipelines
 
 ### Production (`prod`)
 - Full Azure deployment with high availability
 - Enhanced security and monitoring
 - Auto-scaling and performance optimization
+- Error tracking and alerting
 
 ## 📊 Monitoring & Observability
 
@@ -206,20 +294,52 @@ Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 - **Custom dashboards** for key metrics
 - **Automated alerts** for critical issues
 - **Health checks** for service availability
+- **Performance monitoring** for API endpoints
 
 ## 🧪 Testing Strategy
 
 ### Frontend Testing
 - **Unit tests** with Jest and React Testing Library
 - **Component tests** with Storybook interactions
-- **Visual regression testing** with Storybook
+- **Integration tests** for Redux stores and API calls
 - **End-to-end tests** with Playwright
+- **Visual regression testing** capabilities
 
 ### Backend Testing
 - **Unit tests** for controllers and services
 - **Integration tests** for API endpoints
 - **Database tests** with in-memory providers
 - **Performance tests** for matching algorithms
+- **Load testing** for high-traffic scenarios
+
+### Test Coverage Goals
+- **Frontend**: >80% line coverage
+- **Backend**: >85% line coverage
+- **API Integration**: 100% endpoint coverage
+
+## 🌍 Internationalization
+
+- **React i18next** for frontend translations
+- **English/Chinese** language support
+- **Localized date/time formatting**
+- **Cultural considerations** for Chinese users
+- **Right-to-left (RTL)** text support preparation
+
+## 🚀 Performance Optimization
+
+### Frontend
+- **Code splitting** with React.lazy
+- **Bundle optimization** with Vite
+- **Image optimization** and lazy loading
+- **Memoization** for expensive calculations
+- **Virtual scrolling** for large lists
+
+### Backend
+- **Entity Framework** query optimization
+- **Caching strategies** with Redis (planned)
+- **Database indexing** for search operations
+- **Connection pooling** configuration
+- **Response compression**
 
 ## 🤝 Contributing
 
@@ -233,52 +353,99 @@ Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 
 1. **Feature Development**
    - Create feature branch from `develop`
-   - Implement feature with tests
-   - Update Storybook documentation
-   - Create Pull Request
+   - Implement feature with comprehensive tests
+   - Update Storybook documentation if UI changes
+   - Ensure code coverage requirements are met
 
-2. **Code Review**
-   - Automated tests must pass
-   - Code coverage requirements met
-   - Manual review by team members
-   - Merge to `develop`
+2. **Code Review Process**
+   - All automated tests must pass
+   - Code coverage thresholds must be maintained
+   - Manual review by at least one team member
+   - Security and performance considerations reviewed
 
 3. **Release Process**
-   - Merge `develop` to `main`
+   - Merge `develop` to `main` for releases
    - Automatic deployment to test environment
-   - Manual approval for production deployment
+   - Manual approval required for production deployment
+   - Post-deployment verification and monitoring
 
 ## 📋 Implementation Progress
 
 See [Implementation Plan](./plan/feature-flight-companion-platform-1.md) for detailed progress tracking.
 
 ### Completed Features ✅
-- Core backend API with Entity Framework
+- Core backend API with Entity Framework Core 8
 - React frontend with TypeScript and Material-UI
 - Authentication and authorization system
-- Payment processing with Stripe
+- Payment processing with Stripe integration
 - Real-time notifications with SignalR
-- Comprehensive Storybook integration
-- Azure infrastructure as code
+- Comprehensive Storybook component library
+- Azure infrastructure as code with Bicep
+- End-to-end testing with Playwright
+- Code coverage reporting and CI/CD pipeline
 
 ### In Progress 🚧
-- Unit and integration test suites
-- End-to-end testing with Playwright
-- Performance optimization
-- Security hardening
+- Performance optimization and caching
+- Advanced search and filtering capabilities
+- Security hardening and penetration testing
+- Mobile responsiveness improvements
 
 ### Planned Features 📋
-- Bilingual support (English/Chinese)
-- Advanced search and filtering
-- Mobile app development
-- Machine learning for improved matching
+- Bilingual support (English/Chinese) completion
+- Mobile app development (React Native)
+- Machine learning for improved matching algorithms
+- Advanced analytics and reporting dashboard
+- SMS and push notification services
 
-## 📞 Support
+## 🛠️ Development Setup Troubleshooting
 
-For technical support or questions:
-- Create an issue in the repository
-- Contact the development team
-- Refer to the [Architecture Documentation](./docs/)
+### Common Issues
+
+#### Backend Setup
+```bash
+# If dotnet restore fails
+dotnet nuget locals all --clear
+dotnet restore --force
+
+# If database migrations fail
+dotnet ef database drop
+dotnet ef database update
+```
+
+#### Frontend Setup
+```bash
+# If npm install fails
+rm -rf node_modules package-lock.json
+npm install
+
+# If Vite fails to start
+rm -rf node_modules/.vite
+npm run dev
+```
+
+#### Database Issues
+- Ensure SQLite is accessible for local development
+- Check connection strings in `appsettings.Development.json`
+- Verify Entity Framework migrations are applied
+
+## 📞 Support & Resources
+
+### Documentation
+- [API Documentation](./Docs/AuthControllerAPI.md)
+- [Architecture Overview](./Docs/)
+- [Security Guide](./Docs/DataProtection.md)
+- [Infrastructure Guide](./infra/README.md)
+
+### Support Channels
+- Create an issue in the repository for bugs
+- Use GitHub Discussions for questions
+- Contact the development team for urgent issues
+
+### External Resources
+- [.NET 8 Documentation](https://docs.microsoft.com/en-us/dotnet/)
+- [React Documentation](https://reactjs.org/docs/)
+- [Azure Developer CLI](https://docs.microsoft.com/en-us/azure/developer/azure-developer-cli/)
+- [Storybook Documentation](https://storybook.js.org/docs/)
 
 ## 📄 License
 
@@ -288,5 +455,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Azure Well-Architected Framework** for architecture guidance
 - **React** and **.NET** communities for excellent documentation
-- **Material-UI** and **Tailwind CSS** for design systems
-- **Stripe** for payment processing capabilities
+- **Material-UI** team for the comprehensive component library
+- **Tailwind CSS** for utility-first CSS framework
+- **Stripe** for secure payment processing capabilities
+- **Playwright** team for robust end-to-end testing tools
+- **Storybook** community for component development workflow
+
+---
+
+**Built with ❤️ for the Chinese professional community in Auckland, New Zealand**

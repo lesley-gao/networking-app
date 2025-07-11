@@ -6,20 +6,22 @@ import { Button, TextField, Box, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loginUser } from '../store/slices/authSlice';
 import { selectAuthError, selectAuthLoading } from '../store/slices/authSelectors';
-
-const schema = z.object({
-  fullName: z.string().min(2, { message: 'Full name is required' }),
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormInputs = z.infer<typeof schema>;
+import { useTranslation } from 'react-i18next';
 
 const Register: React.FC = () => {
+  const { t } = useTranslation();
+  // Refactor schema to use t() for validation messages
+  const schema = React.useMemo(() => z.object({
+    fullName: z.string().min(2, { message: t('validation.fullNameRequired') }),
+    email: z.string().email({ message: t('validation.invalidEmail') }),
+    password: z.string().min(6, { message: t('validation.passwordMin') }),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t('validation.passwordsDontMatch'),
+    path: ["confirmPassword"],
+  }), [t]);
+  type RegisterFormInputs = z.infer<typeof schema>;
+
   const dispatch = useAppDispatch();
   const error = useAppSelector(selectAuthError);
   const isLoading = useAppSelector(selectAuthLoading);
@@ -50,11 +52,11 @@ const Register: React.FC = () => {
 
   return (
     <Box maxWidth={400} mx="auto" mt={6} p={3} boxShadow={2} borderRadius={2} bgcolor="background.paper">
-      <Typography variant="h5" mb={2}>Register</Typography>
-      {error && <Typography color="error" mb={2}>{error}</Typography>}
+      <Typography variant="h5" mb={2}>{t('registerTitle')}</Typography>
+      {error && <Typography color="error" mb={2}>{t(error)}</Typography>}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <TextField
-          label="Full Name"
+          label={t('fullName')}
           fullWidth
           margin="normal"
           {...register('fullName')}
@@ -62,7 +64,7 @@ const Register: React.FC = () => {
           helperText={errors.fullName?.message}
         />
         <TextField
-          label="Email"
+          label={t('email')}
           fullWidth
           margin="normal"
           {...register('email')}
@@ -70,7 +72,7 @@ const Register: React.FC = () => {
           helperText={errors.email?.message}
         />
         <TextField
-          label="Password"
+          label={t('password')}
           type="password"
           fullWidth
           margin="normal"
@@ -79,7 +81,7 @@ const Register: React.FC = () => {
           helperText={errors.password?.message}
         />
         <TextField
-          label="Confirm Password"
+          label={t('confirmPassword')}
           type="password"
           fullWidth
           margin="normal"
@@ -88,7 +90,7 @@ const Register: React.FC = () => {
           helperText={errors.confirmPassword?.message}
         />
         <Button type="submit" variant="contained" color="primary" fullWidth disabled={isLoading} sx={{ mt: 2 }}>
-          {isLoading ? 'Registering...' : 'Register'}
+          {isLoading ? t('registering', 'Registering...') : t('register')}
         </Button>
       </form>
     </Box>

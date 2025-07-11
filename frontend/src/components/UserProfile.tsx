@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   Box,
   Container,
@@ -37,64 +36,12 @@ import {
   Security as SecurityIcon,
 } from '@mui/icons-material';
 import { Input } from './ui';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppSelector } from '../store/hooks';
 import PaymentHistory from './PaymentHistory';
-
-// Zod validation schemas
-const userProfileSchema = z.object({
-  firstName: z
-    .string()
-    .min(1, 'First name is required')
-    .max(50, 'First name must be less than 50 characters')
-    .regex(/^[a-zA-Z\s]+$/, 'First name can only contain letters and spaces'),
-  
-  lastName: z
-    .string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name must be less than 50 characters')
-    .regex(/^[a-zA-Z\s]+$/, 'Last name can only contain letters and spaces'),
-  
-  phoneNumber: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^\+64\d{8,9}$/.test(val),
-      'Phone number must be in format +64XXXXXXXX'
-    ),
-  
-  preferredLanguage: z
-    .enum(['English', 'Chinese'], {
-      errorMap: () => ({ message: 'Please select a preferred language' }),
-    }),
-  
-  emergencyContact: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || (val.length >= 2 && val.length <= 100),
-      'Emergency contact name must be between 2 and 100 characters'
-    ),
-  
-  emergencyPhone: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^\+64\d{8,9}$/.test(val),
-      'Emergency phone must be in format +64XXXXXXXX'
-    ),
-});
-
-const verificationSchema = z.object({
-  documentReferences: z
-    .string()
-    .min(10, 'Document references must be at least 10 characters')
-    .max(500, 'Document references must be less than 500 characters'),
-});
+import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
 // TypeScript interfaces
-type UserProfileFormData = z.infer<typeof userProfileSchema>;
-type VerificationFormData = z.infer<typeof verificationSchema>;
-
 interface UserProfile {
   id: number;
   email: string;
@@ -123,7 +70,58 @@ interface UserStats {
 
 interface UserProfileProps {}
 
+// UserProfile Component
 const UserProfile: React.FC<UserProfileProps> = () => {
+  const { t } = useTranslation();
+
+  // Zod schemas and types (must be inside component, before useForm)
+  const userProfileSchema = React.useMemo(() => z.object({
+    firstName: z
+      .string()
+      .min(1, t('validation.firstNameRequired'))
+      .max(50, t('validation.firstNameMax'))
+      .regex(/^[a-zA-Z\s]+$/, t('validation.firstNameRegex')),
+    lastName: z
+      .string()
+      .min(1, t('validation.lastNameRequired'))
+      .max(50, t('validation.lastNameMax'))
+      .regex(/^[a-zA-Z\s]+$/, t('validation.lastNameRegex')),
+    phoneNumber: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^\+64\d{8,9}$/.test(val),
+        t('validation.phoneNumberFormat')
+      ),
+    preferredLanguage: z
+      .enum(['English', 'Chinese'], {
+        errorMap: () => ({ message: t('validation.preferredLanguageRequired') }),
+      }),
+    emergencyContact: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || (val.length >= 2 && val.length <= 100),
+        t('validation.emergencyContactLength')
+      ),
+    emergencyPhone: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^\+64\d{8,9}$/.test(val),
+        t('validation.emergencyPhoneFormat')
+      ),
+  }), [t]);
+  type UserProfileFormData = z.infer<typeof userProfileSchema>;
+
+  const verificationSchema = React.useMemo(() => z.object({
+    documentReferences: z
+      .string()
+      .min(10, t('validation.documentReferencesMin'))
+      .max(500, t('validation.documentReferencesMax')),
+  }), [t]);
+  type VerificationFormData = z.infer<typeof verificationSchema>;
+
   // State Management
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -141,7 +139,6 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   });
 
   // Redux Integration
-  const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   // Profile Form
@@ -203,7 +200,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       });
     } catch (error) {
       console.error('Error fetching profile:', error);
-      showSnackbar('Error loading profile', 'error');
+      showSnackbar(t('errorLoadingProfile'), 'error');
     } finally {
       setLoading(false);
     }
@@ -223,7 +220,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
-      showSnackbar('Error loading statistics', 'error');
+      showSnackbar(t('errorLoadingStatistics'), 'error');
     }
   };
 
@@ -261,10 +258,10 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       const updatedProfile: UserProfile = await response.json();
       setProfile(updatedProfile);
       setIsEditing(false);
-      showSnackbar('Profile updated successfully!', 'success');
+      showSnackbar(t('profileUpdated'), 'success');
     } catch (error) {
       console.error('Error updating profile:', error);
-      showSnackbar('Error updating profile', 'error');
+      showSnackbar(t('errorUpdatingProfile'), 'error');
     } finally {
       setLoading(false);
     }
@@ -285,7 +282,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
       if (!response.ok) throw new Error('Failed to submit verification');
 
-      showSnackbar('Verification documents submitted successfully!', 'success');
+      showSnackbar(t('verificationDocumentsSubmitted'), 'success');
       setShowVerificationDialog(false);
       verificationForm.reset();
       
@@ -293,7 +290,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       await fetchProfile();
     } catch (error) {
       console.error('Error submitting verification:', error);
-      showSnackbar('Error submitting verification documents', 'error');
+      showSnackbar(t('errorSubmittingVerificationDocuments'), 'error');
     } finally {
       setLoading(false);
     }
@@ -305,6 +302,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       fetchProfile();
       fetchStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Render loading state
@@ -323,7 +321,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     return (
       <Container maxWidth="lg" className="py-6">
         <Alert severity="warning">
-          Please log in to view your profile.
+          {t('pleaseLogInToViewProfile')}
         </Alert>
       </Container>
     );
@@ -343,7 +341,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         />
       ))}
       <Typography variant="body2" className="ml-2 text-gray-600">
-        {rating.toFixed(1)} ({profile.totalRatings} reviews)
+        {rating.toFixed(1)} ({profile.totalRatings} {t('reviews')})
       </Typography>
     </Box>
   );
@@ -357,13 +355,13 @@ const UserProfile: React.FC<UserProfileProps> = () => {
           component="h1"
           className="mb-2 font-bold text-gray-800 dark:text-white"
         >
-          User Profile
+          {t('userProfile')}
         </Typography>
         <Typography
           variant="h6"
           className="text-gray-600 dark:text-gray-300"
         >
-          Manage your account information and preferences
+          {t('manageYourAccountInformationAndPreferences')}
         </Typography>
       </Box>
 
@@ -374,7 +372,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
             <CardContent className="p-6">
               <Box className="flex justify-between items-center mb-6">
                 <Typography variant="h5" className="font-semibold">
-                  Profile Information
+                  {t('profileInformation')}
                 </Typography>
                 <Button
                   variant={isEditing ? "outlined" : "contained"}
@@ -382,7 +380,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   onClick={handleEditToggle}
                   disabled={loading}
                 >
-                  {isEditing ? 'Cancel' : 'Edit'}
+                  {isEditing ? t('cancel') : t('edit')}
                 </Button>
               </Box>
 
@@ -391,7 +389,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   {/* Basic Information */}
                   <Grid item xs={12}>
                     <Typography variant="h6" className="mb-3 text-gray-700 dark:text-gray-300">
-                      Basic Information
+                      {t('basicInformation')}
                     </Typography>
                   </Grid>
 
@@ -402,7 +400,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label="First Name"
+                          label={t('firstName')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
@@ -420,7 +418,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label="Last Name"
+                          label={t('lastName')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
@@ -433,11 +431,11 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
                   <Grid item xs={12} sm={6}>
                     <Input.TextField
-                      label="Email"
+                      label={t('email')}
                       value={profile.email}
                       disabled={true}
                       fullWidth
-                      helperText="Email cannot be changed"
+                      helperText={t('emailCannotBeChanged')}
                       startAdornment={<EmailIcon className="text-gray-400" />}
                     />
                   </Grid>
@@ -449,10 +447,10 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label="Phone Number"
+                          label={t('phoneNumber')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
-                          helperText={fieldState.error?.message || "Format: +64XXXXXXXX"}
+                          helperText={fieldState.error?.message || t('formatPhoneNumber')}
                           fullWidth
                           placeholder="+64 21 123 4567"
                           startAdornment={<PhoneIcon className="text-gray-400" />}
@@ -468,14 +466,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.Select
                           {...field}
-                          label="Preferred Language"
+                          label={t('preferredLanguage')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                           fullWidth
                           options={[
-                            { value: 'English', label: 'English' },
-                            { value: 'Chinese', label: 'Chinese' },
+                            { value: 'English', label: t('english') },
+                            { value: 'Chinese', label: t('chinese') },
                           ]}
                         />
                       )}
@@ -486,7 +484,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   <Grid item xs={12}>
                     <Divider className="my-4" />
                     <Typography variant="h6" className="mb-3 text-gray-700 dark:text-gray-300">
-                      Emergency Contact
+                      {t('emergencyContact')}
                     </Typography>
                   </Grid>
 
@@ -497,7 +495,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label="Emergency Contact Name"
+                          label={t('emergencyContactName')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
@@ -515,10 +513,10 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label="Emergency Contact Phone"
+                          label={t('emergencyContactPhone')}
                           disabled={!isEditing}
                           error={!!fieldState.error}
-                          helperText={fieldState.error?.message || "Format: +64XXXXXXXX"}
+                          helperText={fieldState.error?.message || t('formatPhoneNumber')}
                           fullWidth
                           placeholder="+64 21 123 4567"
                           startAdornment={<PhoneIcon className="text-gray-400" />}
@@ -538,7 +536,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                           disabled={loading}
                           className="bg-green-600 hover:bg-green-700"
                         >
-                          {loading ? 'Saving...' : 'Save Changes'}
+                          {loading ? t('saving') : t('saveChanges')}
                         </Button>
                       </Box>
                     </Grid>
@@ -569,14 +567,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                 {profile.isVerified ? (
                   <Chip
                     icon={<VerifiedIcon />}
-                    label="Verified"
+                    label={t('verified')}
                     color="success"
                     size="small"
                   />
                 ) : (
                   <Chip
                     icon={<SecurityIcon />}
-                    label="Unverified"
+                    label={t('unverified')}
                     color="warning"
                     size="small"
                   />
@@ -592,7 +590,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               {renderStars(profile.rating)}
 
               <Typography variant="body2" className="text-gray-600 mt-3">
-                Member since {new Date(profile.createdAt).toLocaleDateString()}
+                {t('memberSince')} {new Date(profile.createdAt).toLocaleDateString()}
               </Typography>
 
               {!profile.isVerified && (
@@ -603,7 +601,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   className="mt-4"
                   fullWidth
                 >
-                  Submit Verification
+                  {t('submitVerification')}
                 </Button>
               )}
             </CardContent>
@@ -614,26 +612,26 @@ const UserProfile: React.FC<UserProfileProps> = () => {
             <Card>
               <CardContent className="p-6">
                 <Typography variant="h6" className="font-semibold mb-4">
-                  Activity Statistics
+                  {t('activityStatistics')}
                 </Typography>
                 
                 <Box className="space-y-3">
                   <Box className="flex justify-between">
-                    <Typography variant="body2">Requests Created:</Typography>
+                    <Typography variant="body2">{t('requestsCreated')}:</Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.totalFlightCompanionRequests + stats.totalPickupRequests}
                     </Typography>
                   </Box>
                   
                   <Box className="flex justify-between">
-                    <Typography variant="body2">Services Offered:</Typography>
+                    <Typography variant="body2">{t('servicesOffered')}:</Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.totalFlightCompanionOffers + stats.totalPickupOffers}
                     </Typography>
                   </Box>
                   
                   <Box className="flex justify-between">
-                    <Typography variant="body2">Completed Services:</Typography>
+                    <Typography variant="body2">{t('completedServices')}:</Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.completedServices}
                     </Typography>
@@ -642,7 +640,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   <Divider />
                   
                   <Box className="flex justify-between">
-                    <Typography variant="body2">Average Rating:</Typography>
+                    <Typography variant="body2">{t('averageRating')}:</Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.averageRating.toFixed(1)}/5.0
                     </Typography>
@@ -664,14 +662,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         <DialogTitle>
           <Typography variant="h5" className="flex items-center gap-2">
             <SecurityIcon />
-            Submit Verification Documents
+            {t('submitVerificationDocuments')}
           </Typography>
         </DialogTitle>
 
         <form onSubmit={verificationForm.handleSubmit(handleVerificationSubmit)}>
           <DialogContent>
             <Typography variant="body2" className="mb-4 text-gray-600">
-              Please provide references to your identification documents. This helps us verify your identity and build trust in our community.
+              {t('pleaseProvideReferencesToYourIdentificationDocuments')}
             </Typography>
 
             <Controller
@@ -680,13 +678,13 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               render={({ field, fieldState }) => (
                 <Input.TextField
                   {...field}
-                  label="Document References"
+                  label={t('documentReferences')}
                   error={!!fieldState.error}
-                  helperText={fieldState.error?.message || "e.g., Passport number, Driver's license number, etc."}
+                  helperText={fieldState.error?.message || t('exampleDocumentReferences')}
                   fullWidth
                   multiline
                   rows={4}
-                  placeholder="Please provide document references that can be used to verify your identity..."
+                  placeholder={t('pleaseProvideDocumentReferences')}
                 />
               )}
             />
@@ -697,7 +695,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               onClick={() => setShowVerificationDialog(false)}
               disabled={loading}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
@@ -705,7 +703,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : <UploadIcon />}
             >
-              {loading ? 'Submitting...' : 'Submit'}
+              {loading ? t('submitting') : t('submit')}
             </Button>
           </DialogActions>
         </form>
