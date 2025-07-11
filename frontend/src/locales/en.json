@@ -77,5 +77,347 @@
     "passwordMin": "Password must be at least 6 characters",
     "passwordsDontMatch": "Passwords do not match"
   },
-  "loginFailed": "Login failed. Please try again."
+  "loginFailed": "Login failed. Please try again.",
+  "emergency": {
+    "help": "Emergency Help",
+    "selectType": "Select Emergency Type",
+    "warningMessage": "🚨 This will immediately notify your emergency contact, platform administrators, and any matched users. Only use for genuine emergencies.",
+    "medical": "Medical Emergency",
+    "medicalDesc": "Medical assistance needed urgently",
+    "safety": "Safety Emergency",
+    "safetyDesc": "Personal safety or security concern",
+    "travel": "Travel Emergency",
+    "travelDesc": "Travel-related emergency or assistance needed",
+    "sos": "SOS - General Emergency",
+    "sosDesc": "Immediate assistance needed",
+    "responseInfo": "Emergency contacts will be notified immediately via email and SMS. Platform administrators will also be alerted.",
+    "quickSOS": "Quick SOS Button",
+    "active": "Emergency Active",
+    "helpOnWay": "Help is on the way",
+    "cancel": "Cancel Emergency",
+    "sending": "Sending...",
+    "history": "Emergency History",
+    "noHistory": "No emergency history",
+    "noHistoryDesc": "You haven't triggered any emergency alerts yet.",
+    "createdAt": "Created",
+    "resolvedAt": "Resolved",
+    "contactNotified": "Emergency Contact Notified",
+    "adminNotified": "Admins Notified",
+    "markResolved": "Mark as Resolved",
+    "resolveTitle": "Resolve Emergency",
+    "resolveDesc": "Please provide details about how this emergency was resolved.",
+    "resolutionDetails": "Resolution Details",
+    "resolutionPlaceholder": "Describe how the emergency was resolved...",
+    "resolve": "Resolve",
+    "status": {
+      "active": "Active",
+      "resolved": "Resolved",
+      "cancelled": "Cancelled"
+    }
+  },
+  "guidelines": {
+    "title": "Community Guidelines",
+    "subtitle": "Building a safe and respectful community for Chinese professionals in Auckland",
+    "lastUpdated": "Last updated: {{date}}",
+    "sections": {
+      "overview": {
+        "title": "Overview",
+        "content": "Our platform connects Chinese professionals in Auckland for mutual assistance with flight companionship and airport pickup services. These guidelines ensure a safe, respectful, and trustworthy community for all members."
+      },
+      "conduct": {
+        "title": "Community Conduct",
+        "respect": {
+          "title": "Respect and Courtesy",
+          "content": "Treat all community members with respect, regardless of background, experience level, or personal circumstances. Use polite language in all communications."
+        },
+        "discrimination": {
+          "title": "Zero Tolerance for Discrimination",
+          "content": "Discrimination based on race, gender, age, religion, sexual orientation, or any other personal characteristic is strictly prohibited."
+        },
+        "harassment": {
+          "title": "No Harassment or Abuse",
+          "content": "Harassment, bullying, inappropriate sexual advances, or threatening behavior will result in immediate account suspension."
+        }
+      },
+      "safety": {
+        "title": "Safety Guidelines",
+        "verification": {
+          "title": "Identity Verification",
+          "content": "Complete identity verification before offering or requesting services. Only interact with verified users for your safety."
+        },
+        "meetings": {
+          "title": "Safe Meeting Practices",
+          "content": "Meet in public areas, inform trusted contacts of your plans, and trust your instincts. Use the emergency contact feature if needed."
+        },
+        "personal": {
+          "title": "Personal Information",
+          "content": "Protect your personal information. Do not share sensitive details like passport numbers, addresses, or financial information publicly."
+        }
+      },
+      "services": {
+        "title": "Service Standards",
+        "reliability": {
+          "title": "Reliability and Punctuality",
+          "content": "Honor your commitments. Communicate promptly if plans change. Repeated no-shows may result in account restrictions."
+        },
+        "payment": {
+          "title": "Fair Payment Practices",
+          "content": "Agree on payment terms before services begin. Use the platform's escrow system for financial protection."
+        },
+        "quality": {
+          "title": "Service Quality",
+          "content": "Provide services as described. Be helpful, patient, and professional in all interactions."
+        }
+      },
+      "reporting": {
+        "title": "Reporting and Enforcement",
+        "violations": {
+          "title": "Reporting Violations",
+          "content": "Report any guideline violations, safety concerns, or inappropriate behavior immediately through the platform's reporting system."
+        },
+        "consequences": {
+          "title": "Consequences",
+          "content": "Violations may result in warnings, temporary suspension, or permanent account termination depending on severity."
+        },
+        "appeals": {
+          "title": "Appeals Process",
+          "content": "Users may appeal disciplinary actions by contacting support within 7 days of the decision."
+        }
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "subtitle": "Legal agreement for using the NetworkingApp platform",
+    "lastUpdated": "Last updated: {{date}}",
+    "effectiveDate": "Effective date: {{date}}",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing and using NetworkingApp, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our services."
+      },
+      "description": {
+        "title": "2. Service Description",
+        "content": "NetworkingApp is a platform that connects Chinese professionals in Auckland for flight companionship and airport pickup services. We facilitate connections between users but are not a party to the actual service agreements."
+      },
+      "eligibility": {
+        "title": "3. User Eligibility",
+        "age": "You must be at least 18 years old to use our services.",
+        "verification": "You must provide accurate information and complete identity verification.",
+        "compliance": "You must comply with all applicable laws and regulations."
+      },
+      "accounts": {
+        "title": "4. User Accounts",
+        "responsibility": "You are responsible for maintaining the confidentiality of your account credentials.",
+        "accuracy": "You must provide accurate and current information during registration.",
+        "notification": "You must notify us immediately of any unauthorized use of your account."
+      },
+      "conduct": {
+        "title": "5. Prohibited Conduct",
+        "illegal": "Using the platform for illegal activities or harassment",
+        "fraud": "Providing false information or engaging in fraudulent activities",
+        "interference": "Interfering with the platform's operation or other users' experience",
+        "violation": "Violating these terms or community guidelines"
+      },
+      "payments": {
+        "title": "6. Payment Terms",
+        "escrow": "Payments are held in escrow until service completion",
+        "fees": "Platform fees may apply to certain transactions",
+        "disputes": "Payment disputes will be resolved according to our dispute resolution process",
+        "refunds": "Refunds are subject to our refund policy"
+      },
+      "liability": {
+        "title": "7. Limitation of Liability",
+        "disclaimer": "NetworkingApp is not liable for the quality, safety, or legality of services provided by users",
+        "maximum": "Our maximum liability is limited to the amount of fees paid by you",
+        "exclusion": "We exclude liability for indirect, consequential, or punitive damages"
+      },
+      "privacy": {
+        "title": "8. Privacy Policy",
+        "content": "Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your information."
+      },
+      "termination": {
+        "title": "9. Termination",
+        "user": "You may terminate your account at any time by contacting support",
+        "platform": "We may suspend or terminate accounts that violate these terms",
+        "effect": "Upon termination, your access to the platform will cease immediately"
+      },
+      "changes": {
+        "title": "10. Changes to Terms",
+        "content": "We reserve the right to modify these terms at any time. Users will be notified of significant changes via email or platform notifications."
+      },
+      "governing": {
+        "title": "11. Governing Law",
+        "content": "These terms are governed by the laws of New Zealand. Any disputes will be resolved in Auckland courts."
+      },
+      "contact": {
+        "title": "12. Contact Information",
+        "content": "For questions about these terms, contact us at legal@networkingapp.co.nz"
+      }
+    }
+  },
+  "admin": {
+    "checkingAccess": "Checking admin access...",
+    "loginRequired": "Please log in to access the admin dashboard.",
+    "accessDenied": "Access denied. Admin privileges required.",
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Manage users, verifications, disputes, and monitor platform health"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "pendingVerifications": "Pending Verifications",
+      "openDisputes": "Open Disputes",
+      "systemHealth": "System Health"
+    },
+    "tabs": {
+      "users": "User Management",
+      "verifications": "Verifications",
+      "disputes": "Disputes",
+      "monitoring": "Monitoring"
+    },
+    "users": {
+      "title": "User Management",
+      "fetchError": "Failed to fetch users",
+      "statusUpdated": "User status updated successfully",
+      "statusUpdateError": "Failed to update user status",
+      "userVerified": "User verified successfully",
+      "verifyError": "Failed to verify user",
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "language": "Language",
+        "verified": "Verified",
+        "status": "Status",
+        "rating": "Rating",
+        "joinedDate": "Joined",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit User",
+        "verify": "Verify User",
+        "deactivate": "Deactivate",
+        "activate": "Activate"
+      },
+      "editDialog": {
+        "title": "Edit User"
+      }
+    },
+    "verifications": {
+      "title": "Verification Management",
+      "fetchError": "Failed to fetch verification documents",
+      "approveSuccess": "Verification approved successfully",
+      "approveError": "Failed to approve verification",
+      "rejectSuccess": "Verification rejected",
+      "rejectError": "Failed to reject verification",
+      "columns": {
+        "id": "ID",
+        "user": "User",
+        "document": "Document",
+        "uploadedAt": "Uploaded",
+        "status": "Status",
+        "comment": "Comment",
+        "actions": "Actions"
+      },
+      "actions": {
+        "review": "Review",
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "reviewDialog": {
+        "title": "Review Verification Document",
+        "userInfo": "User Information",
+        "documentInfo": "Document Information",
+        "documentReferences": "Document References",
+        "adminComment": "Admin Comment",
+        "commentPlaceholder": "Add your review comments here..."
+      }
+    },
+    "disputes": {
+      "title": "Dispute Management",
+      "fetchError": "Failed to fetch disputes",
+      "resolveSuccess": "Dispute resolved successfully",
+      "resolveError": "Failed to resolve dispute",
+      "status": {
+        "open": "Open",
+        "underReview": "Under Review",
+        "resolved": "Resolved",
+        "refunded": "Refunded",
+        "rejected": "Rejected"
+      },
+      "columns": {
+        "id": "ID",
+        "user": "Reported By",
+        "service": "Service",
+        "amount": "Amount",
+        "reason": "Reason",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "actions": {
+        "resolve": "Resolve",
+        "view": "View",
+        "refund": "Issue Refund"
+      },
+      "resolveDialog": {
+        "title": "Resolve Dispute",
+        "viewTitle": "View Dispute Details",
+        "disputeInfo": "Dispute Information",
+        "disputeId": "Dispute ID",
+        "paymentId": "Payment ID",
+        "amount": "Amount",
+        "service": "Service",
+        "status": "Status",
+        "userInfo": "Reported By",
+        "createdAt": "Created At",
+        "resolvedAt": "Resolved At",
+        "reason": "Dispute Reason",
+        "evidence": "Evidence",
+        "viewEvidence": "View Evidence",
+        "resolution": "Resolution",
+        "adminNotes": "Admin Notes",
+        "notesPlaceholder": "Add resolution notes..."
+      },
+      "resolution": {
+        "resolved": "Resolved - No refund",
+        "refunded": "Refunded - Issue refund",
+        "rejected": "Rejected - Invalid dispute"
+      }
+    },
+    "monitoring": {
+      "title": "Platform Monitoring",
+      "loading": "Loading monitoring data...",
+      "fetchError": "Failed to fetch monitoring data",
+      "stats": {
+        "totalUsers": "Total Users",
+        "activeUsers": "Active Users",
+        "totalBookings": "Total Bookings",
+        "totalRevenue": "Total Revenue",
+        "successRate": "Success Rate",
+        "avgResponseTime": "Avg Response"
+      },
+      "systemMetrics": "System Metrics",
+      "activityLogs": "Recent Activity",
+      "columns": {
+        "timestamp": "Time",
+        "level": "Level",
+        "source": "Source",
+        "message": "Message",
+        "details": "Details"
+      }
+    }
+  },
+  "active": "Active",
+  "inactive": "Inactive",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "pending": "Pending",
+  "save": "Save",
+  "fileName": "File Name",
+  "fileType": "File Type",
+  "uploadedAt": "Uploaded At",
+  "status": "Status"
 }

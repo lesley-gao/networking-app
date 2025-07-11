@@ -94,5 +94,13 @@ namespace NetworkingApp.Services
         /// <param name="toEmail">Recipient's email address</param>
         /// <param name="receipt">Receipt details</param>
         Task SendReceiptEmailAsync(string toEmail, ReceiptDto receipt);
+
+        /// <summary>
+        /// Sends a general email with custom content
+        /// </summary>
+        /// <param name="toEmail">Recipient's email address</param>
+        /// <param name="htmlContent">HTML content of the email</param>
+        /// <param name="subject">Email subject</param>
+        Task SendEmailAsync(string toEmail, string htmlContent, string subject);
     }
 }

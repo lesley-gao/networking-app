@@ -77,5 +77,347 @@
     "passwordMin": "密码至少为6个字符",
     "passwordsDontMatch": "两次输入的密码不一致"
   },
-  "loginFailed": "登录失败，请重试。"
+  "loginFailed": "登录失败，请重试。",
+  "emergency": {
+    "help": "紧急救助",
+    "selectType": "选择紧急类型",
+    "warningMessage": "🚨 这将立即通知您的紧急联系人、平台管理员和任何匹配的用户。仅在真正紧急情况下使用。",
+    "medical": "医疗紧急情况",
+    "medicalDesc": "急需医疗援助",
+    "safety": "安全紧急情况",
+    "safetyDesc": "人身安全或安保担忧",
+    "travel": "旅行紧急情况",
+    "travelDesc": "旅行相关紧急情况或需要援助",
+    "sos": "SOS - 一般紧急情况",
+    "sosDesc": "需要立即援助",
+    "responseInfo": "紧急联系人将立即通过电子邮件和短信收到通知。平台管理员也会收到警报。",
+    "quickSOS": "快速SOS按钮",
+    "active": "紧急情况已激活",
+    "helpOnWay": "救援正在路上",
+    "cancel": "取消紧急情况",
+    "sending": "发送中...",
+    "history": "紧急情况历史",
+    "noHistory": "无紧急情况历史",
+    "noHistoryDesc": "您还未触发过任何紧急警报。",
+    "createdAt": "创建时间",
+    "resolvedAt": "解决时间",
+    "contactNotified": "已通知紧急联系人",
+    "adminNotified": "已通知管理员",
+    "markResolved": "标记为已解决",
+    "resolveTitle": "解决紧急情况",
+    "resolveDesc": "请提供有关如何解决此紧急情况的详细信息。",
+    "resolutionDetails": "解决详情",
+    "resolutionPlaceholder": "描述紧急情况是如何解决的...",
+    "resolve": "解决",
+    "status": {
+      "active": "进行中",
+      "resolved": "已解决",
+      "cancelled": "已取消"
+    }
+  },
+  "guidelines": {
+    "title": "社区指南",
+    "subtitle": "为奥克兰的华人专业人士建立安全和谐的社区",
+    "lastUpdated": "最后更新：{{date}}",
+    "sections": {
+      "overview": {
+        "title": "概述",
+        "content": "我们的平台为奥克兰的华人专业人士提供结伴飞行和机场接送服务的互助连接。这些指南确保所有成员拥有安全、尊重和值得信赖的社区环境。"
+      },
+      "conduct": {
+        "title": "社区行为准则",
+        "respect": {
+          "title": "尊重与礼貌",
+          "content": "尊重所有社区成员，无论其背景、经验水平或个人情况如何。在所有沟通中使用礼貌用语。"
+        },
+        "discrimination": {
+          "title": "零容忍歧视",
+          "content": "严格禁止基于种族、性别、年龄、宗教、性取向或任何其他个人特征的歧视。"
+        },
+        "harassment": {
+          "title": "禁止骚扰或辱骂",
+          "content": "骚扰、霸凌、不当性暗示或威胁行为将导致账户立即被暂停。"
+        }
+      },
+      "safety": {
+        "title": "安全指南",
+        "verification": {
+          "title": "身份验证",
+          "content": "在提供或请求服务之前完成身份验证。为了您的安全，仅与已验证用户互动。"
+        },
+        "meetings": {
+          "title": "安全见面实践",
+          "content": "在公共场所见面，告知可信联系人您的计划，并相信您的直觉。如需要请使用紧急联系功能。"
+        },
+        "personal": {
+          "title": "个人信息",
+          "content": "保护您的个人信息。不要公开分享敏感详细信息，如护照号码、地址或财务信息。"
+        }
+      },
+      "services": {
+        "title": "服务标准",
+        "reliability": {
+          "title": "可靠性和准时性",
+          "content": "信守承诺。如果计划改变请及时沟通。反复失约可能导致账户限制。"
+        },
+        "payment": {
+          "title": "公平付款实践",
+          "content": "在服务开始前商定付款条件。使用平台的托管系统以获得财务保护。"
+        },
+        "quality": {
+          "title": "服务质量",
+          "content": "按描述提供服务。在所有互动中保持乐于助人、耐心和专业。"
+        }
+      },
+      "reporting": {
+        "title": "举报和执行",
+        "violations": {
+          "title": "举报违规",
+          "content": "通过平台的举报系统立即举报任何指南违规、安全担忧或不当行为。"
+        },
+        "consequences": {
+          "title": "后果",
+          "content": "违规行为可能导致警告、临时暂停或永久账户终止，具体取决于严重程度。"
+        },
+        "appeals": {
+          "title": "申诉流程",
+          "content": "用户可在决定做出后7天内联系支持团队对纪律处分提出申诉。"
+        }
+      }
+    }
+  },
+  "terms": {
+    "title": "服务条款",
+    "subtitle": "使用NetworkingApp平台的法律协议",
+    "lastUpdated": "最后更新：{{date}}",
+    "effectiveDate": "生效日期：{{date}}",
+    "sections": {
+      "acceptance": {
+        "title": "1. 条款接受",
+        "content": "通过访问和使用NetworkingApp，您接受并同意受这些服务条款的约束。如果您不同意这些条款，您不得使用我们的服务。"
+      },
+      "description": {
+        "title": "2. 服务描述",
+        "content": "NetworkingApp是一个为奥克兰的华人专业人士提供结伴飞行和机场接送服务连接的平台。我们促进用户之间的连接，但不是实际服务协议的当事方。"
+      },
+      "eligibility": {
+        "title": "3. 用户资格",
+        "age": "您必须年满18岁才能使用我们的服务。",
+        "verification": "您必须提供准确信息并完成身份验证。",
+        "compliance": "您必须遵守所有适用的法律法规。"
+      },
+      "accounts": {
+        "title": "4. 用户账户",
+        "responsibility": "您有责任维护账户凭据的机密性。",
+        "accuracy": "您必须在注册期间提供准确和最新的信息。",
+        "notification": "您必须立即通知我们任何未经授权使用您账户的情况。"
+      },
+      "conduct": {
+        "title": "5. 禁止行为",
+        "illegal": "将平台用于非法活动或骚扰",
+        "fraud": "提供虚假信息或从事欺诈活动",
+        "interference": "干扰平台运营或其他用户的体验",
+        "violation": "违反这些条款或社区指南"
+      },
+      "payments": {
+        "title": "6. 付款条款",
+        "escrow": "付款将托管直到服务完成",
+        "fees": "某些交易可能适用平台费用",
+        "disputes": "付款争议将按照我们的争议解决流程解决",
+        "refunds": "退款受我们的退款政策约束"
+      },
+      "liability": {
+        "title": "7. 责任限制",
+        "disclaimer": "NetworkingApp不对用户提供的服务质量、安全性或合法性承担责任",
+        "maximum": "我们的最大责任限于您支付的费用金额",
+        "exclusion": "我们排除对间接、后果性或惩罚性损害的责任"
+      },
+      "privacy": {
+        "title": "8. 隐私政策",
+        "content": "您的隐私对我们很重要。请查看我们的隐私政策以了解我们如何收集、使用和保护您的信息。"
+      },
+      "termination": {
+        "title": "9. 终止",
+        "user": "您可以随时通过联系支持团队终止您的账户",
+        "platform": "我们可能暂停或终止违反这些条款的账户",
+        "effect": "终止后，您对平台的访问将立即停止"
+      },
+      "changes": {
+        "title": "10. 条款变更",
+        "content": "我们保留随时修改这些条款的权利。用户将通过电子邮件或平台通知收到重大变更的通知。"
+      },
+      "governing": {
+        "title": "11. 管辖法律",
+        "content": "这些条款受新西兰法律管辖。任何争议将在奥克兰法院解决。"
+      },
+      "contact": {
+        "title": "12. 联系信息",
+        "content": "有关这些条款的问题，请联系我们：legal@networkingapp.co.nz"
+      }
+    }
+  },
+  "admin": {
+    "checkingAccess": "检查管理员权限中...",
+    "loginRequired": "请登录以访问管理员仪表板。",
+    "accessDenied": "访问被拒绝。需要管理员权限。",
+    "dashboard": {
+      "title": "管理员仪表板",
+      "subtitle": "管理用户、验证、争议并监控平台健康状况"
+    },
+    "stats": {
+      "totalUsers": "总用户数",
+      "pendingVerifications": "待验证",
+      "openDisputes": "未结争议",
+      "systemHealth": "系统健康"
+    },
+    "tabs": {
+      "users": "用户管理",
+      "verifications": "验证管理",
+      "disputes": "争议管理",
+      "monitoring": "监控"
+    },
+    "users": {
+      "title": "用户管理",
+      "fetchError": "获取用户失败",
+      "statusUpdated": "用户状态更新成功",
+      "statusUpdateError": "用户状态更新失败",
+      "userVerified": "用户验证成功",
+      "verifyError": "用户验证失败",
+      "columns": {
+        "id": "ID",
+        "name": "姓名",
+        "email": "邮箱",
+        "phone": "电话",
+        "language": "语言",
+        "verified": "已验证",
+        "status": "状态",
+        "rating": "评分",
+        "joinedDate": "注册日期",
+        "actions": "操作"
+      },
+      "actions": {
+        "edit": "编辑用户",
+        "verify": "验证用户",
+        "deactivate": "停用",
+        "activate": "激活"
+      },
+      "editDialog": {
+        "title": "编辑用户"
+      }
+    },
+    "verifications": {
+      "title": "验证管理",
+      "fetchError": "获取验证文档失败",
+      "approveSuccess": "验证批准成功",
+      "approveError": "验证批准失败",
+      "rejectSuccess": "验证被拒绝",
+      "rejectError": "验证拒绝失败",
+      "columns": {
+        "id": "ID",
+        "user": "用户",
+        "document": "文档",
+        "uploadedAt": "上传时间",
+        "status": "状态",
+        "comment": "备注",
+        "actions": "操作"
+      },
+      "actions": {
+        "review": "审核",
+        "approve": "批准",
+        "reject": "拒绝"
+      },
+      "reviewDialog": {
+        "title": "审核验证文档",
+        "userInfo": "用户信息",
+        "documentInfo": "文档信息",
+        "documentReferences": "文档参考",
+        "adminComment": "管理员备注",
+        "commentPlaceholder": "在此添加您的审核意见..."
+      }
+    },
+    "disputes": {
+      "title": "争议管理",
+      "fetchError": "获取争议失败",
+      "resolveSuccess": "争议解决成功",
+      "resolveError": "争议解决失败",
+      "status": {
+        "open": "未处理",
+        "underReview": "审核中",
+        "resolved": "已解决",
+        "refunded": "已退款",
+        "rejected": "已拒绝"
+      },
+      "columns": {
+        "id": "ID",
+        "user": "举报者",
+        "service": "服务",
+        "amount": "金额",
+        "reason": "原因",
+        "status": "状态",
+        "createdAt": "创建时间",
+        "actions": "操作"
+      },
+      "actions": {
+        "resolve": "解决",
+        "view": "查看",
+        "refund": "退款"
+      },
+      "resolveDialog": {
+        "title": "解决争议",
+        "viewTitle": "查看争议详情",
+        "disputeInfo": "争议信息",
+        "disputeId": "争议ID",
+        "paymentId": "支付ID",
+        "amount": "金额",
+        "service": "服务",
+        "status": "状态",
+        "userInfo": "举报者",
+        "createdAt": "创建时间",
+        "resolvedAt": "解决时间",
+        "reason": "争议原因",
+        "evidence": "证据",
+        "viewEvidence": "查看证据",
+        "resolution": "解决方案",
+        "adminNotes": "管理员备注",
+        "notesPlaceholder": "添加解决备注..."
+      },
+      "resolution": {
+        "resolved": "已解决 - 不退款",
+        "refunded": "已退款 - 处理退款",
+        "rejected": "已拒绝 - 无效争议"
+      }
+    },
+    "monitoring": {
+      "title": "平台监控",
+      "loading": "加载监控数据中...",
+      "fetchError": "获取监控数据失败",
+      "stats": {
+        "totalUsers": "总用户数",
+        "activeUsers": "活跃用户",
+        "totalBookings": "总预订数",
+        "totalRevenue": "总收入",
+        "successRate": "成功率",
+        "avgResponseTime": "平均响应时间"
+      },
+      "systemMetrics": "系统指标",
+      "activityLogs": "最近活动",
+      "columns": {
+        "timestamp": "时间",
+        "level": "级别",
+        "source": "来源",
+        "message": "消息",
+        "details": "详情"
+      }
+    }
+  },
+  "active": "活跃",
+  "inactive": "非活跃",
+  "approved": "已批准",
+  "rejected": "已拒绝",
+  "pending": "待处理",
+  "save": "保存",
+  "fileName": "文件名",
+  "fileType": "文件类型",
+  "uploadedAt": "上传时间",
+  "status": "状态"
 }

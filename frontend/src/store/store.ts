@@ -4,6 +4,7 @@ import authSlice from './slices/authSlice';
 import flightCompanionSlice from './slices/flightCompanionSlice';
 import pickupSlice from './slices/pickupSlice';
 import uiSlice from './slices/uiSlice';
+import emergencySlice from './slices/emergencySlice';
 import { baseApi } from './api/baseApi';
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
     flightCompanion: flightCompanionSlice,
     pickup: pickupSlice,
     ui: uiSlice,
+    emergency: emergencySlice,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

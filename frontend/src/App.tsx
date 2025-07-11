@@ -15,6 +15,9 @@ import { useSignalR } from './hooks/useSignalR';
 import FlightCompanion from './components/FlightCompanion';
 import Pickup from './components/Pickup';
 import UserProfile from './components/UserProfile';
+import CommunityGuidelines from './components/CommunityGuidelines';
+import TermsOfService from './components/TermsOfService';
+import AdminDashboard from './components/admin/AdminDashboard';
 import { FetchData } from './components/FetchData';
 import SignalRTest from './components/SignalRTest';
 
@@ -40,6 +43,9 @@ const AppContent: React.FC = () => {
           <Route path="/flight-companion" element={<FlightCompanion />} />
           <Route path="/pickup" element={<Pickup />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/community-guidelines" element={<CommunityGuidelines />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/fetch-data" element={<FetchData />} />
           <Route path="/signalr-test" element={<SignalRTest />} />
         </Routes>

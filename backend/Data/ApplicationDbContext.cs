@@ -11,18 +11,19 @@ namespace NetworkingApp.Data
         {
         }
 
-        public DbSet<FlightCompanionRequest> FlightCompanionRequests { get; set; }
-        public DbSet<FlightCompanionOffer> FlightCompanionOffers { get; set; }
-        public DbSet<PickupRequest> PickupRequests { get; set; }
-        public DbSet<PickupOffer> PickupOffers { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<Rating> Ratings { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Message> Messages { get; set; }
-        public DbSet<UserSettings> UserSettings { get; set; }
-        public DbSet<VerificationDocument> VerificationDocuments { get; set; }
-        public DbSet<Escrow> Escrows { get; set; }
-        public DbSet<Dispute> Disputes { get; set; }
+        public DbSet<FlightCompanionRequest> FlightCompanionRequests { get; set; } = null!;
+        public DbSet<FlightCompanionOffer> FlightCompanionOffers { get; set; } = null!;
+        public DbSet<PickupRequest> PickupRequests { get; set; } = null!;
+        public DbSet<PickupOffer> PickupOffers { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<Rating> Ratings { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<UserSettings> UserSettings { get; set; } = null!;
+        public DbSet<VerificationDocument> VerificationDocuments { get; set; } = null!;
+        public DbSet<Escrow> Escrows { get; set; } = null!;
+        public DbSet<Dispute> Disputes { get; set; } = null!;
+        public DbSet<Emergency> Emergencies { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

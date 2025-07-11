@@ -16,17 +16,19 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Home as HomeIcon,
   Flight as FlightIcon,
   LocalTaxi as PickupIcon,
   Person as ProfileIcon,
+  Gavel as LegalIcon,
+  Description as GuidelinesIcon,
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavigationItem {
-  text: string;
+  textKey: string; // Changed from text to textKey for translation
   path: string;
   icon: React.ReactElement;
 }
@@ -38,22 +40,27 @@ interface NavigationProps {
   mobileOpen?: boolean;
 }
 
-const defaultItems: NavigationItem[] = [
-  { text: 'Home', path: '/', icon: <HomeIcon /> },
-  { text: 'Flight Companion', path: '/flight-companion', icon: <FlightIcon /> },
-  { text: 'Airport Pickup', path: '/pickup', icon: <PickupIcon /> },
-  { text: 'Profile', path: '/profile', icon: <ProfileIcon /> },
+const getDefaultItems = (): NavigationItem[] => [
+  { textKey: 'flightCompanion', path: '/flight-companion', icon: <FlightIcon /> },
+  { textKey: 'pickupService', path: '/pickup', icon: <PickupIcon /> },
+  { textKey: 'profile', path: '/profile', icon: <ProfileIcon /> },
+  { textKey: 'communityGuidelines', path: '/community-guidelines', icon: <GuidelinesIcon /> },
+  { textKey: 'termsOfService', path: '/terms-of-service', icon: <LegalIcon /> },
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
   title = "NetworkingApp",
-  items = defaultItems,
+  items,
   onMenuToggle,
   mobileOpen = false,
 }) => {
+  const { t } = useTranslation();
   const theme = useMuiTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  
+  // Use default items if none provided
+  const navigationItems = items || getDefaultItems();
 
   const handleDrawerToggle = () => {
     onMenuToggle?.(!mobileOpen);
@@ -62,9 +69,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   const drawer = (
     <Box sx={{ width: 250 }} onClick={handleDrawerToggle}>
       <List>
-        {items.map((item) => (
+        {navigationItems.map((item: NavigationItem) => (
           <ListItem
-            key={item.text}
+            key={item.textKey}
             component={Link}
             to={item.path}
             className={`transition-colors duration-200 ${
@@ -87,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               {item.icon}
             </ListItemIcon>
             <ListItemText 
-              primary={item.text}
+              primary={t(item.textKey)}
               className="font-medium"
             />
           </ListItem>
@@ -127,9 +134,9 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {!isMobile && (
             <Box className="flex items-center space-x-1">
-              {items.map((item) => (
+              {navigationItems.map((item: NavigationItem) => (
                 <Box
-                  key={item.text}
+                  key={item.textKey}
                   component={Link}
                   to={item.path}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 no-underline ${
@@ -139,7 +146,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   }`}
                 >
                   {item.icon}
-                  <span>{item.text}</span>
+                  <span>{t(item.textKey)}</span>
                 </Box>
               ))}
             </Box>

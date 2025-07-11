@@ -108,6 +108,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>(); // Regi
 builder.Services.AddScoped<IRoleService, RoleService>(); // Register RoleService
 builder.Services.AddScoped<IDataProtectionService, DataProtectionService>(); // Register DataProtectionService
 builder.Services.AddScoped<PaymentService>(); // Register PaymentService
+builder.Services.AddScoped<IEmergencyService, EmergencyService>(); // Register EmergencyService
 
 // Configure Email Service
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));

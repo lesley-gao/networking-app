@@ -201,6 +201,11 @@ namespace NetworkingApp.Services
             await SendEmailAsync(toEmail, subject, body, false);
         }
 
+        public async Task SendEmailAsync(string toEmail, string htmlContent, string subject)
+        {
+            await SendEmailAsync(toEmail, subject, htmlContent, false);
+        }
+
         private async Task SendEmailAsync(string toEmail, string subject, string body, bool isHighPriority = false)
         {
             if (!_emailConfig.IsEnabled)
