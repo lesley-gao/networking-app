@@ -23,7 +23,50 @@ import {
 
 export const CommunityGuidelines: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const currentDate = new Date().toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-NZ');
+  
+  // More robust date generation
+  const getCurrentDate = () => {
+    try {
+      const now = new Date();
+      if (i18n.language === 'zh') {
+        return now.toLocaleDateString('zh-CN');
+      } else {
+        // Try en-NZ first, fallback to en-US
+        try {
+          return now.toLocaleDateString('en-NZ');
+        } catch {
+          return now.toLocaleDateString('en-US');
+        }
+      }
+    } catch (error) {
+      // Ultimate fallback - manual format
+      const now = new Date();
+      const day = now.getDate().toString().padStart(2, '0');
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const year = now.getFullYear();
+      return i18n.language === 'zh' ? `${year}/${month}/${day}` : `${month}/${day}/${year}`;
+    }
+  };
+  
+  const currentDate = getCurrentDate();
+  
+  // Fallback for last updated text
+  const getLastUpdatedText = () => {
+    try {
+      const translatedText = t('guidelines.lastUpdated', { date: currentDate });
+      // Check if translation worked (doesn't return the key itself)
+      if (translatedText && !translatedText.includes('guidelines.lastUpdated')) {
+        return translatedText;
+      }
+    } catch (error) {
+      console.warn('Translation error for guidelines.lastUpdated:', error);
+    }
+    
+    // Fallback to hardcoded text
+    return i18n.language === 'zh' 
+      ? `最后更新：${currentDate}`
+      : `Last updated: ${currentDate}`;
+  };
 
   const sections = [
     {
@@ -76,7 +119,7 @@ export const CommunityGuidelines: React.FC = () => {
             {t('guidelines.subtitle')}
           </Typography>
           <Chip 
-            label={t('guidelines.lastUpdated', { date: currentDate })}
+            label={getLastUpdatedText()}
             variant="outlined"
             className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
           />
@@ -251,17 +294,9 @@ interface GuidelineItemProps {
 }
 
 const GuidelineItem: React.FC<GuidelineItemProps> = ({ title, content, color }) => {
-  const colorClasses = {
-    primary: 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/10',
-    secondary: 'border-l-purple-500 bg-purple-50 dark:bg-purple-900/10',
-    success: 'border-l-green-500 bg-green-50 dark:bg-green-900/10',
-    error: 'border-l-red-500 bg-red-50 dark:bg-red-900/10',
-    warning: 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/10',
-    info: 'border-l-cyan-500 bg-cyan-50 dark:bg-cyan-900/10',
-  };
 
   return (
-    <Box className={`border-l-4 ${colorClasses[color]} p-4 rounded-r-lg`}>
+    <Box className={`border-l-4  p-4 rounded-r-lg`}>
       <Typography 
         variant="h6" 
         className="font-semibold text-gray-900 dark:text-white mb-2"

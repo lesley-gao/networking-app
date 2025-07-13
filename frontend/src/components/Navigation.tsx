@@ -1,5 +1,5 @@
 // ClientApp/src/components/Navigation.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -13,57 +13,73 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Flight as FlightIcon,
   LocalTaxi as PickupIcon,
   Person as ProfileIcon,
-  Gavel as LegalIcon,
-  Description as GuidelinesIcon,
+  Home as HomeIcon,
+  Storage as DataIcon,
 } from '@mui/icons-material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { clearAuth } from '../store/slices/authSlice';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavigationItem {
-  textKey: string; // Changed from text to textKey for translation
+  textKey: string;
   path: string;
   icon: React.ReactElement;
+  requiresAuth?: boolean;
 }
 
 interface NavigationProps {
   title?: string;
   items?: NavigationItem[];
-  onMenuToggle?: (open: boolean) => void;
-  mobileOpen?: boolean;
 }
 
 const getDefaultItems = (): NavigationItem[] => [
+  { textKey: 'home', path: '/', icon: <HomeIcon /> },
   { textKey: 'flightCompanion', path: '/flight-companion', icon: <FlightIcon /> },
   { textKey: 'pickupService', path: '/pickup', icon: <PickupIcon /> },
-  { textKey: 'profile', path: '/profile', icon: <ProfileIcon /> },
-  { textKey: 'communityGuidelines', path: '/community-guidelines', icon: <GuidelinesIcon /> },
-  { textKey: 'termsOfService', path: '/terms-of-service', icon: <LegalIcon /> },
+  { textKey: 'profile', path: '/profile', icon: <ProfileIcon />, requiresAuth: true },
+  { textKey: 'fetchData', path: '/fetch-data', icon: <DataIcon />, requiresAuth: true },
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
   title = "NetworkingApp",
   items,
-  onMenuToggle,
-  mobileOpen = false,
 }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
   const theme = useMuiTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   
-  // Use default items if none provided
-  const navigationItems = items || getDefaultItems();
+  // Authentication state from Redux
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector((state) => state.auth.user);
+
+  // Use default items if none provided, filtered by auth state
+  const allNavigationItems = items || getDefaultItems();
+  const navigationItems = allNavigationItems.filter(item => 
+    !item.requiresAuth || isAuthenticated
+  );
 
   const handleDrawerToggle = () => {
-    onMenuToggle?.(!mobileOpen);
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleLogout = () => {
+    dispatch(clearAuth());
+    navigate('/');
+    setMobileOpen(false);
   };
 
   const drawer = (
@@ -99,6 +115,30 @@ export const Navigation: React.FC<NavigationProps> = ({
             />
           </ListItem>
         ))}
+        
+        {/* Mobile Auth Buttons */}
+        {!isAuthenticated ? (
+          <>
+            <ListItem 
+              component={Link} 
+              to="/login" 
+              sx={{ color: 'inherit', textDecoration: 'none' }}
+            >
+              <ListItemText primary={t('login')} />
+            </ListItem>
+            <ListItem 
+              component={Link} 
+              to="/register" 
+              sx={{ color: 'inherit', textDecoration: 'none' }}
+            >
+              <ListItemText primary={t('register')} />
+            </ListItem>
+          </>
+        ) : (
+          <ListItem button onClick={handleLogout}>
+            <ListItemText primary={t('logout')} />
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -107,7 +147,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     <>
       <AppBar 
         position="static" 
-        className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700"
+        className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 mb-4"
         elevation={0}
       >
         <Toolbar>
@@ -149,6 +189,42 @@ export const Navigation: React.FC<NavigationProps> = ({
                   <span>{t(item.textKey)}</span>
                 </Box>
               ))}
+              
+              {/* Desktop Auth Section */}
+              {!isAuthenticated ? (
+                <Box className="flex items-center space-x-2 ml-4">
+                  <Button
+                    component={Link}
+                    to="/login"
+                    color="inherit"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    {t('login')}
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    color="inherit"
+                    variant="outlined"
+                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                  >
+                    {t('register')}
+                  </Button>
+                </Box>
+              ) : (
+                <Box className="flex items-center space-x-2 ml-4">
+                  <Typography variant="body2" className="text-gray-700 dark:text-gray-300">
+                    {t('welcome')}, {user?.firstName || t('user')}
+                  </Typography>
+                  <Button
+                    color="inherit"
+                    onClick={handleLogout}
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    {t('logout')}
+                  </Button>
+                </Box>
+              )}
             </Box>
           )}
 

@@ -1,9 +1,12 @@
 {
-  "welcome": "Welcome to NetworkingApp!",
+  "welcome": "Hi",
+  "home": "Home",
   "login": "Login",
   "logout": "Logout",
   "register": "Register",
   "profile": "Profile",
+  "fetchData": "Fetch Data",
+  "user": "User",
   "settings": "Settings",
   "language": "Language",
   "theme": "Theme",
@@ -16,6 +19,90 @@
   "success": "Operation successful!",
   "communityGuidelines": "Community Guidelines",
   "termsOfService": "Terms of Service",
+  "services": "Services",
+  "support": "Support",
+  "legal": "Legal",
+  "emergencyAssistance": "Emergency Assistance",
+  "helpCenter": "Help Center",
+  "contactUs": "Contact Us",
+  "faq": "FAQ",
+  "safetyTips": "Safety Tips",
+  "privacyPolicy": "Privacy Policy",
+  "cookiePolicy": "Cookie Policy",
+  "footerDescription": "Connecting travelers for safer and more enjoyable journeys. Find trusted companions for flights and reliable airport pickup services.",
+  "locationNZ": "Auckland, New Zealand",
+  "allRightsReserved": "All rights reserved.",
+  "guidelines": {
+    "title": "Community Guidelines",
+    "subtitle": "Building a safe, respectful, and trustworthy platform for everyone",
+    "lastUpdated": "Last updated: {{date}}",
+    "sections": {
+      "overview": {
+        "title": "Our Community",
+        "content": "NetworkingApp connects travelers to create safer, more enjoyable journeys. Our community guidelines ensure that everyone can participate with confidence, knowing they're part of a respectful and trustworthy platform."
+      },
+      "conduct": {
+        "title": "Expected Conduct",
+        "respect": {
+          "title": "Treat Everyone with Respect",
+          "content": "Communicate politely and considerately. Remember that behind every profile is a real person deserving of dignity and kindness."
+        },
+        "discrimination": {
+          "title": "Zero Tolerance for Discrimination",
+          "content": "Discrimination based on race, religion, gender, nationality, age, sexual orientation, or any other characteristic is strictly prohibited."
+        },
+        "harassment": {
+          "title": "No Harassment or Abuse",
+          "content": "Harassment, bullying, threats, or any form of abusive behavior will result in immediate account suspension."
+        }
+      },
+      "safety": {
+        "title": "Safety First",
+        "verification": {
+          "title": "Complete Profile Verification",
+          "content": "Verify your identity to build trust with other community members. Verified profiles receive priority in search results."
+        },
+        "meetings": {
+          "title": "Safe Meeting Practices",
+          "content": "Meet in public places, inform trusted contacts of your plans, and trust your instincts if something feels wrong."
+        },
+        "personal": {
+          "title": "Protect Personal Information",
+          "content": "Never share sensitive information like passport numbers, home address, or financial details through the platform."
+        }
+      },
+      "services": {
+        "title": "Service Standards",
+        "reliability": {
+          "title": "Be Reliable and Punctual",
+          "content": "Honor your commitments. If you must cancel, do so as early as possible and communicate clearly with affected parties."
+        },
+        "payment": {
+          "title": "Transparent Pricing",
+          "content": "Be clear about costs upfront. No hidden fees or last-minute price changes. All payments must go through the platform."
+        },
+        "quality": {
+          "title": "Provide Quality Service",
+          "content": "Whether offering or requesting services, maintain high standards and treat others as you would want to be treated."
+        }
+      },
+      "reporting": {
+        "title": "Reporting & Enforcement",
+        "violations": {
+          "title": "Report Violations",
+          "content": "If you experience or witness violations of these guidelines, report them immediately through the app or contact support."
+        },
+        "consequences": {
+          "title": "Consequences",
+          "content": "Violations may result in warnings, temporary suspension, or permanent account termination depending on severity."
+        },
+        "appeals": {
+          "title": "Appeals Process",
+          "content": "If you believe action was taken in error, you can appeal through our support system within 30 days."
+        }
+      }
+    }
+  },
   "firstName": "First Name",
   "lastName": "Last Name",
   "phoneNumber": "Phone Number",
@@ -116,82 +203,11 @@
       "cancelled": "Cancelled"
     }
   },
-  "guidelines": {
-    "title": "Community Guidelines",
-    "subtitle": "Building a safe and respectful community for Chinese professionals in Auckland",
-    "lastUpdated": "Last updated: ",
-    "sections": {
-      "overview": {
-        "title": "Overview",
-        "content": "Our platform connects Chinese professionals in Auckland for mutual assistance with flight companionship and airport pickup services. These guidelines ensure a safe, respectful, and trustworthy community for all members."
-      },
-      "conduct": {
-        "title": "Community Conduct",
-        "respect": {
-          "title": "Respect and Courtesy",
-          "content": "Treat all community members with respect, regardless of background, experience level, or personal circumstances. Use polite language in all communications."
-        },
-        "discrimination": {
-          "title": "Zero Tolerance for Discrimination",
-          "content": "Discrimination based on race, gender, age, religion, sexual orientation, or any other personal characteristic is strictly prohibited."
-        },
-        "harassment": {
-          "title": "No Harassment or Abuse",
-          "content": "Harassment, bullying, inappropriate sexual advances, or threatening behavior will result in immediate account suspension."
-        }
-      },
-      "safety": {
-        "title": "Safety Guidelines",
-        "verification": {
-          "title": "Identity Verification",
-          "content": "Complete identity verification before offering or requesting services. Only interact with verified users for your safety."
-        },
-        "meetings": {
-          "title": "Safe Meeting Practices",
-          "content": "Meet in public areas, inform trusted contacts of your plans, and trust your instincts. Use the emergency contact feature if needed."
-        },
-        "personal": {
-          "title": "Personal Information",
-          "content": "Protect your personal information. Do not share sensitive details like passport numbers, addresses, or financial information publicly."
-        }
-      },
-      "services": {
-        "title": "Service Standards",
-        "reliability": {
-          "title": "Reliability and Punctuality",
-          "content": "Honor your commitments. Communicate promptly if plans change. Repeated no-shows may result in account restrictions."
-        },
-        "payment": {
-          "title": "Fair Payment Practices",
-          "content": "Agree on payment terms before services begin. Use the platform's escrow system for financial protection."
-        },
-        "quality": {
-          "title": "Service Quality",
-          "content": "Provide services as described. Be helpful, patient, and professional in all interactions."
-        }
-      },
-      "reporting": {
-        "title": "Reporting and Enforcement",
-        "violations": {
-          "title": "Reporting Violations",
-          "content": "Report any guideline violations, safety concerns, or inappropriate behavior immediately through the platform's reporting system."
-        },
-        "consequences": {
-          "title": "Consequences",
-          "content": "Violations may result in warnings, temporary suspension, or permanent account termination depending on severity."
-        },
-        "appeals": {
-          "title": "Appeals Process",
-          "content": "Users may appeal disciplinary actions by contacting support within 7 days of the decision."
-        }
-      }
-    }
-  },
   "terms": {
     "title": "Terms of Service",
     "subtitle": "Legal agreement for using the NetworkingApp platform",
-    "lastUpdated": "Last updated: ",
-    "effectiveDate": "Effective date: ",
+    "lastUpdated": "Last updated: {{date}}",
+    "effectiveDate": "Effective date: {{date}}",
     "sections": {
       "acceptance": {
         "title": "1. Acceptance of Terms",

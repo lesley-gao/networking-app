@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Box } from '@mui/material';
-import { NavMenu } from './NavMenu';
+import { Navigation } from './Navigation';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <NavMenu />
+      <Navigation />
       <Container 
         maxWidth="lg" 
         sx={{ 
@@ -20,6 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         {children}
       </Container>
+      <Footer />
     </Box>
   );
 };

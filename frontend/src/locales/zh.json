@@ -1,9 +1,12 @@
 {
-  "welcome": "欢迎使用NetworkingApp！",
+  "welcome": "你好",
+  "home": "首页",
   "login": "登录",
   "logout": "登出",
   "register": "注册",
   "profile": "个人资料",
+  "fetchData": "获取数据",
+  "user": "用户",
   "settings": "设置",
   "language": "语言",
   "theme": "主题",
@@ -16,6 +19,90 @@
   "success": "操作成功！",
   "communityGuidelines": "社区指南",
   "termsOfService": "服务条款",
+  "services": "服务",
+  "support": "支持",
+  "legal": "法律",
+  "emergencyAssistance": "紧急援助",
+  "helpCenter": "帮助中心",
+  "contactUs": "联系我们",
+  "faq": "常见问题",
+  "safetyTips": "安全提示",
+  "privacyPolicy": "隐私政策",
+  "cookiePolicy": "Cookie政策",
+  "footerDescription": "为旅行者提供安全愉快的旅程连接服务。寻找可信的飞行伙伴和可靠的机场接送服务。",
+  "locationNZ": "新西兰奥克兰",
+  "allRightsReserved": "版权所有。",
+  "guidelines": {
+    "title": "社区指南",
+    "subtitle": "为每个人建设一个安全、尊重和值得信赖的平台",
+    "lastUpdated": "最后更新：{{date}}",
+    "sections": {
+      "overview": {
+        "title": "我们的社区",
+        "content": "NetworkingApp连接旅行者，创造更安全、更愉快的旅程。我们的社区指南确保每个人都能充满信心地参与，知道他们是一个尊重和值得信赖的平台的一部分。"
+      },
+      "conduct": {
+        "title": "行为准则",
+        "respect": {
+          "title": "尊重每个人",
+          "content": "礼貌和体贴地沟通。记住每个档案背后都是一个真实的人，值得尊严和善待。"
+        },
+        "discrimination": {
+          "title": "零容忍歧视",
+          "content": "严格禁止基于种族、宗教、性别、国籍、年龄、性取向或任何其他特征的歧视。"
+        },
+        "harassment": {
+          "title": "禁止骚扰或虐待",
+          "content": "骚扰、欺凌、威胁或任何形式的虐待行为将导致立即暂停账户。"
+        }
+      },
+      "safety": {
+        "title": "安全第一",
+        "verification": {
+          "title": "完成档案验证",
+          "content": "验证您的身份以与其他社区成员建立信任。已验证的档案在搜索结果中将获得优先级。"
+        },
+        "meetings": {
+          "title": "安全会面实践",
+          "content": "在公共场所见面，告知信任的联系人您的计划，如果感觉有什么不对劲，请相信您的直觉。"
+        },
+        "personal": {
+          "title": "保护个人信息",
+          "content": "绝不要通过平台分享敏感信息，如护照号码、家庭地址或财务详细信息。"
+        }
+      },
+      "services": {
+        "title": "服务标准",
+        "reliability": {
+          "title": "可靠和准时",
+          "content": "履行您的承诺。如果您必须取消，请尽早取消并与受影响的各方清楚沟通。"
+        },
+        "payment": {
+          "title": "透明定价",
+          "content": "提前明确费用。没有隐藏费用或最后一分钟的价格变更。所有付款必须通过平台进行。"
+        },
+        "quality": {
+          "title": "提供优质服务",
+          "content": "无论是提供还是请求服务，都要保持高标准，并像您希望被对待的那样对待他人。"
+        }
+      },
+      "reporting": {
+        "title": "举报和执行",
+        "violations": {
+          "title": "举报违规",
+          "content": "如果您经历或目睹违反这些指南的行为，请立即通过应用程序举报或联系支持。"
+        },
+        "consequences": {
+          "title": "后果",
+          "content": "违规可能导致警告、临时暂停或永久账户终止，具体取决于严重程度。"
+        },
+        "appeals": {
+          "title": "申诉程序",
+          "content": "如果您认为采取的行动是错误的，您可以在30天内通过我们的支持系统进行申诉。"
+        }
+      }
+    }
+  },
   "firstName": "名字",
   "lastName": "姓氏",
   "phoneNumber": "电话号码",
@@ -116,82 +203,11 @@
       "cancelled": "已取消"
     }
   },
-  "guidelines": {
-    "title": "社区指南",
-    "subtitle": "为奥克兰的华人专业人士建立安全和谐的社区",
-    "lastUpdated": "最后更新: ",
-    "sections": {
-      "overview": {
-        "title": "概述",
-        "content": "我们的平台为奥克兰的华人专业人士提供结伴飞行和机场接送服务的互助连接。这些指南确保所有成员拥有安全、尊重和值得信赖的社区环境。"
-      },
-      "conduct": {
-        "title": "社区行为准则",
-        "respect": {
-          "title": "尊重与礼貌",
-          "content": "尊重所有社区成员，无论其背景、经验水平或个人情况如何。在所有沟通中使用礼貌用语。"
-        },
-        "discrimination": {
-          "title": "零容忍歧视",
-          "content": "严格禁止基于种族、性别、年龄、宗教、性取向或任何其他个人特征的歧视。"
-        },
-        "harassment": {
-          "title": "禁止骚扰或辱骂",
-          "content": "骚扰、霸凌、不当性暗示或威胁行为将导致账户立即被暂停。"
-        }
-      },
-      "safety": {
-        "title": "安全指南",
-        "verification": {
-          "title": "身份验证",
-          "content": "在提供或请求服务之前完成身份验证。为了您的安全，仅与已验证用户互动。"
-        },
-        "meetings": {
-          "title": "安全见面实践",
-          "content": "在公共场所见面，告知可信联系人您的计划，并相信您的直觉。如需要请使用紧急联系功能。"
-        },
-        "personal": {
-          "title": "个人信息",
-          "content": "保护您的个人信息。不要公开分享敏感详细信息，如护照号码、地址或财务信息。"
-        }
-      },
-      "services": {
-        "title": "服务标准",
-        "reliability": {
-          "title": "可靠性和准时性",
-          "content": "信守承诺。如果计划改变请及时沟通。反复失约可能导致账户限制。"
-        },
-        "payment": {
-          "title": "公平付款实践",
-          "content": "在服务开始前商定付款条件。使用平台的托管系统以获得财务保护。"
-        },
-        "quality": {
-          "title": "服务质量",
-          "content": "按描述提供服务。在所有互动中保持乐于助人、耐心和专业。"
-        }
-      },
-      "reporting": {
-        "title": "举报和执行",
-        "violations": {
-          "title": "举报违规",
-          "content": "通过平台的举报系统立即举报任何指南违规、安全担忧或不当行为。"
-        },
-        "consequences": {
-          "title": "后果",
-          "content": "违规行为可能导致警告、临时暂停或永久账户终止，具体取决于严重程度。"
-        },
-        "appeals": {
-          "title": "申诉流程",
-          "content": "用户可在决定做出后7天内联系支持团队对纪律处分提出申诉。"
-        }
-      }
-    }
-  },
   "terms": {
     "title": "服务条款",
     "subtitle": "使用NetworkingApp平台的法律协议",
-    "lastUpdated": "最后更新: ",
-    "effectiveDate": "生效日期: ",
+    "lastUpdated": "最后更新: {{date}}",
+    "effectiveDate": "生效日期: {{date}}",
     "sections": {
       "acceptance": {
         "title": "1. 条款接受",
