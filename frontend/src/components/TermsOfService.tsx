@@ -1,5 +1,5 @@
 // frontend/src/components/TermsOfService.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
@@ -37,6 +37,9 @@ export const TermsOfService: React.FC = () => {
   const currentDate = new Date().toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-NZ');
   const effectiveDate = new Date('2025-01-01').toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-NZ');
 
+  // Create refs for each section to enable scrolling
+  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+
   const sections = [
     { id: 'acceptance', icon: <CheckIcon />, color: 'success' as const },
     { id: 'description', icon: <ArticleIcon />, color: 'primary' as const },
@@ -58,6 +61,37 @@ export const TermsOfService: React.FC = () => {
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     );
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = sectionRefs.current[sectionId];
+    if (element) {
+      // Calculate the offset to account for header padding
+      const headerOffset = 100; // Adjust this value based on your header height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleTableOfContentsClick = (sectionId: string) => {
+    const isCurrentlyExpanded = expandedSections.includes(sectionId);
+    
+    // Expand the section if it's not already expanded
+    if (!isCurrentlyExpanded) {
+      setExpandedSections(prev => [...prev, sectionId]);
+      // Scroll to the section after a brief delay to allow expansion animation
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 150);
+    } else {
+      // If already expanded, scroll immediately
+      scrollToSection(sectionId);
+    }
   };
 
   const expandAllSections = () => {
@@ -141,17 +175,29 @@ export const TermsOfService: React.FC = () => {
               <ListItem
                 key={section.id}
                 button
-                onClick={() => handleSectionToggle(section.id)}
-                className="hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors cursor-pointer"
+                onClick={() => handleTableOfContentsClick(section.id)}
+                className={`hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors cursor-pointer ${
+                  expandedSections.includes(section.id) 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
+                    : ''
+                }`}
               >
                 <ListItemIcon className="min-w-0 mr-3">
-                  <Box className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold">
+                  <Box className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                    expandedSections.includes(section.id)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                  }`}>
                     {index + 1}
                   </Box>
                 </ListItemIcon>
                 <ListItemText
                   primary={t(`terms.sections.${section.id}.title`)}
-                  className="text-gray-700 dark:text-gray-300"
+                  className={`${
+                    expandedSections.includes(section.id)
+                      ? 'text-blue-700 dark:text-blue-300 font-medium'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}
                 />
               </ListItem>
             ))}
@@ -163,6 +209,7 @@ export const TermsOfService: React.FC = () => {
           {sections.map((section, index) => (
             <Accordion
               key={section.id}
+              ref={(el) => (sectionRefs.current[section.id] = el)}
               expanded={expandedSections.includes(section.id)}
               onChange={() => handleSectionToggle(section.id)}
               className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm"
@@ -184,7 +231,7 @@ export const TermsOfService: React.FC = () => {
                   </Typography>
                 </Box>
               </AccordionSummary>
-              <AccordionDetails className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
+              <AccordionDetails className="border-t border-gray-200 dark:border-gray-600">
                 <Box className="p-4">
                   {section.id === 'eligibility' ? (
                     <Box className="space-y-4">
