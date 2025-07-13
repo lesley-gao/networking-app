@@ -48,7 +48,6 @@ const AppContent: React.FC = () => {
       }}
       showDetails={process.env.NODE_ENV === 'development'}
     >
-      {/* Remove <Router> wrapper - it's already in index.tsx */}
       <Layout>
         <Routes>
           <Route path="/" element={<FlightCompanion />} />

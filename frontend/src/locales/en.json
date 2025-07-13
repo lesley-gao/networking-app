@@ -35,7 +35,7 @@
   "manageAccount": "Manage your account information and preferences",
   "verified": "Verified",
   "unverified": "Unverified",
-  "memberSince": "Member since {{date}}",
+  "memberSince": "Member since",
   "submitVerification": "Submit Verification",
   "activityStatistics": "Activity Statistics",
   "requestsCreated": "Requests Created:",
@@ -55,6 +55,7 @@
   "verificationSubmitted": "Verification documents submitted successfully!",
   "errorSubmittingVerification": "Error submitting verification documents",
   "pleaseLoginProfile": "Please log in to view your profile.",
+  "paymentHistory": "Payment History",
   "fullName": "Full Name",
   "password": "Password",
   "confirmPassword": "Confirm Password",
@@ -118,7 +119,7 @@
   "guidelines": {
     "title": "Community Guidelines",
     "subtitle": "Building a safe and respectful community for Chinese professionals in Auckland",
-    "lastUpdated": "Last updated: {{date}}",
+    "lastUpdated": "Last updated: ",
     "sections": {
       "overview": {
         "title": "Overview",
@@ -189,8 +190,8 @@
   "terms": {
     "title": "Terms of Service",
     "subtitle": "Legal agreement for using the NetworkingApp platform",
-    "lastUpdated": "Last updated: {{date}}",
-    "effectiveDate": "Effective date: {{date}}",
+    "lastUpdated": "Last updated: ",
+    "effectiveDate": "Effective date: ",
     "sections": {
       "acceptance": {
         "title": "1. Acceptance of Terms",

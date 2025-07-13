@@ -35,7 +35,7 @@
   "manageAccount": "管理您的账户信息和偏好设置",
   "verified": "已验证",
   "unverified": "未验证",
-  "memberSince": "会员自 {{date}}",
+  "memberSince": "会员自 ",
   "submitVerification": "提交验证",
   "activityStatistics": "活动统计",
   "requestsCreated": "已创建请求:",
@@ -55,6 +55,7 @@
   "verificationSubmitted": "验证文件提交成功！",
   "errorSubmittingVerification": "提交验证文件时出错",
   "pleaseLoginProfile": "请登录以查看您的个人资料。",
+  "paymentHistory": "支付历史",
   "fullName": "全名",
   "password": "密码",
   "confirmPassword": "确认密码",
@@ -118,7 +119,7 @@
   "guidelines": {
     "title": "社区指南",
     "subtitle": "为奥克兰的华人专业人士建立安全和谐的社区",
-    "lastUpdated": "最后更新：{{date}}",
+    "lastUpdated": "最后更新: ",
     "sections": {
       "overview": {
         "title": "概述",
@@ -189,8 +190,8 @@
   "terms": {
     "title": "服务条款",
     "subtitle": "使用NetworkingApp平台的法律协议",
-    "lastUpdated": "最后更新：{{date}}",
-    "effectiveDate": "生效日期：{{date}}",
+    "lastUpdated": "最后更新: ",
+    "effectiveDate": "生效日期: ",
     "sections": {
       "acceptance": {
         "title": "1. 条款接受",

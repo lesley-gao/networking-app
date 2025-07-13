@@ -94,6 +94,10 @@ export const getCurrentUser = createAsyncThunk(
       });
 
       if (!response.ok) {
+        // If unauthorized, clear the token
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+        }
         // Return error key for localization
         return rejectWithValue('getUserProfileFailed');
       }
@@ -153,11 +157,16 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
       })
-      .addCase(getCurrentUser.rejected, (state) => {
+      .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
-        state.token = null;
-        localStorage.removeItem('token');
+        // Clear user data on rejection
+        state.user = null;
+        state.error = action.payload as string || 'Failed to fetch user profile.';
+        // If it's a token-related error, clear the token
+        if (action.payload === 'noToken' || action.payload === 'getUserProfileFailed') {
+          state.token = null;
+        }
       });
   },
 });

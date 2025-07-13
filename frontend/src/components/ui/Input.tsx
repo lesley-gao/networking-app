@@ -69,6 +69,8 @@ export interface SelectProps extends BaseInputProps {
   size?: 'small' | 'medium';
   variant?: 'outlined' | 'filled' | 'standard';
   displayEmpty?: boolean;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
 }
 
 export interface CheckboxProps extends Omit<BaseInputProps, 'value' | 'onChange'> {
@@ -130,7 +132,7 @@ const StyledTextField = styled(MuiTextField)(({ theme }) => ({
 }));
 
 // TextField component
-export const TextField: React.FC<TextFieldProps> = ({
+export const TextField = React.forwardRef<HTMLDivElement, TextFieldProps>(({
   type = 'text',
   multiline = false,
   rows,
@@ -149,7 +151,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   sx,
   'data-testid': testId,
   ...props
-}) => {
+}, ref) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleTogglePassword = () => {
@@ -184,6 +186,7 @@ export const TextField: React.FC<TextFieldProps> = ({
 
   return (
     <StyledTextField
+      ref={ref}
       type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
       multiline={multiline}
       rows={rows}
@@ -208,60 +211,79 @@ export const TextField: React.FC<TextFieldProps> = ({
       {...props}
     />
   );
-};
+});
+
+// Add displayName for debugging
+TextField.displayName = 'TextField';
 
 // Select component
-export const Select: React.FC<SelectProps> = ({
+export const Select = React.forwardRef<HTMLDivElement, SelectProps>(({
   options,
   multiple = false,
   size = 'medium',
   variant = 'outlined',
   displayEmpty = false,
+  startAdornment,
+  endAdornment,
   className = '',
   sx,
-  'data-testid': testId,
+  'data-testid': testId = undefined,
   ...props
-}) => {
+}, ref) => {
+  const getStartAdornment = () => {
+    return startAdornment ? (
+      <InputAdornment position="start">{startAdornment}</InputAdornment>
+    ) : undefined;
+  };
+
+  const getEndAdornment = () => {
+    return endAdornment ? (
+      <InputAdornment position="end">{endAdornment}</InputAdornment>
+    ) : undefined;
+  };
+
   return (
-    <FormControl fullWidth={props.fullWidth} error={props.error} disabled={props.disabled}>
-      {props.label && <FormLabel component="legend">{props.label}</FormLabel>}
-      <MuiTextField
-        select
-        size={size}
-        variant={variant}
-        SelectProps={{
-          multiple,
-          displayEmpty,
-        }}
-        className={`${className} bg-white dark:bg-gray-700 rounded-lg`.trim()}
-        sx={sx}
-        data-testid={testId}
-        {...props}
-      >
-        {displayEmpty && (
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-        )}
-        {options.map((option) => (
-          <MenuItem
-            key={option.value}
-            value={option.value}
-            disabled={option.disabled}
-          >
-            {option.label}
-          </MenuItem>
-        ))}
-      </MuiTextField>
-      {props.helperText && (
-        <FormHelperText>{props.helperText}</FormHelperText>
+    <StyledTextField
+      ref={ref}
+      select
+      size={size}
+      variant={variant}
+      SelectProps={{
+        multiple,
+        displayEmpty,
+      }}
+      InputProps={{
+        startAdornment: getStartAdornment(),
+        endAdornment: getEndAdornment(),
+      }}
+      className={`${className} bg-white dark:bg-gray-700 rounded-lg`.trim()}
+      sx={sx}
+      data-testid={testId}
+      {...props}
+    >
+      {displayEmpty && (
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
       )}
-    </FormControl>
+      {options.map((option) => (
+        <MenuItem
+          key={option.value}
+          value={option.value}
+          disabled={option.disabled}
+        >
+          {option.label}
+        </MenuItem>
+      ))}
+    </StyledTextField>
   );
-};
+});
+
+// Add displayName for debugging
+Select.displayName = 'Select';
 
 // Checkbox component
-export const Checkbox: React.FC<CheckboxProps> = ({
+export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(({
   checked,
   onChange,
   indeterminate = false,
@@ -272,9 +294,10 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   sx,
   'data-testid': testId,
   ...props
-}) => {
+}, ref) => {
   const checkboxElement = (
     <MuiCheckbox
+      ref={ref}
       checked={checked}
       onChange={onChange}
       indeterminate={indeterminate}
@@ -298,10 +321,13 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   }
 
   return checkboxElement;
-};
+});
+
+// Add displayName for debugging
+Checkbox.displayName = 'Checkbox';
 
 // RadioGroup component
-export const RadioGroup: React.FC<RadioGroupProps> = ({
+export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(({
   options,
   onChange,
   row = false,
@@ -311,11 +337,12 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   sx,
   'data-testid': testId,
   ...props
-}) => {
+}, ref) => {
   return (
     <FormControl component="fieldset" error={props.error} disabled={props.disabled}>
       {props.label && <FormLabel component="legend">{props.label}</FormLabel>}
       <MuiRadioGroup
+        ref={ref}
         value={props.value}
         onChange={onChange}
         row={row}
@@ -345,10 +372,13 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
       )}
     </FormControl>
   );
-};
+});
+
+// Add displayName for debugging
+RadioGroup.displayName = 'RadioGroup';
 
 // Switch component
-export const Switch: React.FC<SwitchProps> = ({
+export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(({
   checked,
   onChange,
   size = 'medium',
@@ -358,9 +388,10 @@ export const Switch: React.FC<SwitchProps> = ({
   sx,
   'data-testid': testId,
   ...props
-}) => {
+}, ref) => {
   const switchElement = (
     <MuiSwitch
+      ref={ref}
       checked={checked}
       onChange={onChange}
       size={size}
@@ -383,7 +414,10 @@ export const Switch: React.FC<SwitchProps> = ({
   }
 
   return switchElement;
-};
+});
+
+// Add displayName for debugging
+Switch.displayName = 'Switch';
 
 // Export compound component
 const Input = {

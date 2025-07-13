@@ -69,7 +69,7 @@ namespace NetworkingApp.Controllers
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"User {user.Email} registered successfully");
+                    _logger.LogInformation("User {Email} registered successfully", user.Email);
 
                     var response = new UserRegistrationResponse
                     {
@@ -397,7 +397,7 @@ namespace NetworkingApp.Controllers
         [MaxLength(50)]
         public string LastName { get; set; } = string.Empty;
 
-        [Phone]
+        [RegularExpression(@"^\+64\d{8,9}$", ErrorMessage = "Phone number must be in New Zealand format (+64 followed by 8-9 digits)")]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(10)]
@@ -406,7 +406,7 @@ namespace NetworkingApp.Controllers
         [MaxLength(100)]
         public string? EmergencyContact { get; set; }
 
-        [Phone]
+        [RegularExpression(@"^\+64\d{8,9}$", ErrorMessage = "Emergency phone number must be in New Zealand format (+64 followed by 8-9 digits)")]
         public string? EmergencyPhone { get; set; }
     }
 
@@ -457,7 +457,7 @@ namespace NetworkingApp.Controllers
         [MaxLength(50)]
         public string? LastName { get; set; }
 
-        [Phone]
+        [RegularExpression(@"^\+64\d{8,9}$", ErrorMessage = "Phone number must be in New Zealand format (+64 followed by 8-9 digits)")]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(10)]
@@ -466,7 +466,7 @@ namespace NetworkingApp.Controllers
         [MaxLength(100)]
         public string? EmergencyContact { get; set; }
 
-        [Phone]
+        [RegularExpression(@"^\+64\d{8,9}$", ErrorMessage = "Emergency phone number must be in New Zealand format (+64 followed by 8-9 digits)")]
         public string? EmergencyPhone { get; set; }
     }
 

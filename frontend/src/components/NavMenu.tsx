@@ -27,7 +27,9 @@ export const NavMenu: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  // Use Redux selector for authentication and user
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector((state) => state.auth.user);
 
   const authenticatedItems = [
     { text: 'Home', path: '/' },

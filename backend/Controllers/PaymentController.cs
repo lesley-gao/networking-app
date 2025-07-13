@@ -90,16 +90,31 @@ namespace NetworkingApp.Controllers
         }
 
         /// <summary>
-        /// Gets the payment history for a user.
+        /// Gets the payment history for the authenticated user.
         /// </summary>
-        /// <param name="userId">The user's ID.</param>
         /// <returns>List of payments for the user.</returns>
-        [HttpGet("history/{userId}")]
+        [HttpGet("history")]
         [Authorize]
-        public async Task<IActionResult> GetPaymentHistory(string userId)
+        public async Task<IActionResult> GetPaymentHistory()
         {
-            var payments = await _paymentService.GetPaymentHistoryAsync(userId);
-            return Ok(payments);
+            try
+            {
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "User ID not found in token" });
+                }
+
+                var payments = await _paymentService.GetPaymentHistoryAsync(userId);
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                // Log the error for debugging
+                Console.WriteLine($"Error getting payment history: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Error retrieving payment history", details = ex.Message });
+            }
         }
     }
 

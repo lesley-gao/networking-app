@@ -6,7 +6,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 3000,
     proxy: {
-      '/api': 'http://localhost:5000',
+      '/api': {
+        target: 'https://localhost:5001',
+        changeOrigin: true,
+        secure: false, // Allow self-signed certificates in development
+      },
     },
   },
   build: {

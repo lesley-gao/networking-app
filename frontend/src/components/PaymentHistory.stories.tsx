@@ -38,7 +38,7 @@ const mockPaymentHistoryData = [
 ];
 
 // Create a wrapper component that mocks the Redux provider and API response
-const MockTemplate: React.FC<{ userId: string }> = ({ userId }) => {
+const MockTemplate: React.FC = () => {
   // Create a mock store
   const mockStore = configureStore({
     reducer: {
@@ -56,7 +56,7 @@ const MockTemplate: React.FC<{ userId: string }> = ({ userId }) => {
 
   return (
     <Provider store={mockStore}>
-      <PaymentHistory userId={userId} />
+      <PaymentHistory />
     </Provider>
   );
 };
@@ -64,16 +64,13 @@ const MockTemplate: React.FC<{ userId: string }> = ({ userId }) => {
 const meta: Meta<typeof PaymentHistory> = {
   title: 'Components/PaymentHistory',
   component: PaymentHistory,
-  decorators: [(Story: any, { args }: { args: any }) => <MockTemplate {...args} />],
+  decorators: [(Story: any) => <MockTemplate />],
 };
 export default meta;
 
 type Story = StoryObj<typeof PaymentHistory>;
 
 export const Default: Story = {
-  args: {
-    userId: 'user_1',
-  },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
 

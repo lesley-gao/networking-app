@@ -1,7 +1,7 @@
 // ClientApp/src/components/UserProfile.tsx
-import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
   Container,
@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Person as PersonIcon,
   Edit as EditIcon,
@@ -34,12 +34,12 @@ import {
   ContactPhone as EmergencyIcon,
   Upload as UploadIcon,
   Security as SecurityIcon,
-} from '@mui/icons-material';
-import { Input } from './ui';
-import { useAppSelector } from '../store/hooks';
-import PaymentHistory from './PaymentHistory';
-import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
+} from "@mui/icons-material";
+import { Input } from "./ui";
+import { useAppSelector } from "../store/hooks";
+import PaymentHistory from "./PaymentHistory";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 // TypeScript interfaces
 interface UserProfile {
@@ -75,51 +75,60 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   const { t } = useTranslation();
 
   // Zod schemas and types (must be inside component, before useForm)
-  const userProfileSchema = React.useMemo(() => z.object({
-    firstName: z
-      .string()
-      .min(1, t('validation.firstNameRequired'))
-      .max(50, t('validation.firstNameMax'))
-      .regex(/^[a-zA-Z\s]+$/, t('validation.firstNameRegex')),
-    lastName: z
-      .string()
-      .min(1, t('validation.lastNameRequired'))
-      .max(50, t('validation.lastNameMax'))
-      .regex(/^[a-zA-Z\s]+$/, t('validation.lastNameRegex')),
-    phoneNumber: z
-      .string()
-      .optional()
-      .refine(
-        (val) => !val || /^\+64\d{8,9}$/.test(val),
-        t('validation.phoneNumberFormat')
-      ),
-    preferredLanguage: z
-      .enum(['English', 'Chinese'], {
-        errorMap: () => ({ message: t('validation.preferredLanguageRequired') }),
+  const userProfileSchema = React.useMemo(
+    () =>
+      z.object({
+        firstName: z
+          .string()
+          .min(1, t("validation.firstNameRequired"))
+          .max(50, t("validation.firstNameMax"))
+          .regex(/^[a-zA-Z\s]+$/, t("validation.firstNameRegex")),
+        lastName: z
+          .string()
+          .min(1, t("validation.lastNameRequired"))
+          .max(50, t("validation.lastNameMax"))
+          .regex(/^[a-zA-Z\s]+$/, t("validation.lastNameRegex")),
+        phoneNumber: z
+          .string()
+          .optional()
+          .refine(
+            (val) => !val || /^\+64\d{8,9}$/.test(val),
+            t("validation.phoneNumberFormat")
+          ),
+        preferredLanguage: z.enum(["English", "Chinese"], {
+          errorMap: () => ({
+            message: t("validation.preferredLanguageRequired"),
+          }),
+        }),
+        emergencyContact: z
+          .string()
+          .optional()
+          .refine(
+            (val) => !val || (val.length >= 2 && val.length <= 100),
+            t("validation.emergencyContactLength")
+          ),
+        emergencyPhone: z
+          .string()
+          .optional()
+          .refine(
+            (val) => !val || /^\+64\d{8,9}$/.test(val),
+            t("validation.emergencyPhoneFormat")
+          ),
       }),
-    emergencyContact: z
-      .string()
-      .optional()
-      .refine(
-        (val) => !val || (val.length >= 2 && val.length <= 100),
-        t('validation.emergencyContactLength')
-      ),
-    emergencyPhone: z
-      .string()
-      .optional()
-      .refine(
-        (val) => !val || /^\+64\d{8,9}$/.test(val),
-        t('validation.emergencyPhoneFormat')
-      ),
-  }), [t]);
+    [t]
+  );
   type UserProfileFormData = z.infer<typeof userProfileSchema>;
 
-  const verificationSchema = React.useMemo(() => z.object({
-    documentReferences: z
-      .string()
-      .min(10, t('validation.documentReferencesMin'))
-      .max(500, t('validation.documentReferencesMax')),
-  }), [t]);
+  const verificationSchema = React.useMemo(
+    () =>
+      z.object({
+        documentReferences: z
+          .string()
+          .min(10, t("validation.documentReferencesMin"))
+          .max(500, t("validation.documentReferencesMax")),
+      }),
+    [t]
+  );
   type VerificationFormData = z.infer<typeof verificationSchema>;
 
   // State Management
@@ -127,15 +136,16 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [showVerificationDialog, setShowVerificationDialog] = useState<boolean>(false);
+  const [showVerificationDialog, setShowVerificationDialog] =
+    useState<boolean>(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
+    severity: "success" | "error" | "info" | "warning";
   }>({
     open: false,
-    message: '',
-    severity: 'info',
+    message: "",
+    severity: "info",
   });
 
   // Redux Integration
@@ -145,12 +155,12 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   const profileForm = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      phoneNumber: '',
-      preferredLanguage: 'English',
-      emergencyContact: '',
-      emergencyPhone: '',
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      preferredLanguage: "English",
+      emergencyContact: "",
+      emergencyPhone: "",
     },
   });
 
@@ -158,14 +168,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   const verificationForm = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
-      documentReferences: '',
+      documentReferences: "",
     },
   });
 
   // Helper Functions
   const showSnackbar = (
     message: string,
-    severity: 'success' | 'error' | 'info' | 'warning'
+    severity: "success" | "error" | "info" | "warning"
   ): void => {
     setSnackbar({ open: true, message, severity });
   };
@@ -178,13 +188,13 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   const fetchProfile = async (): Promise<void> => {
     try {
       setLoading(true);
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch("/api/user/profile", {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch profile');
+      if (!response.ok) throw new Error("Failed to fetch profile");
 
       const data: UserProfile = await response.json();
       setProfile(data);
@@ -193,14 +203,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       profileForm.reset({
         firstName: data.firstName,
         lastName: data.lastName,
-        phoneNumber: data.phoneNumber || '',
-        preferredLanguage: data.preferredLanguage as 'English' | 'Chinese',
-        emergencyContact: data.emergencyContact || '',
-        emergencyPhone: data.emergencyPhone || '',
+        phoneNumber: data.phoneNumber || "",
+        preferredLanguage: data.preferredLanguage as "English" | "Chinese",
+        emergencyContact: data.emergencyContact || "",
+        emergencyPhone: data.emergencyPhone || "",
       });
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      showSnackbar(t('errorLoadingProfile'), 'error');
+      console.error("Error fetching profile:", error);
+      showSnackbar(t("errorLoadingProfile"), "error");
     } finally {
       setLoading(false);
     }
@@ -208,19 +218,19 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
   const fetchStats = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/user/stats', {
+      const response = await fetch("/api/user/stats", {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      if (!response.ok) throw new Error("Failed to fetch stats");
 
       const data: UserStats = await response.json();
       setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      showSnackbar(t('errorLoadingStatistics'), 'error');
+      console.error("Error fetching stats:", error);
+      showSnackbar(t("errorLoadingStatistics"), "error");
     }
   };
 
@@ -230,67 +240,72 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     if (isEditing) {
       // Reset form to original values when canceling
       profileForm.reset({
-        firstName: profile?.firstName || '',
-        lastName: profile?.lastName || '',
-        phoneNumber: profile?.phoneNumber || '',
-        preferredLanguage: (profile?.preferredLanguage as 'English' | 'Chinese') || 'English',
-        emergencyContact: profile?.emergencyContact || '',
-        emergencyPhone: profile?.emergencyPhone || '',
+        firstName: profile?.firstName || "",
+        lastName: profile?.lastName || "",
+        phoneNumber: profile?.phoneNumber || "",
+        preferredLanguage:
+          (profile?.preferredLanguage as "English" | "Chinese") || "English",
+        emergencyContact: profile?.emergencyContact || "",
+        emergencyPhone: profile?.emergencyPhone || "",
       });
     }
   };
 
-  const handleProfileSubmit = async (data: UserProfileFormData): Promise<void> => {
+  const handleProfileSubmit = async (
+    data: UserProfileFormData
+  ): Promise<void> => {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error('Failed to update profile');
+      if (!response.ok) throw new Error("Failed to update profile");
 
       const updatedProfile: UserProfile = await response.json();
       setProfile(updatedProfile);
       setIsEditing(false);
-      showSnackbar(t('profileUpdated'), 'success');
+      showSnackbar(t("profileUpdated"), "success");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      showSnackbar(t('errorUpdatingProfile'), 'error');
+      console.error("Error updating profile:", error);
+      showSnackbar(t("errorUpdatingProfile"), "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerificationSubmit = async (data: VerificationFormData): Promise<void> => {
+  const handleVerificationSubmit = async (
+    data: VerificationFormData
+  ): Promise<void> => {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/user/submit-verification', {
-        method: 'POST',
+      const response = await fetch("/api/user/submit-verification", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error('Failed to submit verification');
+      if (!response.ok) throw new Error("Failed to submit verification");
 
-      showSnackbar(t('verificationDocumentsSubmitted'), 'success');
+      showSnackbar(t("verificationDocumentsSubmitted"), "success");
       setShowVerificationDialog(false);
       verificationForm.reset();
-      
+
       // Refresh profile to get updated verification status
       await fetchProfile();
     } catch (error) {
-      console.error('Error submitting verification:', error);
-      showSnackbar(t('errorSubmittingVerificationDocuments'), 'error');
+      console.error("Error submitting verification:", error);
+      showSnackbar(t("errorSubmittingVerificationDocuments"), "error");
     } finally {
       setLoading(false);
     }
@@ -320,9 +335,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   if (!isAuthenticated || !profile) {
     return (
       <Container maxWidth="lg" className="py-6">
-        <Alert severity="warning">
-          {t('pleaseLogInToViewProfile')}
-        </Alert>
+        <Alert severity="warning">{t("pleaseLoginProfile")}</Alert>
       </Container>
     );
   }
@@ -334,14 +347,12 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         <StarIcon
           key={star}
           className={`w-4 h-4 ${
-            star <= Math.round(rating)
-              ? 'text-yellow-400'
-              : 'text-gray-300'
+            star <= Math.round(rating) ? "text-yellow-400" : "text-gray-300"
           }`}
         />
       ))}
       <Typography variant="body2" className="ml-2 text-gray-600">
-        {rating.toFixed(1)} ({profile.totalRatings} {t('reviews')})
+        {rating.toFixed(1)} ({profile.totalRatings} {t("reviews")})
       </Typography>
     </Box>
   );
@@ -355,13 +366,10 @@ const UserProfile: React.FC<UserProfileProps> = () => {
           component="h1"
           className="mb-2 font-bold text-gray-800 dark:text-white"
         >
-          {t('userProfile')}
+          {t("userProfile")}
         </Typography>
-        <Typography
-          variant="h6"
-          className="text-gray-600 dark:text-gray-300"
-        >
-          {t('manageYourAccountInformationAndPreferences')}
+        <Typography variant="h6" className="text-gray-600 dark:text-gray-300">
+          {t("manageAccount")}
         </Typography>
       </Box>
 
@@ -372,7 +380,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
             <CardContent className="p-6">
               <Box className="flex justify-between items-center mb-6">
                 <Typography variant="h5" className="font-semibold">
-                  {t('profileInformation')}
+                  {t("profileInformation")}
                 </Typography>
                 <Button
                   variant={isEditing ? "outlined" : "contained"}
@@ -380,7 +388,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   onClick={handleEditToggle}
                   disabled={loading}
                 >
-                  {isEditing ? t('cancel') : t('edit')}
+                  {isEditing ? t("cancel") : t("edit")}
                 </Button>
               </Box>
 
@@ -388,8 +396,11 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                 <Grid container spacing={3}>
                   {/* Basic Information */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" className="mb-3 text-gray-700 dark:text-gray-300">
-                      {t('basicInformation')}
+                    <Typography
+                      variant="h6"
+                      className="mb-3 text-gray-700 dark:text-gray-300"
+                    >
+                      {t("basicInformation")}
                     </Typography>
                   </Grid>
 
@@ -400,7 +411,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label={t('firstName')}
+                          label={t("firstName")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
@@ -418,7 +429,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label={t('lastName')}
+                          label={t("lastName")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
@@ -431,11 +442,11 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
                   <Grid item xs={12} sm={6}>
                     <Input.TextField
-                      label={t('email')}
+                      label={t("email")}
                       value={profile.email}
                       disabled={true}
                       fullWidth
-                      helperText={t('emailCannotBeChanged')}
+                      helperText={t("emailCannotBeChanged")}
                       startAdornment={<EmailIcon className="text-gray-400" />}
                     />
                   </Grid>
@@ -447,13 +458,18 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label={t('phoneNumber')}
+                          label={t("phoneNumber")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
-                          helperText={fieldState.error?.message || t('formatPhoneNumber')}
+                          helperText={
+                            fieldState.error?.message ||
+                            t("validation.phoneNumberFormat")
+                          }
                           fullWidth
                           placeholder="+64 21 123 4567"
-                          startAdornment={<PhoneIcon className="text-gray-400" />}
+                          startAdornment={
+                            <PhoneIcon className="text-gray-400" />
+                          }
                         />
                       )}
                     />
@@ -466,14 +482,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.Select
                           {...field}
-                          label={t('preferredLanguage')}
+                          label={t("preferredLanguage")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                           fullWidth
                           options={[
-                            { value: 'English', label: t('english') },
-                            { value: 'Chinese', label: t('chinese') },
+                            { value: "English", label: t("english") },
+                            { value: "Chinese", label: t("chinese") },
                           ]}
                         />
                       )}
@@ -483,8 +499,11 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   {/* Emergency Contact */}
                   <Grid item xs={12}>
                     <Divider className="my-4" />
-                    <Typography variant="h6" className="mb-3 text-gray-700 dark:text-gray-300">
-                      {t('emergencyContact')}
+                    <Typography
+                      variant="h6"
+                      className="mb-3 text-gray-700 dark:text-gray-300"
+                    >
+                      {t("emergencyContact")}
                     </Typography>
                   </Grid>
 
@@ -495,12 +514,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label={t('emergencyContactName')}
+                          label={t("emergencyContact")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                           fullWidth
-                          startAdornment={<EmergencyIcon className="text-gray-400" />}
+                          startAdornment={
+                            <EmergencyIcon className="text-gray-400" />
+                          }
                         />
                       )}
                     />
@@ -513,13 +534,18 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       render={({ field, fieldState }) => (
                         <Input.TextField
                           {...field}
-                          label={t('emergencyContactPhone')}
+                          label={t("emergencyPhone")}
                           disabled={!isEditing}
                           error={!!fieldState.error}
-                          helperText={fieldState.error?.message || t('formatPhoneNumber')}
+                          helperText={
+                            fieldState.error?.message ||
+                            t("validation.phoneNumberFormat")
+                          }
                           fullWidth
                           placeholder="+64 21 123 4567"
-                          startAdornment={<PhoneIcon className="text-gray-400" />}
+                          startAdornment={
+                            <PhoneIcon className="text-gray-400" />
+                          }
                         />
                       )}
                     />
@@ -532,11 +558,17 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                         <Button
                           type="submit"
                           variant="contained"
-                          startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
+                          startIcon={
+                            loading ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <SaveIcon />
+                            )
+                          }
                           disabled={loading}
                           className="bg-green-600 hover:bg-green-700"
                         >
-                          {loading ? t('saving') : t('saveChanges')}
+                          {loading ? t("saving") : t("saveChanges")}
                         </Button>
                       </Box>
                     </Grid>
@@ -558,23 +590,23 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               >
                 <PersonIcon sx={{ fontSize: 40 }} />
               </Avatar>
-              
+
               <Typography variant="h5" className="font-semibold mb-2">
                 {profile.firstName} {profile.lastName}
               </Typography>
-              
+
               <Box className="flex justify-center items-center gap-2 mb-3">
                 {profile.isVerified ? (
                   <Chip
                     icon={<VerifiedIcon />}
-                    label={t('verified')}
+                    label={t("verified")}
                     color="success"
                     size="small"
                   />
                 ) : (
                   <Chip
                     icon={<SecurityIcon />}
-                    label={t('unverified')}
+                    label={t("unverified")}
                     color="warning"
                     size="small"
                   />
@@ -590,7 +622,8 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               {renderStars(profile.rating)}
 
               <Typography variant="body2" className="text-gray-600 mt-3">
-                {t('memberSince')} {new Date(profile.createdAt).toLocaleDateString()}
+                {t("memberSince")}{" "}
+                {new Date(profile.createdAt).toLocaleDateString()}
               </Typography>
 
               {!profile.isVerified && (
@@ -601,7 +634,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   className="mt-4"
                   fullWidth
                 >
-                  {t('submitVerification')}
+                  {t("submitVerification")}
                 </Button>
               )}
             </CardContent>
@@ -612,35 +645,45 @@ const UserProfile: React.FC<UserProfileProps> = () => {
             <Card>
               <CardContent className="p-6">
                 <Typography variant="h6" className="font-semibold mb-4">
-                  {t('activityStatistics')}
+                  {t("activityStatistics")}
                 </Typography>
-                
+
                 <Box className="space-y-3">
                   <Box className="flex justify-between">
-                    <Typography variant="body2">{t('requestsCreated')}:</Typography>
+                    <Typography variant="body2">
+                      {t("requestsCreated")}:
+                    </Typography>
                     <Typography variant="body2" className="font-semibold">
-                      {stats.totalFlightCompanionRequests + stats.totalPickupRequests}
+                      {stats.totalFlightCompanionRequests +
+                        stats.totalPickupRequests}
                     </Typography>
                   </Box>
-                  
+
                   <Box className="flex justify-between">
-                    <Typography variant="body2">{t('servicesOffered')}:</Typography>
+                    <Typography variant="body2">
+                      {t("servicesOffered")}:
+                    </Typography>
                     <Typography variant="body2" className="font-semibold">
-                      {stats.totalFlightCompanionOffers + stats.totalPickupOffers}
+                      {stats.totalFlightCompanionOffers +
+                        stats.totalPickupOffers}
                     </Typography>
                   </Box>
-                  
+
                   <Box className="flex justify-between">
-                    <Typography variant="body2">{t('completedServices')}:</Typography>
+                    <Typography variant="body2">
+                      {t("completedServices")}:
+                    </Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.completedServices}
                     </Typography>
                   </Box>
-                  
+
                   <Divider />
-                  
+
                   <Box className="flex justify-between">
-                    <Typography variant="body2">{t('averageRating')}:</Typography>
+                    <Typography variant="body2">
+                      {t("averageRating")}:
+                    </Typography>
                     <Typography variant="body2" className="font-semibold">
                       {stats.averageRating.toFixed(1)}/5.0
                     </Typography>
@@ -662,14 +705,16 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         <DialogTitle>
           <Typography variant="h5" className="flex items-center gap-2">
             <SecurityIcon />
-            {t('submitVerificationDocuments')}
+            {t("submitVerificationDocuments")}
           </Typography>
         </DialogTitle>
 
-        <form onSubmit={verificationForm.handleSubmit(handleVerificationSubmit)}>
+        <form
+          onSubmit={verificationForm.handleSubmit(handleVerificationSubmit)}
+        >
           <DialogContent>
             <Typography variant="body2" className="mb-4 text-gray-600">
-              {t('pleaseProvideReferencesToYourIdentificationDocuments')}
+              {t("verificationDialogDesc")}
             </Typography>
 
             <Controller
@@ -678,13 +723,15 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               render={({ field, fieldState }) => (
                 <Input.TextField
                   {...field}
-                  label={t('documentReferences')}
+                  label={t("documentReferences")}
                   error={!!fieldState.error}
-                  helperText={fieldState.error?.message || t('exampleDocumentReferences')}
+                  helperText={
+                    fieldState.error?.message || t("documentReferencesHelper")
+                  }
                   fullWidth
                   multiline
                   rows={4}
-                  placeholder={t('pleaseProvideDocumentReferences')}
+                  placeholder={t("documentReferencesPlaceholder")}
                 />
               )}
             />
@@ -695,15 +742,17 @@ const UserProfile: React.FC<UserProfileProps> = () => {
               onClick={() => setShowVerificationDialog(false)}
               disabled={loading}
             >
-              {t('cancel')}
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
               variant="contained"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : <UploadIcon />}
+              startIcon={
+                loading ? <CircularProgress size={20} /> : <UploadIcon />
+              }
             >
-              {loading ? t('submitting') : t('submit')}
+              {loading ? t("submitting") : t("submit")}
             </Button>
           </DialogActions>
         </form>
@@ -714,7 +763,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={closeSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={closeSnackbar}
@@ -727,7 +776,12 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       </Snackbar>
 
       {/* Payment History */}
-      {user && <PaymentHistory userId={user.id.toString()} />}
+      <Box className="mt-6">
+        <Typography variant="h4" component="h2" className="mb-4 font-bold text-gray-800 dark:text-white">
+          {t("paymentHistory")}
+        </Typography>
+        <PaymentHistory />
+      </Box>
     </Container>
   );
 };
