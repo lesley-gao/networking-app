@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive logging strategy implemented for the Flight Companion & Airport Pickup Platform. The strategy includes structured logging, performance monitoring, security auditing, and integration with Azure Application Insights.
+This document describes the comprehensive logging strategy implemented for WingCompanion. The strategy includes structured logging, performance monitoring, security auditing, and integration with Azure Application Insights.
 
 ## Table of Contents
 

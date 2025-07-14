@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Email Notification Service provides comprehensive email functionality for the Flight Companion Platform, sending critical updates and confirmations to users. The service is integrated with the NotificationService to automatically send emails when important events occur.
+The Email Notification Service provides comprehensive email functionality for WingCompanion, sending critical updates and confirmations to users. The service is integrated with the NotificationService to automatically send emails when important events occur.
 
 ## Features
 
@@ -51,11 +51,11 @@ The Email Notification Service provides comprehensive email functionality for th
     "SmtpUsername": "",
     "SmtpPassword": "",
     "FromEmail": "noreply@flightcompanion.com",
-    "FromName": "Flight Companion Platform",
+    "FromName": "WingCompanion",
     "ReplyToEmail": "support@flightcompanion.com",
     "Templates": {
       "BaseTemplateDirectory": "Templates/Email",
-      "CompanyName": "Flight Companion Platform",
+      "CompanyName": "WingCompanion",
       "LogoUrl": "https://flightcompanion.com/images/logo.png",
       "SupportEmail": "support@flightcompanion.com",
       "WebsiteUrl": "https://flightcompanion.com",
@@ -219,4 +219,4 @@ All email operations are logged with appropriate log levels:
 
 ## Summary
 
-The Email Notification Service provides a robust, scalable, and secure foundation for all email communications in the Flight Companion Platform. It's fully integrated with the existing notification system and ready for production deployment with proper SMTP configuration.
+The Email Notification Service provides a robust, scalable, and secure foundation for all email communications in WingCompanion. It's fully integrated with the existing notification system and ready for production deployment with proper SMTP configuration.

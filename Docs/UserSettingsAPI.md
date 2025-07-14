@@ -2,7 +2,7 @@
 
 ## Overview
 
-The User Settings API provides comprehensive endpoints for managing user preferences and settings in the Flight Companion & Pickup Platform. This includes theme preferences, notification settings, privacy controls, and custom user preferences.
+The User Settings API provides comprehensive endpoints for managing user preferences and settings in WingCompanion. This includes theme preferences, notification settings, privacy controls, and custom user preferences.
 
 ## API Endpoints
 

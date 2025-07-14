@@ -1,7 +1,7 @@
 # Security Audit Checklist
 
 ## Overview
-This checklist ensures comprehensive preparation for third-party security audit of the Flight Companion Platform. Each item should be verified before engaging with the security firm.
+This checklist ensures comprehensive preparation for third-party security audit of WingCompanion. Each item should be verified before engaging with the security firm.
 
 ## Pre-Audit Preparation Checklist
 

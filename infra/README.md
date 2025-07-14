@@ -1,6 +1,6 @@
-# NetworkingApp - Azure Infrastructure
+# WingCompanion - Azure Infrastructure
 
-This directory contains the Infrastructure as Code (IaC) templates for deploying the Flight Companion & Airport Pickup Platform to Azure using Azure Developer CLI (azd) and Bicep templates.
+This directory contains the Infrastructure as Code (IaC) templates for deploying WingCompanion to Azure using Azure Developer CLI (azd) and Bicep templates.
 
 ## Architecture Overview
 
@@ -27,7 +27,7 @@ The solution deploys a secure, scalable architecture following Azure Well-Archit
 
 ```bash
 # Clone or navigate to the project directory
-cd NetworkingApp
+cd WingCompanion
 
 # Initialize azd (if not already done)
 azd init

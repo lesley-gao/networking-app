@@ -1,315 +1,279 @@
 // frontend/src/components/CommunityGuidelines.tsx
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Container,
-  Typography,
-  Paper,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip,
-  Divider,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  Security as SecurityIcon,
-  People as PeopleIcon,
-  HandshakeOutlined as HandshakeIcon,
-  Report as ReportIcon,
-  Gavel as GavelIcon,
-} from '@mui/icons-material';
 
-export const CommunityGuidelines: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  
-  // More robust date generation
-  const getCurrentDate = () => {
-    try {
-      const now = new Date();
-      if (i18n.language === 'zh') {
-        return now.toLocaleDateString('zh-CN');
-      } else {
-        // Try en-NZ first, fallback to en-US
-        try {
-          return now.toLocaleDateString('en-NZ');
-        } catch {
-          return now.toLocaleDateString('en-US');
-        }
-      }
-    } catch (error) {
-      // Ultimate fallback - manual format
-      const now = new Date();
-      const day = now.getDate().toString().padStart(2, '0');
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      const year = now.getFullYear();
-      return i18n.language === 'zh' ? `${year}/${month}/${day}` : `${month}/${day}/${year}`;
+const CommunityGuidelines: React.FC = () => {
+  const lastUpdated = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
-  const currentDate = getCurrentDate();
-  
-  // Fallback for last updated text
-  const getLastUpdatedText = () => {
-    try {
-      const translatedText = t('guidelines.lastUpdated', { date: currentDate });
-      // Check if translation worked (doesn't return the key itself)
-      if (translatedText && !translatedText.includes('guidelines.lastUpdated')) {
-        return translatedText;
-      }
-    } catch (error) {
-      console.warn('Translation error for guidelines.lastUpdated:', error);
-    }
-    
-    // Fallback to hardcoded text
-    return i18n.language === 'zh' 
-      ? `最后更新：${currentDate}`
-      : `Last updated: ${currentDate}`;
-  };
 
-  const sections = [
-    {
-      id: 'overview',
-      icon: <PeopleIcon className="text-blue-600 dark:text-blue-400" />,
-      color: 'primary' as const,
-    },
-    {
-      id: 'conduct',
-      icon: <HandshakeIcon className="text-green-600 dark:text-green-400" />,
-      color: 'success' as const,
-    },
-    {
-      id: 'safety',
-      icon: <SecurityIcon className="text-orange-600 dark:text-orange-400" />,
-      color: 'warning' as const,
-    },
-    {
-      id: 'services',
-      icon: <GavelIcon className="text-purple-600 dark:text-purple-400" />,
-      color: 'secondary' as const,
-    },
-    {
-      id: 'reporting',
-      icon: <ReportIcon className="text-red-600 dark:text-red-400" />,
-      color: 'error' as const,
-    },
+  const tableOfContents = [
+    { id: 'overview', title: 'Community Overview' },
+    { id: 'conduct', title: 'Code of Conduct' },
+    { id: 'safety', title: 'Safety Guidelines' },
+    { id: 'services', title: 'Service Standards' },
+    { id: 'reporting', title: 'Reporting and Enforcement' },
+    { id: 'consequences', title: 'Consequences of Violations' }
   ];
 
   return (
-    <Container maxWidth="lg" className="py-8">
-      <Paper 
-        elevation={2} 
-        className="p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
-      >
-        {/* Header */}
-        <Box className="text-center mb-8">
-          <Typography 
-            variant="h3" 
-            component="h1" 
-            className="font-bold text-gray-900 dark:text-white mb-4"
-            gutterBottom
-          >
-            {t('guidelines.title')}
-          </Typography>
-          <Typography 
-            variant="h6" 
-            className="text-gray-600 dark:text-gray-300 mb-4 max-w-3xl mx-auto"
-          >
-            {t('guidelines.subtitle')}
-          </Typography>
-          <Chip 
-            label={getLastUpdatedText()}
-            variant="outlined"
-            className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-          />
-        </Box>
-
-        <Divider className="mb-8" />
-
-        {/* Overview Section */}
-        <Box className="mb-8">
-          <Box className="flex items-center mb-4">
-            <PeopleIcon className="text-blue-600 dark:text-blue-400 mr-3" fontSize="large" />
-            <Typography 
-              variant="h4" 
-              component="h2" 
-              className="font-semibold text-gray-900 dark:text-white"
-            >
-              {t('guidelines.sections.overview.title')}
-            </Typography>
-          </Box>
-          <Paper 
-            elevation={1} 
-            className="p-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg"
-          >
-            <Typography 
-              variant="body1" 
-              className="text-gray-700 dark:text-gray-300 leading-relaxed"
-            >
-              {t('guidelines.sections.overview.content')}
-            </Typography>
-          </Paper>
-        </Box>
-
-        {/* Accordion Sections */}
-        <Box className="space-y-4">
-          {sections.slice(1).map((section) => (
-            <Accordion
-              key={section.id}
-              className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm"
-              elevation={0}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon className="text-gray-600 dark:text-gray-300" />}
-                className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-              >
-                <Box className="flex items-center">
-                  {section.icon}
-                  <Typography 
-                    variant="h5" 
-                    className="ml-3 font-semibold text-gray-900 dark:text-white"
+    <div className="max-w-7xl mx-auto p-6 bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Table of Contents */}
+        <div className="lg:col-span-1 hidden lg:block">
+          <div className="sticky top-6 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Table of Contents</h3>
+            <ul className="space-y-2 pl-0 list-none">
+              {tableOfContents.map((item, index) => (
+                <li key={item.id} className="cursor-pointer list-none">
+                  <div
+                    onClick={() => scrollToSection(item.id)}
+                    className="text-gray-700 hover:text-blue-600 transition-colors text-left block w-full"
                   >
-                    {t(`guidelines.sections.${section.id}.title`)}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
-                <Box className="space-y-6">
-                  {section.id === 'conduct' && (
-                    <>
-                      <GuidelineItem
-                        title={t('guidelines.sections.conduct.respect.title')}
-                        content={t('guidelines.sections.conduct.respect.content')}
-                        color="primary"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.conduct.discrimination.title')}
-                        content={t('guidelines.sections.conduct.discrimination.content')}
-                        color="error"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.conduct.harassment.title')}
-                        content={t('guidelines.sections.conduct.harassment.content')}
-                        color="warning"
-                      />
-                    </>
-                  )}
-                  {section.id === 'safety' && (
-                    <>
-                      <GuidelineItem
-                        title={t('guidelines.sections.safety.verification.title')}
-                        content={t('guidelines.sections.safety.verification.content')}
-                        color="success"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.safety.meetings.title')}
-                        content={t('guidelines.sections.safety.meetings.content')}
-                        color="warning"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.safety.personal.title')}
-                        content={t('guidelines.sections.safety.personal.content')}
-                        color="error"
-                      />
-                    </>
-                  )}
-                  {section.id === 'services' && (
-                    <>
-                      <GuidelineItem
-                        title={t('guidelines.sections.services.reliability.title')}
-                        content={t('guidelines.sections.services.reliability.content')}
-                        color="primary"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.services.payment.title')}
-                        content={t('guidelines.sections.services.payment.content')}
-                        color="success"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.services.quality.title')}
-                        content={t('guidelines.sections.services.quality.content')}
-                        color="secondary"
-                      />
-                    </>
-                  )}
-                  {section.id === 'reporting' && (
-                    <>
-                      <GuidelineItem
-                        title={t('guidelines.sections.reporting.violations.title')}
-                        content={t('guidelines.sections.reporting.violations.content')}
-                        color="error"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.reporting.consequences.title')}
-                        content={t('guidelines.sections.reporting.consequences.content')}
-                        color="warning"
-                      />
-                      <GuidelineItem
-                        title={t('guidelines.sections.reporting.appeals.title')}
-                        content={t('guidelines.sections.reporting.appeals.content')}
-                        color="info"
-                      />
-                    </>
-                  )}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
+                    {index + 1}. {item.title}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-        {/* Footer */}
-        <Box className="mt-12 text-center">
-          <Paper 
-            elevation={1} 
-            className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 rounded-lg"
-          >
-            <Typography 
-              variant="h6" 
-              className="font-semibold text-gray-900 dark:text-white mb-2"
-            >
-              💙 {i18n.language === 'zh' ? '让我们共同建设一个更好的社区' : 'Let\'s Build a Better Community Together'}
-            </Typography>
-            <Typography 
-              variant="body2" 
-              className="text-gray-600 dark:text-gray-300"
-            >
-              {i18n.language === 'zh' 
-                ? '遵守这些指南有助于创造一个所有人都能安全、舒适地连接和互助的环境。'
-                : 'Following these guidelines helps create an environment where everyone can connect and help each other safely and comfortably.'
-              }
-            </Typography>
-          </Paper>
-        </Box>
-      </Paper>
-    </Container>
-  );
-};
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Community Guidelines</h1>
+            <p className="text-gray-600">Last updated: {lastUpdated}</p>
+          </div>
 
-// Helper component for individual guideline items
-interface GuidelineItemProps {
-  title: string;
-  content: string;
-  color: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
-}
+          <div className="prose prose-lg max-w-none">
+            <section className="mb-8" id="overview">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Community Overview</h2>
+              <p className="text-gray-700 mb-4">
+                Welcome to the WingCompanion community! Our platform connects travelers 
+                worldwide, fostering safe, reliable, and enjoyable travel experiences through companion matching, 
+                pickup services, and emergency assistance.
+              </p>
+              <p className="text-gray-700 mb-4">
+                These Community Guidelines establish the standards of behavior expected from all platform users. 
+                By joining our community, you agree to uphold these values and contribute to a positive, 
+                safe environment for all travelers.
+              </p>
+              <p className="text-gray-700">
+                Our community thrives on mutual respect, trust, and safety. Together, we create memorable 
+                travel experiences while ensuring everyone feels secure and valued.
+              </p>
+            </section>
 
-const GuidelineItem: React.FC<GuidelineItemProps> = ({ title, content, color }) => {
+            <section className="mb-8" id="conduct">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Code of Conduct</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">2.1 Respectful Communication</h3>
+              <p className="text-gray-700 mb-4">
+                Treat all community members with dignity and respect. Our platform welcomes users from diverse 
+                backgrounds, cultures, and experiences. We expect all interactions to be courteous, professional, 
+                and considerate.
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Use polite and professional language in all communications</li>
+                <li>Respond promptly to messages and booking requests</li>
+                <li>Be patient and understanding with fellow travelers</li>
+                <li>Respect cultural differences and personal boundaries</li>
+                <li>Maintain constructive dialogue even during disagreements</li>
+              </ul>
 
-  return (
-    <Box className={`border-l-4  p-4 rounded-r-lg`}>
-      <Typography 
-        variant="h6" 
-        className="font-semibold text-gray-900 dark:text-white mb-2"
-      >
-        {title}
-      </Typography>
-      <Typography 
-        variant="body2" 
-        className="text-gray-700 dark:text-gray-300 leading-relaxed"
-      >
-        {content}
-      </Typography>
-    </Box>
+              <h3 className="text-xl font-medium text-gray-800 mb-3">2.2 Zero Tolerance for Discrimination</h3>
+              <p className="text-gray-700 mb-4">
+                Discrimination of any kind is strictly prohibited on our platform. We do not tolerate harassment, 
+                hate speech, or discriminatory behavior based on:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Race, ethnicity, or national origin</li>
+                <li>Religion or personal beliefs</li>
+                <li>Gender, gender identity, or sexual orientation</li>
+                <li>Age, disability, or health status</li>
+                <li>Economic status or profession</li>
+                <li>Political views or affiliations</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">2.3 Harassment Prevention</h3>
+              <p className="text-gray-700 mb-4">
+                Harassment in any form is unacceptable. This includes but is not limited to:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Unwelcome sexual advances or inappropriate comments</li>
+                <li>Persistent unwanted contact or stalking behavior</li>
+                <li>Threats, intimidation, or aggressive behavior</li>
+                <li>Sharing personal information without consent</li>
+                <li>Creating fake profiles or impersonating others</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="safety">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. Safety Guidelines</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.1 Identity Verification</h3>
+              <p className="text-gray-700 mb-4">
+                Complete identity verification is mandatory for all users. This process helps ensure platform 
+                safety and builds trust within our community.
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Upload a clear government-issued photo ID</li>
+                <li>Verify your phone number and email address</li>
+                <li>Use recent, genuine photos in your profile</li>
+                <li>Keep your profile information current and accurate</li>
+                <li>Complete additional verification steps when requested</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.2 Safe Meeting Practices</h3>
+              <p className="text-gray-700 mb-4">
+                Your safety is our top priority. Follow these guidelines when meeting fellow travelers:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Meet in public, well-lit areas with good foot traffic</li>
+                <li>Inform trusted friends or family about your travel plans</li>
+                <li>Trust your instincts – if something feels wrong, prioritize your safety</li>
+                <li>Use our in-app communication tools for initial contact</li>
+                <li>Verify companion identity before meeting in person</li>
+                <li>Keep your phone charged and emergency contacts readily available</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.3 Personal Information Protection</h3>
+              <p className="text-gray-700 mb-4">
+                Protect your personal information and respect others' privacy:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Don't share sensitive personal information until you feel comfortable</li>
+                <li>Use the platform's messaging system for initial communications</li>
+                <li>Be cautious about sharing home addresses or workplace information</li>
+                <li>Report users who request inappropriate personal information</li>
+                <li>Respect others' privacy preferences and boundaries</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="services">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Service Standards</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.1 Reliability and Commitment</h3>
+              <p className="text-gray-700 mb-4">
+                Honor your commitments and maintain reliability to ensure positive experiences for all users:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Arrive on time for all scheduled meetings and pickups</li>
+                <li>Provide advance notice if plans change or cancellation is necessary</li>
+                <li>Be prepared and bring agreed-upon items or documents</li>
+                <li>Follow through on agreed arrangements and pricing</li>
+                <li>Communicate proactively about any delays or issues</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.2 Payment and Financial Conduct</h3>
+              <p className="text-gray-700 mb-4">
+                Maintain transparency and honesty in all financial transactions:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Use only the platform's secure payment system</li>
+                <li>Be clear about pricing and any additional costs</li>
+                <li>Don't request or offer payments outside the platform</li>
+                <li>Report any attempts at payment fraud or manipulation</li>
+                <li>Respect the escrow system and dispute resolution process</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.3 Service Quality Standards</h3>
+              <p className="text-gray-700 mb-4">
+                Provide high-quality services that meet or exceed expectations:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Maintain clean, safe, and reliable transportation when offering pickup services</li>
+                <li>Be helpful, courteous, and professional at all times</li>
+                <li>Provide accurate descriptions of services offered</li>
+                <li>Address any issues or concerns promptly and professionally</li>
+                <li>Continuously strive to improve the user experience</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="reporting">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Reporting and Enforcement</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">5.1 Reporting Violations</h3>
+              <p className="text-gray-700 mb-4">
+                Help us maintain a safe community by reporting violations of these guidelines:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Use the in-app reporting feature to flag inappropriate behavior</li>
+                <li>Provide detailed information about the incident</li>
+                <li>Include screenshots or evidence when possible</li>
+                <li>Report immediately for safety-related concerns</li>
+                <li>Contact emergency services for immediate threats or danger</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">5.2 Investigation Process</h3>
+              <p className="text-gray-700 mb-4">
+                We take all reports seriously and investigate them thoroughly:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>All reports are reviewed within 24 hours</li>
+                <li>Both parties may be contacted for additional information</li>
+                <li>Evidence is carefully evaluated by our safety team</li>
+                <li>Decisions are made based on platform policies and user safety</li>
+                <li>Updates are provided to reporting users when appropriate</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="consequences">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Consequences of Violations</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.1 Warning System</h3>
+              <p className="text-gray-700 mb-4">
+                Minor violations may result in warnings and educational resources:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>First-time minor offenses receive educational warnings</li>
+                <li>Guidance provided on appropriate platform behavior</li>
+                <li>Opportunity for users to correct behavior</li>
+                <li>Tracking of warning history for pattern identification</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.2 Account Restrictions</h3>
+              <p className="text-gray-700 mb-4">
+                Serious or repeated violations may result in account limitations:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Temporary suspension of messaging or booking features</li>
+                <li>Reduced profile visibility in search results</li>
+                <li>Mandatory completion of safety education modules</li>
+                <li>Extended verification requirements</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.3 Account Termination</h3>
+              <p className="text-gray-700 mb-4">
+                Severe violations result in immediate and permanent account termination:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Harassment, discrimination, or threatening behavior</li>
+                <li>Fraud, scams, or payment manipulation</li>
+                <li>Creating fake profiles or identity misrepresentation</li>
+                <li>Repeated violations after multiple warnings</li>
+                <li>Any illegal activity or safety violations</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.4 Appeals Process</h3>
+              <p className="text-gray-700">
+                Users may appeal enforcement decisions through our formal appeals process. 
+                Appeals are reviewed by a separate team and decided based on additional evidence 
+                and circumstances. Users have 30 days from the enforcement action to submit an appeal.
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

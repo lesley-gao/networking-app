@@ -1,6 +1,6 @@
 # 🚀 GitHub Actions CI/CD Pipeline Setup Guide
 
-This guide will help you configure the comprehensive CI/CD pipeline for the Flight Companion Platform, including automated testing, security scanning, deployment, and release management.
+This guide will help you configure the comprehensive CI/CD pipeline for WingCompanion, including automated testing, security scanning, deployment, and release management.
 
 ## 📋 Prerequisites
 

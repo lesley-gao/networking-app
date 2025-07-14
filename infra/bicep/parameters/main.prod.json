@@ -15,7 +15,7 @@
       "value": "NetworkingApp Production Team"
     },
     "ownerEmail": {
-      "value": "prod-team@networkingapp.com"
+      "value": "prod-team@wingcompanion.com"
     },
     "enableDeploymentSlots": {
       "value": true
@@ -58,7 +58,7 @@
       "value": true
     },
     "alertEmailAddress": {
-      "value": "prod-alerts@networkingapp.com"
+      "value": "prod-alerts@wingcompanion.com"
     },
     "alertingEnvironment": {
       "value": "production"

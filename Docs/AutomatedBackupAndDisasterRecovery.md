@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive backup and disaster recovery (DR) strategy for the Flight Companion & Airport Pickup Platform. The plan ensures data protection, business continuity, and rapid recovery from various failure scenarios.
+This document outlines the comprehensive backup and disaster recovery (DR) strategy for WingCompanion. The plan ensures data protection, business continuity, and rapid recovery from various failure scenarios.
 
 ## Table of Contents
 
@@ -869,7 +869,7 @@ This runbook provides step-by-step instructions for recovering from database fai
 # Application Service Recovery Runbook
 
 ## Purpose
-Recovery procedures for Azure App Service failures affecting the Flight Companion platform.
+Recovery procedures for Azure App Service failures affecting WingCompanion.
 
 ## Trigger Conditions
 - App Service returning 5xx errors for > 2 minutes
@@ -1086,4 +1086,4 @@ This comprehensive backup and disaster recovery plan provides:
 - **Regular Reporting**: Monthly compliance reports and metrics
 - **Documentation**: Comprehensive runbooks and procedures
 
-This backup and disaster recovery strategy ensures the Flight Companion platform can recover quickly from any failure scenario while maintaining data integrity and meeting all compliance requirements! 🛡️
+This backup and disaster recovery strategy ensures WingCompanion can recover quickly from any failure scenario while maintaining data integrity and meeting all compliance requirements! 🛡️

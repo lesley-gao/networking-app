@@ -16,7 +16,7 @@ param(
     [string]$SubscriptionId = "",
 
     [Parameter(Mandatory = $false)]
-    [string]$AlertEmailAddress = "admin@networkingapp.com",
+    [string]$AlertEmailAddress = "admin@wingcompanion.com",
 
     [Parameter(Mandatory = $false)]
     [bool]$EnableAlerts = $true,

@@ -1,10 +1,10 @@
-# Azure CDN Configuration for Flight Companion Platform
+# Azure CDN Configuration for WingCompanion
 
 This document describes the Azure CDN setup for optimized static asset delivery and React application hosting.
 
 ## Overview
 
-The Flight Companion platform uses Azure CDN to provide:
+WingCompanion uses Azure CDN to provide:
 - **Global content delivery** for static assets (CSS, JS, images, fonts)
 - **Optimized React SPA routing** with proper fallback handling
 - **Environment-specific configurations** for development, testing, and production

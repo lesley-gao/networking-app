@@ -79,7 +79,7 @@ param(
     [string]$Location = 'australiaeast',
 
     [Parameter(Mandatory = $false)]
-    [string]$AlertEmail = 'admin@networkingapp.com',
+    [string]$AlertEmail = 'admin@wingcompanion.com',
 
     [Parameter(Mandatory = $false)]
     [switch]$WhatIf,

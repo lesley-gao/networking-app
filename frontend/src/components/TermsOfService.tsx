@@ -1,405 +1,274 @@
-// frontend/src/components/TermsOfService.tsx
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Container,
-  Typography,
-  Paper,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Button,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  CheckCircle as CheckIcon,
-  Article as ArticleIcon,
-  Person as PersonIcon,
-  Payment as PaymentIcon,
-  Security as SecurityIcon,
-  Gavel as GavelIcon,
-  ContactSupport as ContactIcon,
-  Schedule as ScheduleIcon,
-  Warning as WarningIcon,
-} from '@mui/icons-material';
 
-export const TermsOfService: React.FC = () => {
+const TermsOfService: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   
-  const currentDate = new Date().toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-NZ');
-  const effectiveDate = new Date('2025-01-01').toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-NZ');
-
-  // Create refs for each section to enable scrolling
-  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-
-  const sections = [
-    { id: 'acceptance', icon: <CheckIcon />, color: 'success' as const },
-    { id: 'description', icon: <ArticleIcon />, color: 'primary' as const },
-    { id: 'eligibility', icon: <PersonIcon />, color: 'info' as const },
-    { id: 'accounts', icon: <SecurityIcon />, color: 'warning' as const },
-    { id: 'conduct', icon: <WarningIcon />, color: 'error' as const },
-    { id: 'payments', icon: <PaymentIcon />, color: 'success' as const },
-    { id: 'liability', icon: <GavelIcon />, color: 'secondary' as const },
-    { id: 'privacy', icon: <SecurityIcon />, color: 'primary' as const },
-    { id: 'termination', icon: <ScheduleIcon />, color: 'warning' as const },
-    { id: 'changes', icon: <ArticleIcon />, color: 'info' as const },
-    { id: 'governing', icon: <GavelIcon />, color: 'secondary' as const },
-    { id: 'contact', icon: <ContactIcon />, color: 'primary' as const },
-  ];
-
-  const handleSectionToggle = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
-  };
+  const lastUpdated = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 
   const scrollToSection = (sectionId: string) => {
-    const element = sectionRefs.current[sectionId];
+    const element = document.getElementById(sectionId);
     if (element) {
-      // Calculate the offset to account for header padding
-      const headerOffset = 100; // Adjust this value based on your header height
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const handleTableOfContentsClick = (sectionId: string) => {
-    const isCurrentlyExpanded = expandedSections.includes(sectionId);
-    
-    // Expand the section if it's not already expanded
-    if (!isCurrentlyExpanded) {
-      setExpandedSections(prev => [...prev, sectionId]);
-      // Scroll to the section after a brief delay to allow expansion animation
-      setTimeout(() => {
-        scrollToSection(sectionId);
-      }, 150);
-    } else {
-      // If already expanded, scroll immediately
-      scrollToSection(sectionId);
-    }
-  };
-
-  const expandAllSections = () => {
-    setExpandedSections(sections.map(s => s.id));
-  };
-
-  const collapseAllSections = () => {
-    setExpandedSections([]);
-  };
+  const tableOfContents = [
+    { id: 'acceptance', title: 'Acceptance of Terms' },
+    { id: 'description', title: 'Service Description' },
+    { id: 'eligibility', title: 'User Eligibility' },
+    { id: 'accounts', title: 'User Accounts and Registration' },
+    { id: 'conduct', title: 'User Conduct and Responsibilities' },
+    { id: 'payments', title: 'Payment Terms and Conditions' },
+    { id: 'liability', title: 'Limitation of Liability' },
+    { id: 'privacy', title: 'Privacy and Data Protection' },
+    { id: 'termination', title: 'Termination of Service' },
+    { id: 'changes', title: 'Modifications to Terms' },
+    { id: 'governing', title: 'Governing Law' },
+    { id: 'contact', title: 'Contact Information' }
+  ];
 
   return (
-    <Container maxWidth="lg" className="py-8">
-      <Paper 
-        elevation={2} 
-        className="p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
-      >
-        {/* Header */}
-        <Box className="text-center mb-8">
-          <Typography 
-            variant="h3" 
-            component="h1" 
-            className="font-bold text-gray-900 dark:text-white mb-4"
-            gutterBottom
-          >
-            {t('terms.title')}
-          </Typography>
-          <Typography 
-            variant="h6" 
-            className="text-gray-600 dark:text-gray-300 mb-4 max-w-3xl mx-auto"
-          >
-            {t('terms.subtitle')}
-          </Typography>
-          <Box className="flex flex-wrap justify-center gap-3 mb-4">
-            <Chip 
-              label={t('terms.lastUpdated', { date: currentDate })}
-              variant="outlined"
-              className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-            />
-            <Chip 
-              label={t('terms.effectiveDate', { date: effectiveDate })}
-              variant="outlined"
-              className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
-            />
-          </Box>
-        </Box>
-
-        <Divider className="mb-8" />
-
-        {/* Control Buttons */}
-        <Box className="flex justify-center gap-4 mb-6">
-          <Button
-            variant="outlined"
-            onClick={expandAllSections}
-            className="border-blue-500 text-blue-600 hover:bg-blue-50"
-          >
-            {i18n.language === 'zh' ? '展开全部' : 'Expand All'}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={collapseAllSections}
-            className="border-gray-500 text-gray-600 hover:bg-gray-50"
-          >
-            {i18n.language === 'zh' ? '收起全部' : 'Collapse All'}
-          </Button>
-        </Box>
-
+    <div className="max-w-7xl mx-auto p-6 bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Table of Contents */}
-        <Paper 
-          elevation={1} 
-          className="p-6 mb-8 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg"
-        >
-          <Typography 
-            variant="h5" 
-            className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center"
-          >
-            <ArticleIcon className="mr-2" />
-            {i18n.language === 'zh' ? '目录' : 'Table of Contents'}
-          </Typography>
-          <List className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {sections.map((section, index) => (
-              <ListItem
-                key={section.id}
-                button
-                onClick={() => handleTableOfContentsClick(section.id)}
-                className={`hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors cursor-pointer ${
-                  expandedSections.includes(section.id) 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
-                    : ''
-                }`}
-              >
-                <ListItemIcon className="min-w-0 mr-3">
-                  <Box className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                    expandedSections.includes(section.id)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                  }`}>
-                    {index + 1}
-                  </Box>
-                </ListItemIcon>
-                <ListItemText
-                  primary={t(`terms.sections.${section.id}.title`)}
-                  className={`${
-                    expandedSections.includes(section.id)
-                      ? 'text-blue-700 dark:text-blue-300 font-medium'
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-
-        {/* Terms Sections */}
-        <Box className="space-y-4">
-          {sections.map((section, index) => (
-            <Accordion
-              key={section.id}
-              ref={(el) => (sectionRefs.current[section.id] = el)}
-              expanded={expandedSections.includes(section.id)}
-              onChange={() => handleSectionToggle(section.id)}
-              className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm"
-              elevation={0}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon className="text-gray-600 dark:text-gray-300" />}
-                className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-              >
-                <Box className="flex items-center">
-                  <Box className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-lg font-bold mr-4">
-                    {index + 1}
-                  </Box>
-                  <Typography 
-                    variant="h6" 
-                    className="font-semibold text-gray-900 dark:text-white"
+        <div className="lg:col-span-1 hidden lg:block">
+          <div className="sticky top-6 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Table of Contents</h3>
+            <ul className="space-y-2 pl-0 list-none">
+              {tableOfContents.map((item, index) => (
+                <li key={item.id} className="cursor-pointer list-none">
+                  <div
+                    onClick={() => scrollToSection(item.id)}
+                    className="text-gray-700 hover:text-blue-600 transition-colors text-left block w-full"
                   >
-                    {t(`terms.sections.${section.id}.title`)}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails className="border-t border-gray-200 dark:border-gray-600">
-                <Box className="p-4">
-                  {section.id === 'eligibility' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.eligibility.age')}
-                        icon={<PersonIcon className="text-blue-600 dark:text-blue-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.eligibility.verification')}
-                        icon={<SecurityIcon className="text-green-600 dark:text-green-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.eligibility.compliance')}
-                        icon={<GavelIcon className="text-orange-600 dark:text-orange-400" />}
-                      />
-                    </Box>
-                  ) : section.id === 'accounts' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.accounts.responsibility')}
-                        icon={<SecurityIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.accounts.accuracy')}
-                        icon={<CheckIcon className="text-green-600 dark:text-green-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.accounts.notification')}
-                        icon={<WarningIcon className="text-orange-600 dark:text-orange-400" />}
-                      />
-                    </Box>
-                  ) : section.id === 'conduct' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.conduct.illegal')}
-                        icon={<WarningIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.conduct.fraud')}
-                        icon={<WarningIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.conduct.interference')}
-                        icon={<WarningIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.conduct.violation')}
-                        icon={<WarningIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                    </Box>
-                  ) : section.id === 'payments' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.payments.escrow')}
-                        icon={<SecurityIcon className="text-green-600 dark:text-green-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.payments.fees')}
-                        icon={<PaymentIcon className="text-blue-600 dark:text-blue-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.payments.disputes')}
-                        icon={<GavelIcon className="text-orange-600 dark:text-orange-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.payments.refunds')}
-                        icon={<CheckIcon className="text-purple-600 dark:text-purple-400" />}
-                      />
-                    </Box>
-                  ) : section.id === 'liability' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.liability.disclaimer')}
-                        icon={<WarningIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.liability.maximum')}
-                        icon={<PaymentIcon className="text-blue-600 dark:text-blue-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.liability.exclusion')}
-                        icon={<GavelIcon className="text-gray-600 dark:text-gray-400" />}
-                      />
-                    </Box>
-                  ) : section.id === 'termination' ? (
-                    <Box className="space-y-4">
-                      <TermsItem
-                        content={t('terms.sections.termination.user')}
-                        icon={<PersonIcon className="text-blue-600 dark:text-blue-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.termination.platform')}
-                        icon={<WarningIcon className="text-orange-600 dark:text-orange-400" />}
-                      />
-                      <TermsItem
-                        content={t('terms.sections.termination.effect')}
-                        icon={<ScheduleIcon className="text-red-600 dark:text-red-400" />}
-                      />
-                    </Box>
-                  ) : (
-                    <Typography 
-                      variant="body1" 
-                      className="text-gray-700 dark:text-gray-300 leading-relaxed"
-                    >
-                      {t(`terms.sections.${section.id}.content`)}
-                    </Typography>
-                  )}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
+                    {index + 1}. {item.title}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-        {/* Footer */}
-        <Box className="mt-12 text-center">
-          <Paper 
-            elevation={1} 
-            className="p-6 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border border-blue-200 dark:border-blue-700 rounded-lg"
-          >
-            <Typography 
-              variant="h6" 
-              className="font-semibold text-gray-900 dark:text-white mb-2"
-            >
-              📄 {i18n.language === 'zh' ? '重要法律文件' : 'Important Legal Document'}
-            </Typography>
-            <Typography 
-              variant="body2" 
-              className="text-gray-600 dark:text-gray-300 mb-4"
-            >
-              {i18n.language === 'zh' 
-                ? '这些条款构成您与NetworkingApp之间具有法律约束力的协议。使用我们的服务即表示您同意这些条款。'
-                : 'These terms constitute a legally binding agreement between you and NetworkingApp. By using our services, you agree to these terms.'
-              }
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              {i18n.language === 'zh' ? '返回顶部' : 'Back to Top'}
-            </Button>
-          </Paper>
-        </Box>
-      </Paper>
-    </Container>
-  );
-};
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Terms of Service</h1>
+            <p className="text-gray-600">Last updated: {lastUpdated}</p>
+          </div>
 
-// Helper component for individual terms items
-interface TermsItemProps {
-  content: string;
-  icon: React.ReactElement;
-}
+          <div className="prose prose-lg max-w-none">
+            <section className="mb-8" id="acceptance">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
+              <p className="text-gray-700 mb-4">
+                By accessing and using WingCompanion ("Service", "Platform", "we", "us", or "our"), 
+                you accept and agree to be bound by the terms and provision of this agreement.
+              </p>
+              <p className="text-gray-700">
+                If you do not agree to abide by the above, please do not use this service. These Terms of Service, 
+                together with our Privacy Policy, constitute the entire agreement between you and our Platform.
+              </p>
+            </section>
 
-const TermsItem: React.FC<TermsItemProps> = ({ content, icon }) => {
-  return (
-    <Box className="flex items-start space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-      <Box className="flex-shrink-0 mt-1">
-        {icon}
-      </Box>
-      <Typography 
-        variant="body2" 
-        className="text-gray-700 dark:text-gray-300 leading-relaxed"
-      >
-        {content}
-      </Typography>
-    </Box>
+            <section className="mb-8" id="description">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Service Description</h2>
+              <p className="text-gray-700 mb-4">
+                WingCompanion provides a comprehensive travel companion service that includes:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Flight companion matching for solo travelers</li>
+                <li>Airport pickup and drop-off services</li>
+                <li>Emergency assistance and safety features</li>
+                <li>Secure payment processing and escrow services</li>
+                <li>User verification and safety screening</li>
+                <li>Real-time communication and location sharing</li>
+              </ul>
+              <p className="text-gray-700">
+                The Platform serves as an intermediary connecting travelers with compatible companions and service providers, 
+                facilitating safe and reliable travel experiences.
+              </p>
+            </section>
+
+            <section className="mb-8" id="eligibility">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. User Eligibility</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.1 Age Requirements</h3>
+              <p className="text-gray-700 mb-4">
+                You must be at least 18 years old to use our Service. Users under 18 may use the Service only 
+                with the involvement and consent of a parent or guardian.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.2 Identity Verification</h3>
+              <p className="text-gray-700 mb-4">
+                All users must complete our identity verification process, which includes:
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Government-issued photo identification</li>
+                <li>Phone number verification</li>
+                <li>Email address confirmation</li>
+                <li>Background check (where legally permitted)</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">3.3 Legal Compliance</h3>
+              <p className="text-gray-700">
+                You must comply with all applicable local, state, national, and international laws and regulations 
+                while using our Service.
+              </p>
+            </section>
+
+            <section className="mb-8" id="accounts">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. User Accounts and Registration</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.1 Account Creation</h3>
+              <p className="text-gray-700 mb-4">
+                To access our Service, you must create an account by providing accurate and complete information. 
+                You are responsible for safeguarding your account credentials and for all activities that occur under your account.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.2 Account Responsibilities</h3>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Maintain accurate and up-to-date profile information</li>
+                <li>Use a secure password and enable two-factor authentication when available</li>
+                <li>Immediately notify us of any unauthorized use of your account</li>
+                <li>Accept responsibility for all activities under your account</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">4.3 Account Suspension</h3>
+              <p className="text-gray-700">
+                We reserve the right to suspend or terminate accounts that violate these Terms of Service, 
+                engage in fraudulent activity, or pose a safety risk to other users.
+              </p>
+            </section>
+
+            <section className="mb-8" id="conduct">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. User Conduct and Responsibilities</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">5.1 Prohibited Activities</h3>
+              <p className="text-gray-700 mb-4">You agree not to:</p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Use the Service for any illegal or unauthorized purpose</li>
+                <li>Harass, threaten, or discriminate against other users</li>
+                <li>Share false, misleading, or fraudulent information</li>
+                <li>Engage in any activity that compromises platform security</li>
+                <li>Use the platform for commercial purposes without authorization</li>
+                <li>Attempt to circumvent our safety measures or verification processes</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">5.2 Safety Guidelines</h3>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Always meet in public places when possible</li>
+                <li>Inform friends or family about your travel plans</li>
+                <li>Trust your instincts and report suspicious behavior</li>
+                <li>Use the platform's communication tools for initial contact</li>
+                <li>Verify companion identity before meeting</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="payments">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Payment Terms and Conditions</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.1 Payment Processing</h3>
+              <p className="text-gray-700 mb-4">
+                All payments are processed securely through our third-party payment processor (Stripe). 
+                We use an escrow system to ensure safe transactions between users.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.2 Service Fees</h3>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>Platform service fee: 5% of transaction value</li>
+                <li>Payment processing fee: As determined by payment processor</li>
+                <li>Emergency service fee: Fixed rate per incident</li>
+              </ul>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">6.3 Refund Policy</h3>
+              <p className="text-gray-700">
+                Refunds are processed according to our refund policy and may vary based on the timing of cancellation 
+                and circumstances. Emergency cancellations may be eligible for full refunds.
+              </p>
+            </section>
+
+            <section className="mb-8" id="liability">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Limitation of Liability</h2>
+              <p className="text-gray-700 mb-4">
+                While we strive to provide a safe and reliable platform, we cannot guarantee the conduct of users 
+                or the quality of services provided. Our liability is limited to the maximum extent permitted by law.
+              </p>
+              <ul className="list-disc pl-6 mb-4 text-gray-700">
+                <li>We are not liable for the actions or omissions of platform users</li>
+                <li>We do not guarantee the safety or quality of transportation services</li>
+                <li>Our maximum liability shall not exceed the fees paid by you in the 12 months preceding the claim</li>
+                <li>We are not responsible for indirect, incidental, or consequential damages</li>
+              </ul>
+            </section>
+
+            <section className="mb-8" id="privacy">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Privacy and Data Protection</h2>
+              <p className="text-gray-700 mb-4">
+                Your privacy is important to us. Our collection, use, and protection of your personal information 
+                is governed by our Privacy Policy, which is incorporated into these Terms by reference.
+              </p>
+              <p className="text-gray-700">
+                By using our Service, you consent to the collection and use of your information as outlined 
+                in our Privacy Policy.
+              </p>
+            </section>
+
+            <section className="mb-8" id="termination">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Termination of Service</h2>
+              
+              <h3 className="text-xl font-medium text-gray-800 mb-3">9.1 Termination by User</h3>
+              <p className="text-gray-700 mb-4">
+                You may terminate your account at any time by contacting our customer support team. 
+                Upon termination, your access to the Service will be immediately suspended.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">9.2 Termination by Platform</h3>
+              <p className="text-gray-700">
+                We may terminate or suspend your account immediately, without prior notice or liability, 
+                for any reason whatsoever, including without limitation if you breach the Terms.
+              </p>
+            </section>
+
+            <section className="mb-8" id="changes">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Modifications to Terms</h2>
+              <p className="text-gray-700 mb-4">
+                We reserve the right to modify or replace these Terms at any time. If a revision is material, 
+                we will try to provide at least 30 days' notice prior to any new terms taking effect.
+              </p>
+              <p className="text-gray-700">
+                Your continued use of the Service after any changes constitutes acceptance of the new Terms.
+              </p>
+            </section>
+
+            <section className="mb-8" id="governing">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">11. Governing Law</h2>
+              <p className="text-gray-700">
+                These Terms shall be interpreted and governed by the laws of New Zealand, without regard to its 
+                conflict of law provisions. Any disputes arising from these Terms shall be resolved in the 
+                courts of New Zealand.
+              </p>
+            </section>
+
+            <section className="mb-8" id="contact">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">12. Contact Information</h2>
+              <p className="text-gray-700 mb-4">
+                If you have any questions about these Terms of Service, please contact us:
+              </p>
+              <ul className="list-disc pl-6 text-gray-700">
+                <li>Email: legal@wingcompanion.com</li>
+                <li>Phone: +64 9 123 4567</li>
+                <li>Address: 123 Queen Street, Auckland, New Zealand</li>
+                <li>Support Portal: Available 24/7 through our mobile app</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -16,7 +16,7 @@ param resourceToken string
 param environmentName string = 'dev'
 
 @description('Email address for alert notifications.')
-param alertEmailAddress string = 'admin@networkingapp.com'
+param alertEmailAddress string = 'admin@wingcompanion.com'
 
 @description('Application Insights sampling percentage (0-100).')
 param samplingPercentage int = 100

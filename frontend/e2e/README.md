@@ -1,6 +1,6 @@
 # Playwright E2E Tests for NetworkingApp
 
-This directory contains end-to-end tests for the Flight Companion & Airport Pickup Platform using Playwright with TypeScript.
+This directory contains end-to-end tests for WingCompanion using Playwright with TypeScript.
 
 ## Test Structure
 

@@ -1,7 +1,7 @@
 # Azure SQL Database Configuration Guide
 
 ## 📋 Overview
-This document provides comprehensive guidance for configuring Azure SQL Database for the Flight Companion Platform with proper DTU sizing and backup retention policies across development, test, and production environments.
+This document provides comprehensive guidance for configuring Azure SQL Database for WingCompanion with proper DTU sizing and backup retention policies across development, test, and production environments.
 
 ## 🏗️ Database Architecture
 

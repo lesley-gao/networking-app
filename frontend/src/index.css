@@ -2,14 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font Face Declaration */
+@font-face {
+  font-family: 'CallunaSans';
+  src: url('./assets/fonts/CallunaSans-Light.otf') format('opentype'),
+       url('/assets/fonts/CallunaSans-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom CSS for smooth transitions and modern styling */
 * {
   box-sizing: border-box;
 }
 
+/* Apply font to all elements since Tailwind preflight is disabled */
+html, body, * {
+  font-family: 'CallunaSans', 'Roboto', 'Helvetica', 'Arial', sans-serif !important;
+}
+
 body {
   margin: 0;
-  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'CallunaSans', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Enable momentum scrolling on iOS */
@@ -18,6 +33,11 @@ body {
 
 /* Responsive utilities */
 @layer base {
+  /* Apply CallunaSans font to all elements */
+  html, body, * {
+    font-family: 'CallunaSans', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  }
+  
   /* Safe area support for mobile devices */
   html {
     padding-top: env(safe-area-inset-top);

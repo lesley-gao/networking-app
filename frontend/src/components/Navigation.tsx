@@ -51,7 +51,7 @@ const getDefaultItems = (): NavigationItem[] => [
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
-  title = "NetworkingApp",
+  title = "WingCompanion",
   items,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);

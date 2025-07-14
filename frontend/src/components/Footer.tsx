@@ -26,7 +26,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({
-  companyName = "NetworkingApp"
+  companyName = "WingCompanion"
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -55,7 +55,7 @@ export const Footer: React.FC<FooterProps> = ({
         { textKey: 'termsOfService', path: '/terms-of-service' },
         { textKey: 'privacyPolicy', path: '/privacy-policy' },
         { textKey: 'communityGuidelines', path: '/community-guidelines' },
-        { textKey: 'cookiePolicy', path: '/cookies' },
+        { textKey: 'cookiePolicy', path: '/cookie-policy' },
       ]
     }
   ];
@@ -97,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <Box className="flex items-center space-x-2">
                   <EmailIcon className="text-gray-500 dark:text-gray-400 w-4 h-4" />
                   <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
-                    support@networkingapp.com
+                    support@wingcompanion.com
                   </Typography>
                 </Box>
                 <Box className="flex items-center space-x-2">

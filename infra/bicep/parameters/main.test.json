@@ -15,7 +15,7 @@
       "value": "NetworkingApp Test Team"
     },
     "ownerEmail": {
-      "value": "test-team@networkingapp.com"
+      "value": "test-team@wingcompanion.com"
     },
     "enableDeploymentSlots": {
       "value": true
@@ -56,7 +56,7 @@
       "value": true
     },
     "alertEmailAddress": {
-      "value": "test-alerts@networkingapp.com"
+      "value": "test-alerts@wingcompanion.com"
     },
     "alertingEnvironment": {
       "value": "testing"

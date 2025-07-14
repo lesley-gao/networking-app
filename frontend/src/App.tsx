@@ -18,10 +18,12 @@ import Pickup from './components/Pickup';
 import UserProfile from './components/UserProfile';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
-import { FetchData } from './components/FetchData';
+import { FetchData } from './components/FetchData';  
 import SignalRTest from './components/SignalRTest';
 
 // App Content Component (needs access to Redux state)
@@ -56,6 +58,8 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/community-guidelines" element={<CommunityGuidelines />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

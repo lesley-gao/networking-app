@@ -1,6 +1,6 @@
-# NetworkingApp - Flight Companion & Airport Pickup Platform
+# WingCompanion - Travel Companion & Airport Pickup Platform
 
-A community-focused networking platform designed for Chinese professionals in Auckland, New Zealand, facilitating flight companion matching and airport pickup services.
+A community-focused networking platform designed for Chinese professionals in Auckland, New Zealand, facilitating travel companion matching and airport pickup services.
 
 ## 🚀 Quick Start
 
@@ -15,7 +15,7 @@ A community-focused networking platform designed for Chinese professionals in Au
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd NetworkingApp
+   cd WingCompanion
    ```
 
 2. **Setup backend**
@@ -89,7 +89,7 @@ For detailed deployment instructions, see [Infrastructure Documentation](./infra
 ## 📁 Project Structure
 
 ```
-NetworkingApp/
+WingCompanion/
 ├── 📁 backend/                   # .NET 8 Web API
 │   ├── 📁 Controllers/           # Web API controllers
 │   ├── 📁 Data/                  # Database context and migrations
@@ -107,8 +107,8 @@ NetworkingApp/
 │   ├── 📁 bin/                   # Build output
 │   ├── 📁 obj/                   # Build intermediates
 │   ├── 📄 Program.cs             # Application entry point
-│   ├── 📄 NetworkingApp.csproj   # .NET project file
-│   ├── 📄 NetworkingApp.sln      # Solution file
+│   ├── 📄 WingCompanion.csproj   # .NET project file
+│   ├── 📄 WingCompanion.sln      # Solution file
 │   ├── 📄 appsettings.json       # App configuration
 │   ├── 📄 appsettings.Development.json # Development config
 │   ├── 📄 coverlet.runsettings   # Code coverage configuration

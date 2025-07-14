@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive guidance for database migration scripts, production deployment, and data seeding for the Flight Companion Platform. The migration infrastructure ensures reliable, secure, and automated database deployments across development, testing, and production environments.
+This document provides comprehensive guidance for database migration scripts, production deployment, and data seeding for WingCompanion. The migration infrastructure ensures reliable, secure, and automated database deployments across development, testing, and production environments.
 
 ## Architecture
 

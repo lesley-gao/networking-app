@@ -15,7 +15,7 @@
       "value": "NetworkingApp Dev Team"
     },
     "ownerEmail": {
-      "value": "dev-team@networkingapp.com"
+      "value": "dev-team@wingcompanion.com"
     },
     "enableDeploymentSlots": {
       "value": true
@@ -92,7 +92,7 @@
       "value": true
     },
     "alertEmailAddress": {
-      "value": "dev-alerts@networkingapp.com"
+      "value": "dev-alerts@wingcompanion.com"
     },
     "alertingEnvironment": {
       "value": "development"

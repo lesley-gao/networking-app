@@ -1,7 +1,7 @@
 # Application Insights Implementation Summary
 
 ## Overview
-Completed comprehensive Application Insights configuration for the Flight Companion & Pickup Platform, providing enterprise-grade monitoring, logging, and performance tracking capabilities.
+Completed comprehensive Application Insights configuration for WingCompanion, providing enterprise-grade monitoring, logging, and performance tracking capabilities.
 
 ## Implementation Details
 

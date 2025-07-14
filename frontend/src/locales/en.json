@@ -12,6 +12,7 @@
   "theme": "Theme",
   "search": "Search",
   "flightCompanion": "Flight Companion",
+  "appName": "WingCompanion",
   "pickupService": "Pickup Service",
   "submit": "Submit",
   "cancel": "Cancel",
@@ -39,7 +40,7 @@
     "sections": {
       "overview": {
         "title": "Our Community",
-        "content": "NetworkingApp connects travelers to create safer, more enjoyable journeys. Our community guidelines ensure that everyone can participate with confidence, knowing they're part of a respectful and trustworthy platform."
+        "content": "WingCompanion connects travelers to create safer, more enjoyable journeys. Our community guidelines ensure that everyone can participate with confidence, knowing they're part of a respectful and trustworthy platform."
       },
       "conduct": {
         "title": "Expected Conduct",
@@ -205,17 +206,17 @@
   },
   "terms": {
     "title": "Terms of Service",
-    "subtitle": "Legal agreement for using the NetworkingApp platform",
+    "subtitle": "Legal agreement for using the WingCompanion platform",
     "lastUpdated": "Last updated: {{date}}",
     "effectiveDate": "Effective date: {{date}}",
     "sections": {
       "acceptance": {
         "title": "1. Acceptance of Terms",
-        "content": "By accessing and using NetworkingApp, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our services."
+        "content": "By accessing and using WingCompanion, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our services."
       },
       "description": {
         "title": "2. Service Description",
-        "content": "NetworkingApp is a platform that connects Chinese professionals in Auckland for flight companionship and airport pickup services. We facilitate connections between users but are not a party to the actual service agreements."
+        "content": "WingCompanion is a platform that connects Chinese professionals in Auckland for flight companionship and airport pickup services. We facilitate connections between users but are not a party to the actual service agreements."
       },
       "eligibility": {
         "title": "3. User Eligibility",
@@ -245,7 +246,7 @@
       },
       "liability": {
         "title": "7. Limitation of Liability",
-        "disclaimer": "NetworkingApp is not liable for the quality, safety, or legality of services provided by users",
+        "disclaimer": "WingCompanion is not liable for the quality, safety, or legality of services provided by users",
         "maximum": "Our maximum liability is limited to the amount of fees paid by you",
         "exclusion": "We exclude liability for indirect, consequential, or punitive damages"
       },

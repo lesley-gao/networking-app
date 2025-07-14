@@ -1,7 +1,7 @@
 # ASP.NET Core Identity Configuration
 
 ## Overview
-This document describes the configuration and implementation of ASP.NET Core Identity for the Flight Companion & Airport Pickup Platform.
+This document describes the configuration and implementation of ASP.NET Core Identity for WingCompanion.
 
 ## Key Features
 - Strongly-typed User model extending `IdentityUser<int>`

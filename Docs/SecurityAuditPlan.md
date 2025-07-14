@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive security audit and penetration testing plan for the Flight Companion Platform, designed to be executed in collaboration with a third-party security firm to ensure enterprise-grade security before production launch.
+This document outlines the comprehensive security audit and penetration testing plan for WingCompanion, designed to be executed in collaboration with a third-party security firm to ensure enterprise-grade security before production launch.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This document outlines the comprehensive security audit and penetration testing 
 
 ## Executive Summary
 
-The Flight Companion Platform handles sensitive user data, payment transactions, and personal communications, making comprehensive security testing critical before production deployment. This security audit encompasses application security, infrastructure security, data protection, and compliance validation.
+WingCompanion handles sensitive user data, payment transactions, and personal communications, making comprehensive security testing critical before production deployment. This security audit encompasses application security, infrastructure security, data protection, and compliance validation.
 
 ### Key Security Concerns
 - Payment processing and escrow system security

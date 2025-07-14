@@ -1,9 +1,9 @@
 ---
-title: Flight Companion & Airport Pickup Platform Design Specification
+title: WingCompanion Design Specification
 version: 1.0
 date_created: 2025-07-07
 last_updated: 2025-07-07
-owner: NetworkingApp Development Team
+owner: WingCompanion Development Team
 tags: [design, app, networking, travel, community, platform]
 ---
 

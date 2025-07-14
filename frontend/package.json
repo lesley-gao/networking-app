@@ -1,5 +1,5 @@
 {
-  "name": "networkingapp",
+  "name": "wingcompanion",
   "version": "0.1.0",
   "private": true,
   "proxy": "https://localhost:5001",

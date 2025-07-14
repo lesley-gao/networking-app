@@ -31,7 +31,7 @@ param actionGroupId string
 param enableAlerts bool = true
 
 @description('Email address for critical alert notifications.')
-param criticalAlertEmail string = 'admin@networkingapp.com'
+param criticalAlertEmail string = 'admin@wingcompanion.com'
 
 @description('Application name for alert naming and identification.')
 param applicationName string = 'NetworkingApp'

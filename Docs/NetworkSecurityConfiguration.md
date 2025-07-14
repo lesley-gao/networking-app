@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive guidance on implementing and managing network security for the Flight Companion Platform using Azure Network Security Groups (NSGs) and Application Gateway with Web Application Firewall (WAF).
+This document provides comprehensive guidance on implementing and managing network security for WingCompanion using Azure Network Security Groups (NSGs) and Application Gateway with Web Application Firewall (WAF).
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This document provides comprehensive guidance on implementing and managing netwo
 
 ## Architecture Overview
 
-The Flight Companion Platform implements a multi-tier security architecture with the following components:
+WingCompanion implements a multi-tier security architecture with the following components:
 
 ```
 Internet → Application Gateway (WAF) → App Service → SQL Database
@@ -496,7 +496,7 @@ Keep documentation current with:
 
 ## Conclusion
 
-The network security implementation provides comprehensive protection for the Flight Companion Platform through:
+The network security implementation provides comprehensive protection for WingCompanion through:
 
 - Multi-layered security architecture
 - Automated deployment and validation

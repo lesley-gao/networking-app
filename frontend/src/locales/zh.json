@@ -12,6 +12,7 @@
   "theme": "主题",
   "search": "搜索",
   "flightCompanion": "结伴飞行",
+  "appName": "翼伴",
   "pickupService": "接送服务",
   "submit": "提交",
   "cancel": "取消",
@@ -39,7 +40,7 @@
     "sections": {
       "overview": {
         "title": "我们的社区",
-        "content": "NetworkingApp连接旅行者，创造更安全、更愉快的旅程。我们的社区指南确保每个人都能充满信心地参与，知道他们是一个尊重和值得信赖的平台的一部分。"
+        "content": "翼伴连接旅行者，创造更安全、更愉快的旅程。我们的社区指南确保每个人都能充满信心地参与，知道他们是一个尊重和值得信赖的平台的一部分。"
       },
       "conduct": {
         "title": "行为准则",
@@ -205,17 +206,17 @@
   },
   "terms": {
     "title": "服务条款",
-    "subtitle": "使用NetworkingApp平台的法律协议",
+    "subtitle": "使用翼伴平台的法律协议",
     "lastUpdated": "最后更新: {{date}}",
     "effectiveDate": "生效日期: {{date}}",
     "sections": {
       "acceptance": {
         "title": "1. 条款接受",
-        "content": "通过访问和使用NetworkingApp，您接受并同意受这些服务条款的约束。如果您不同意这些条款，您不得使用我们的服务。"
+        "content": "通过访问和使用翼伴，您接受并同意受这些服务条款的约束。如果您不同意这些条款，您不得使用我们的服务。"
       },
       "description": {
         "title": "2. 服务描述",
-        "content": "NetworkingApp是一个为奥克兰的华人专业人士提供结伴飞行和机场接送服务连接的平台。我们促进用户之间的连接，但不是实际服务协议的当事方。"
+        "content": "翼伴是一个为奥克兰的华人专业人士提供结伴飞行和机场接送服务连接的平台。我们促进用户之间的连接，但不是实际服务协议的当事方。"
       },
       "eligibility": {
         "title": "3. 用户资格",
@@ -245,7 +246,7 @@
       },
       "liability": {
         "title": "7. 责任限制",
-        "disclaimer": "NetworkingApp不对用户提供的服务质量、安全性或合法性承担责任",
+        "disclaimer": "翼伴不对用户提供的服务质量、安全性或合法性承担责任",
         "maximum": "我们的最大责任限于您支付的费用金额",
         "exclusion": "我们排除对间接、后果性或惩罚性损害的责任"
       },

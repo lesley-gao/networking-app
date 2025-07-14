@@ -335,9 +335,9 @@ The following PowerShell scripts are available for Key Vault management:
 
 ### Support Contacts
 
-- **Development Team**: dev-team@networkingapp.com
-- **Infrastructure Team**: infra-team@networkingapp.com
-- **Security Team**: security-team@networkingapp.com
+- **Development Team**: dev-team@wingcompanion.com
+- **Infrastructure Team**: infra-team@wingcompanion.com
+- **Security Team**: security-team@wingcompanion.com
 
 ### Additional Resources
 

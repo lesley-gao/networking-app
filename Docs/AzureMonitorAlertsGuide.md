@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive guidance for configuring and managing Azure Monitor alerts for the Flight Companion & Airport Pickup Platform. The alerting system provides proactive monitoring for application health, database performance, and error rates across development, testing, and production environments.
+This document provides comprehensive guidance for configuring and managing Azure Monitor alerts for WingCompanion. The alerting system provides proactive monitoring for application health, database performance, and error rates across development, testing, and production environments.
 
 ## Table of Contents
 
@@ -206,7 +206,7 @@ az monitor metrics alert list \
 .\Scripts\Setup-AzureMonitorAlerts.ps1 \
   -Environment "dev" \
   -ResourceGroupName "rg-netapp-dev" \
-  -AlertEmailAddress "dev-alerts@networkingapp.com" \
+  -AlertEmailAddress "dev-alerts@wingcompanion.com" \
   -EnableAlerts $true
 ```
 
@@ -464,7 +464,7 @@ AlertsManagementResources
 
 ## Conclusion
 
-This comprehensive Azure Monitor alerts system provides robust monitoring capabilities for the Flight Companion Platform. Regular maintenance, testing, and optimization ensure the alerts remain effective and actionable.
+This comprehensive Azure Monitor alerts system provides robust monitoring capabilities for WingCompanion. Regular maintenance, testing, and optimization ensure the alerts remain effective and actionable.
 
 For additional support or questions, contact the DevOps team or refer to the Azure Monitor documentation.
 
