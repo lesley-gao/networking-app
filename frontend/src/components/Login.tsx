@@ -54,7 +54,7 @@ const Login: React.FC = () => {
           {apiError}
         </Alert>
       </Snackbar>
-      <Box maxWidth={400} mx="auto" mt={6} p={3} boxShadow={2} borderRadius={2} bgcolor="background.paper">
+      <Box maxWidth={400} mx="auto" my={20} p={3} boxShadow={2} borderRadius={2} bgcolor="background.paper">
         <Typography variant="h5" mb={2}>Login</Typography>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <TextField

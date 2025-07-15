@@ -13,6 +13,7 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  Grid,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { loginUser } from "../store/slices/authSlice";
@@ -132,10 +133,11 @@ const Register: React.FC = () => {
           {apiError}
         </Alert>
       </Snackbar>
+      
       <Box
-        maxWidth={400}
+        maxWidth={800}
         mx="auto"
-        mt={6}
+        my={6}
         p={3}
         boxShadow={2}
         borderRadius={2}
@@ -149,164 +151,176 @@ const Register: React.FC = () => {
             {t(error)}
           </Typography>
         )}
+
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <TextField
-            label={t("firstName") + " *"}
-            fullWidth
-            margin="normal"
-            placeholder="Maximum 50 characters"
-            {...register("firstName")}
-            error={!!errors.firstName}
-            FormHelperTextProps={{
-              sx: { color: errors.firstName ? "error.main" : "info.main" },
-            }}
-            helperText={errors.firstName?.message || "Maximum 50 characters"}
-          />
-          <TextField
-            label={t("lastName") + " *"}
-            fullWidth
-            margin="normal"
-            placeholder="Maximum 50 characters"
-            {...register("lastName")}
-            error={!!errors.lastName}
-            FormHelperTextProps={{
-              sx: { color: errors.lastName ? "error.main" : "info.main" },
-            }}
-            helperText={errors.lastName?.message || "Maximum 50 characters"}
-          />
-          <TextField
-            label={t("email") + " *"}
-            fullWidth
-            margin="normal"
-            placeholder="Enter a valid email address"
-            {...register("email")}
-            error={!!errors.email}
-            FormHelperTextProps={{
-              sx: { color: errors.email ? "error.main" : "info.main" },
-            }}
-            helperText={errors.email?.message || "Enter a valid email address"}
-          />
-          <TextField
-            label={t("password") + " *"}
-            type="password"
-            fullWidth
-            margin="normal"
-            placeholder="Minimum 6 characters, must include letters and at least one number or symbol"
-            {...register("password")}
-            error={!!errors.password}
-            FormHelperTextProps={{
-              sx: { color: errors.password ? "error.main" : "info.main" },
-            }}
-            helperText={
-              errors.password?.message ||
-              "Minimum 6 characters, must include letters and at least one number or symbol"
-            }
-          />
-          <TextField
-            label={t("confirmPassword") + " *"}
-            type="password"
-            fullWidth
-            margin="normal"
-            placeholder="Re-enter your password"
-            {...register("confirmPassword")}
-            error={!!errors.confirmPassword}
-            FormHelperTextProps={{
-              sx: {
-                color: errors.confirmPassword ? "error.main" : "info.main",
-              },
-            }}
-            helperText={
-              errors.confirmPassword?.message || "Re-enter your password"
-            }
-          />
-          <TextField
-            label={t("phoneNumber") + " (" + t("optional", "optional") + ")"}
-            fullWidth
-            margin="normal"
-            placeholder="Optional. Enter a valid phone number"
-            {...register("phoneNumber")}
-            error={!!errors.phoneNumber}
-            FormHelperTextProps={{
-              sx: { color: errors.phoneNumber ? "error.main" : "info.main" },
-            }}
-            helperText={
-              errors.phoneNumber?.message ||
-              "Optional. Enter a valid phone number"
-            }
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="preferred-language-label">
-              Preferred Language (optional)
-            </InputLabel>
-            <Select
-              labelId="preferred-language-label"
-              id="preferredLanguage"
-              defaultValue=""
-              {...register("preferredLanguage")}
-              label="Preferred Language (optional)"
-              sx={{ textAlign: "left" }}
-              error={!!errors.preferredLanguage}
-            >
-              <MenuItem value="">None</MenuItem>
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="Chinese">Chinese</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label={
-              t("emergencyContact") + " (" + t("optional", "optional") + ")"
-            }
-            fullWidth
-            margin="normal"
-            placeholder="Optional. Maximum 100 characters"
-            {...register("emergencyContact")}
-            error={!!errors.emergencyContact}
-            FormHelperTextProps={{
-              sx: {
-                color: errors.emergencyContact ? "error.main" : "info.main",
-              },
-            }}
-            helperText={
-              errors.emergencyContact?.message ||
-              "Optional. Maximum 100 characters"
-            }
-          />
-          <TextField
-            label={t("emergencyPhone") + " (" + t("optional", "optional") + ")"}
-            fullWidth
-            margin="normal"
-            placeholder="Optional. Enter a valid phone number"
-            {...register("emergencyPhone")}
-            error={!!errors.emergencyPhone}
-            FormHelperTextProps={{
-              sx: { color: errors.emergencyPhone ? "error.main" : "info.main" },
-            }}
-            helperText={
-              errors.emergencyPhone?.message ||
-              "Optional. Enter a valid phone number"
-            }
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            disabled={isLoading}
-            sx={{ mt: 2 }}
-          >
-            {isLoading ? t("registering", "Registering...") : t("register")}
-          </Button>
-          {/* {apiError && (
-            <Typography
-              variant="h6"
-              color="error"
-              mt={3}
-              align="center"
-              sx={{ fontWeight: 600 }}
-            >
-              {apiError}
-            </Typography>
-          )} */}
+          <Grid container spacing={1}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("firstName") + " *"}
+                fullWidth
+                margin="normal"
+                placeholder="Maximum 50 characters"
+                {...register("firstName")}
+                error={!!errors.firstName}
+                FormHelperTextProps={{
+                  sx: { color: errors.firstName ? "error.main" : "info.main" },
+                }}
+                helperText={errors.firstName?.message || "Maximum 50 characters"}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("lastName") + " *"}
+                fullWidth
+                margin="normal"
+                placeholder="Maximum 50 characters"
+                {...register("lastName")}
+                error={!!errors.lastName}
+                FormHelperTextProps={{
+                  sx: { color: errors.lastName ? "error.main" : "info.main" },
+                }}
+                helperText={errors.lastName?.message || "Maximum 50 characters"}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label={t("email") + " *"}
+                fullWidth
+                margin="normal"
+                placeholder="Enter a valid email address"
+                {...register("email")}
+                error={!!errors.email}
+                FormHelperTextProps={{
+                  sx: { color: errors.email ? "error.main" : "info.main" },
+                }}
+                helperText={errors.email?.message || "Enter a valid email address"}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("password") + " *"}
+                type="password"
+                fullWidth
+                margin="normal"
+                placeholder="Minimum 6 characters, must include letters and at least one number or symbol"
+                {...register("password")}
+                error={!!errors.password}
+                FormHelperTextProps={{
+                  sx: { color: errors.password ? "error.main" : "info.main" },
+                }}
+                helperText={
+                  errors.password?.message ||
+                  "Minimum 6 characters, must include letters and at least one number or symbol"
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("confirmPassword") + " *"}
+                type="password"
+                fullWidth
+                margin="normal"
+                placeholder="Re-enter your password"
+                {...register("confirmPassword")}
+                error={!!errors.confirmPassword}
+                FormHelperTextProps={{
+                  sx: {
+                    color: errors.confirmPassword ? "error.main" : "info.main",
+                  },
+                }}
+                helperText={
+                  errors.confirmPassword?.message || "Re-enter your password"
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("phoneNumber") + " (" + t("optional", "optional") + ")"}
+                fullWidth
+                margin="normal"
+                placeholder="Optional. Enter a valid phone number"
+                {...register("phoneNumber")}
+                error={!!errors.phoneNumber}
+                FormHelperTextProps={{
+                  sx: { color: errors.phoneNumber ? "error.main" : "info.main" },
+                }}
+                helperText={
+                  errors.phoneNumber?.message ||
+                  "Optional. Enter a valid phone number"
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="preferred-language-label">
+                  Preferred Language (optional)
+                </InputLabel>
+                <Select
+                  labelId="preferred-language-label"
+                  id="preferredLanguage"
+                  defaultValue=""
+                  {...register("preferredLanguage")}
+                  label="Preferred Language (optional)"
+                  sx={{ textAlign: "left" }}
+                  error={!!errors.preferredLanguage}
+                >
+                  <MenuItem value="">None</MenuItem>
+                  <MenuItem value="English">English</MenuItem>
+                  <MenuItem value="Chinese">Chinese</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={
+                  t("emergencyContact") + " (" + t("optional", "optional") + ")"
+                }
+                fullWidth
+                margin="normal"
+                placeholder="Optional. Maximum 100 characters"
+                {...register("emergencyContact")}
+                error={!!errors.emergencyContact}
+                FormHelperTextProps={{
+                  sx: {
+                    color: errors.emergencyContact ? "error.main" : "info.main",
+                  },
+                }}
+                helperText={
+                  errors.emergencyContact?.message ||
+                  "Optional. Maximum 100 characters"
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label={t("emergencyPhone") + " (" + t("optional", "optional") + ")"}
+                fullWidth
+                margin="normal"
+                placeholder="Optional. Enter a valid phone number"
+                {...register("emergencyPhone")}
+                error={!!errors.emergencyPhone}
+                FormHelperTextProps={{
+                  sx: { color: errors.emergencyPhone ? "error.main" : "info.main" },
+                }}
+                helperText={
+                  errors.emergencyPhone?.message ||
+                  "Optional. Enter a valid phone number"
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={isLoading}
+                sx={{ mt: 2 }}
+              >
+                {isLoading ? t("registering", "Registering...") : t("register")}
+              </Button>
+            </Grid>
+          </Grid>
         </form>
       </Box>
     </>
