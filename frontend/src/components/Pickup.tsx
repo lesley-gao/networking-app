@@ -483,7 +483,7 @@ const Pickup: React.FC<PickupProps> = () => {
   return (
     <Container maxWidth="lg" className="py-8">
       {/* Header */}
-      <Paper elevation={0} className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-green-50">
+      <Paper elevation={0} className="mb-8 p-6">
         <Box className="text-center">
           <Typography variant="h3" component="h1" className="font-bold text-gray-900 mb-2">
             Airport Pickup Service

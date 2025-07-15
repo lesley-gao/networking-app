@@ -390,7 +390,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   return (
     <Container maxWidth="lg" className="py-8">
       {/* Header */}
-      <Paper elevation={0} className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900">
+      <Paper elevation={0} className="mb-8 p-6 ">
         <Box className="text-center">
           <Typography variant="h3" component="h1" className="font-bold text-gray-900 dark:text-gray-100 mb-2">
             Flight Companion Service

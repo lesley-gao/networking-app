@@ -118,9 +118,9 @@ export const Button: React.FC<ButtonProps> = ({
     if (variant === 'contained') {
       switch (color) {
         case 'primary':
-          return `${baseClasses} bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500`;
+          return `${baseClasses} bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-white focus:ring-[var(--color-primary)]`;
         case 'secondary':
-          return `${baseClasses} bg-pink-600 hover:bg-pink-700 text-white focus:ring-pink-500`;
+          return `${baseClasses} bg-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/80 text-[var(--color-primary)] focus:ring-[var(--color-secondary)]`;
         case 'success':
           return `${baseClasses} bg-green-600 hover:bg-green-700 text-white focus:ring-green-500`;
         case 'error':
@@ -135,9 +135,9 @@ export const Button: React.FC<ButtonProps> = ({
     } else if (variant === 'outlined') {
       switch (color) {
         case 'primary':
-          return `${baseClasses} border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:ring-blue-500`;
+          return `${baseClasses} border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 focus:ring-[var(--color-primary)]`;
         case 'secondary':
-          return `${baseClasses} border border-pink-600 text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 focus:ring-pink-500`;
+          return `${baseClasses} border border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/10 dark:hover:bg-[var(--color-secondary)]/20 focus:ring-[var(--color-secondary)]`;
         case 'success':
           return `${baseClasses} border border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 focus:ring-green-500`;
         case 'error':
@@ -152,9 +152,9 @@ export const Button: React.FC<ButtonProps> = ({
     } else { // text variant
       switch (color) {
         case 'primary':
-          return `${baseClasses} text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:ring-blue-500`;
+          return `${baseClasses} text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 focus:ring-[var(--color-primary)]`;
         case 'secondary':
-          return `${baseClasses} text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 focus:ring-pink-500`;
+          return `${baseClasses} text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/10 dark:hover:bg-[var(--color-secondary)]/20 focus:ring-[var(--color-secondary)]`;
         case 'success':
           return `${baseClasses} text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 focus:ring-green-500`;
         case 'error':

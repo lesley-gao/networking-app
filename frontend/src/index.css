@@ -57,30 +57,50 @@ body {
 /* Custom component classes with responsive patterns */
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-    @apply min-h-touch; /* Ensure touch-friendly size */
+    background: var(--color-primary);
+    color: white;
+    font-medium: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+    min-height: 2.5rem;
   }
-  
+  .btn-primary:hover {
+    background: #061e4a;
+  }
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-    @apply min-h-touch;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font-medium: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+    min-height: 2.5rem;
   }
-  
+  .btn-secondary:hover {
+    background: #6bb3c7;
+  }
   .card {
     @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 mb-4;
     @apply transition-shadow duration-300 hover:shadow-card-hover;
   }
-  
   .form-input {
-    @apply border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2;
-    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-    @apply bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
-    @apply min-h-touch; /* Touch-friendly input size */
+    border: 1px solid #ddd;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    background: white;
+    color: #222;
+    transition: border-color 0.3s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(8, 43, 109, 0.2);
   }
   
   /* Enhanced loading states */
   .loading-spinner {
-    @apply animate-spin h-5 w-5 text-blue-600;
+    color: var(--color-primary);
   }
   
   .loading-pulse {
@@ -288,7 +308,8 @@ body {
 /* Focus styles for accessibility */
 @layer base {
   *:focus {
-    @apply outline-2 outline-offset-2 outline-blue-500;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
   
   *:focus:not(:focus-visible) {
@@ -336,4 +357,22 @@ body {
   .animate-spin {
     animation: none;
   }
+}
+
+:root {
+  --color-primary: #020F6F;
+  --color-secondary: #CBDDDF;
+  --color-tertiary: #DC6E6A;
+}
+
+h1, h2, h3 {
+  color: var(--color-primary);
+}
+
+.text-responsive-title {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
 }

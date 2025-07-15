@@ -1,6 +1,6 @@
 // ClientApp/src/App.tsx - Fixed Router nesting issue
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom'; // Remove BrowserRouter import
+import { Routes, Route, useLocation } from 'react-router-dom'; // Remove BrowserRouter import
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { AppThemeProvider } from './themes/ThemeProvider';
@@ -25,11 +25,16 @@ import Login from './components/Login';
 import Register from './components/Register';
 import { FetchData } from './components/FetchData';  
 import SignalRTest from './components/SignalRTest';
+import FAQ from './components/FAQ';
+import HelpCenter from './components/HelpCenter';
+import ContactUs from './components/ContactUs';
+import Homepage from './components/Homepage';
 
 // App Content Component (needs access to Redux state)
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
   const isLoading = useAppSelector((state) => state.ui.isLoading);
+  const location = useLocation();
 
   // Initialize authentication on app load
   useEffect(() => {
@@ -42,6 +47,10 @@ const AppContent: React.FC = () => {
   // Initialize SignalR
   useSignalR();
 
+  // Routes that should not use Layout wrapper
+  const noLayoutRoutes = ['/'];
+  const shouldUseLayout = !noLayoutRoutes.includes(location.pathname);
+
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
@@ -50,23 +59,31 @@ const AppContent: React.FC = () => {
       }}
       showDetails={process.env.NODE_ENV === 'development'}
     >
-      <Layout>
+      {shouldUseLayout ? (
+        <Layout>
+          <Routes>
+            <Route path="/flight-companion" element={<FlightCompanion />} />
+            <Route path="/pickup" element={<Pickup />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelines />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/fetch-data" element={<FetchData />} />
+            <Route path="/signalr-test" element={<SignalRTest />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/contact" element={<ContactUs />} />
+          </Routes>
+        </Layout>
+      ) : (
         <Routes>
-          <Route path="/" element={<FlightCompanion />} />
-          <Route path="/flight-companion" element={<FlightCompanion />} />
-          <Route path="/pickup" element={<Pickup />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/community-guidelines" element={<CommunityGuidelines />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/cookie-policy" element={<CookiePolicy />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/fetch-data" element={<FetchData />} />
-          <Route path="/signalr-test" element={<SignalRTest />} />
+          <Route path="/" element={<Homepage />} />
         </Routes>
-      </Layout>
+      )}
 
       {/* Global Loading Overlay */}
       <LoadingOverlay 

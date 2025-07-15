@@ -1,5 +1,5 @@
 // ClientApp/src/components/Navigation.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -14,7 +14,7 @@ import {
   ListItemIcon,
   ListItemText,
   Button,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Menu as MenuIcon,
   Flight as FlightIcon,
@@ -22,13 +22,13 @@ import {
   Person as ProfileIcon,
   Home as HomeIcon,
   Storage as DataIcon,
-} from '@mui/icons-material';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { clearAuth } from '../store/slices/authSlice';
-import { ThemeToggle } from './ThemeToggle';
-import { LanguageSwitcher } from './LanguageSwitcher';
+} from "@mui/icons-material";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { clearAuth } from "../store/slices/authSlice";
+import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface NavigationItem {
   textKey: string;
@@ -43,11 +43,25 @@ interface NavigationProps {
 }
 
 const getDefaultItems = (): NavigationItem[] => [
-  { textKey: 'home', path: '/', icon: <HomeIcon /> },
-  { textKey: 'flightCompanion', path: '/flight-companion', icon: <FlightIcon /> },
-  { textKey: 'pickupService', path: '/pickup', icon: <PickupIcon /> },
-  { textKey: 'profile', path: '/profile', icon: <ProfileIcon />, requiresAuth: true },
-  { textKey: 'fetchData', path: '/fetch-data', icon: <DataIcon />, requiresAuth: true },
+  { textKey: "home", path: "/", icon: <HomeIcon /> },
+  {
+    textKey: "flightCompanion",
+    path: "/flight-companion",
+    icon: <FlightIcon />,
+  },
+  { textKey: "pickupService", path: "/pickup", icon: <PickupIcon /> },
+  {
+    textKey: "profile",
+    path: "/profile",
+    icon: <ProfileIcon />,
+    requiresAuth: true,
+  },
+  {
+    textKey: "fetchData",
+    path: "/fetch-data",
+    icon: <DataIcon />,
+    requiresAuth: true,
+  },
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -57,19 +71,19 @@ export const Navigation: React.FC<NavigationProps> = ({
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
   const theme = useMuiTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
+
   // Authentication state from Redux
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const user = useAppSelector((state) => state.auth.user);
 
   // Use default items if none provided, filtered by auth state
   const allNavigationItems = items || getDefaultItems();
-  const navigationItems = allNavigationItems.filter(item => 
-    !item.requiresAuth || isAuthenticated
+  const navigationItems = allNavigationItems.filter(
+    (item) => !item.requiresAuth || isAuthenticated
   );
 
   const handleDrawerToggle = () => {
@@ -78,7 +92,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   const handleLogout = () => {
     dispatch(clearAuth());
-    navigate('/');
+    navigate("/");
     setMobileOpen(false);
   };
 
@@ -91,52 +105,49 @@ export const Navigation: React.FC<NavigationProps> = ({
             component={Link}
             to={item.path}
             className={`transition-colors duration-200 ${
-              location.pathname === item.path 
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              location.pathname === item.path
+                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800"
             }`}
             sx={{
-              textDecoration: 'none',
-              color: 'inherit',
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
             <ListItemIcon
               className={
-                location.pathname === item.path 
-                  ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-300'
+                location.pathname === item.path
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-300"
               }
             >
               {item.icon}
             </ListItemIcon>
-            <ListItemText 
-              primary={t(item.textKey)}
-              className="font-medium"
-            />
+            <ListItemText primary={t(item.textKey)} className="font-medium" />
           </ListItem>
         ))}
-        
+
         {/* Mobile Auth Buttons */}
         {!isAuthenticated ? (
           <>
-            <ListItem 
-              component={Link} 
-              to="/login" 
-              sx={{ color: 'inherit', textDecoration: 'none' }}
+            <ListItem
+              component={Link}
+              to="/login"
+              sx={{ color: "inherit", textDecoration: "none" }}
             >
-              <ListItemText primary={t('login')} />
+              <ListItemText primary={t("login")} />
             </ListItem>
-            <ListItem 
-              component={Link} 
-              to="/register" 
-              sx={{ color: 'inherit', textDecoration: 'none' }}
+            <ListItem
+              component={Link}
+              to="/register"
+              sx={{ color: "inherit", textDecoration: "none" }}
             >
-              <ListItemText primary={t('register')} />
+              <ListItemText primary={t("register")} />
             </ListItem>
           </>
         ) : (
           <ListItem button onClick={handleLogout}>
-            <ListItemText primary={t('logout')} />
+            <ListItemText primary={t("logout")} />
           </ListItem>
         )}
       </List>
@@ -145,9 +156,9 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <>
-      <AppBar 
-        position="static" 
-        className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 mb-4"
+      <AppBar
+        position="static"
+        className="shadow-sm border-b border-gray-200 text-color-primary bg-[#CBDDDF]"
         elevation={0}
       >
         <Toolbar>
@@ -157,18 +168,33 @@ export const Navigation: React.FC<NavigationProps> = ({
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              className="mr-2 text-gray-800 dark:text-white"
+              className="mr-2"
+              sx={{ color: "var(--color-primary)" }}
             >
               <MenuIcon />
             </IconButton>
           )}
-          
+
           <Typography
             variant="h6"
             component={Link}
             to="/"
-            className="flex-grow font-bold text-gray-800 dark:text-white no-underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="flex-grow font-bold no-underline transition-colors flex items-center"
+            sx={{
+              color: "var(--color-primary)",
+              "&:hover": { color: "#061e4a" },
+            }}
           >
+            <img
+              src="/images/logo.png"
+              alt="WingCompanion Logo"
+              style={{
+                height: 40,
+                marginRight: 12,
+                display: "inline-block",
+                verticalAlign: "middle",
+              }}
+            />
             {title}
           </Typography>
 
@@ -181,15 +207,16 @@ export const Navigation: React.FC<NavigationProps> = ({
                   to={item.path}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 no-underline ${
                     location.pathname === item.path
-                      ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? "bg-white/40" // subtle highlight for active
+                      : "hover:bg-white/30"
                   }`}
+                  sx={{ color: "var(--color-primary)" }}
                 >
                   {item.icon}
                   <span>{t(item.textKey)}</span>
                 </Box>
               ))}
-              
+
               {/* Desktop Auth Section */}
               {!isAuthenticated ? (
                 <Box className="flex items-center space-x-2 ml-4">
@@ -199,7 +226,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     color="inherit"
                     className="text-gray-700 dark:text-gray-300"
                   >
-                    {t('login')}
+                    {t("login")}
                   </Button>
                   <Button
                     component={Link}
@@ -208,20 +235,23 @@ export const Navigation: React.FC<NavigationProps> = ({
                     variant="outlined"
                     className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
                   >
-                    {t('register')}
+                    {t("register")}
                   </Button>
                 </Box>
               ) : (
                 <Box className="flex items-center space-x-2 ml-4">
-                  <Typography variant="body2" className="text-gray-700 dark:text-gray-300">
-                    {t('welcome')}, {user?.firstName || t('user')}
+                  <Typography
+                    variant="body2"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    {t("welcome")}, {user?.firstName || t("user")}
                   </Typography>
                   <Button
                     color="inherit"
                     onClick={handleLogout}
                     className="text-gray-700 dark:text-gray-300"
                   >
-                    {t('logout')}
+                    {t("logout")}
                   </Button>
                 </Box>
               )}
@@ -242,10 +272,10 @@ export const Navigation: React.FC<NavigationProps> = ({
         }}
         className="md:hidden"
         sx={{
-          '& .MuiDrawer-paper': { 
-            boxSizing: 'border-box', 
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
             width: 250,
-            backgroundColor: 'background.default',
+            backgroundColor: "background.default",
           },
         }}
       >

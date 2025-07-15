@@ -66,14 +66,14 @@ export const AppThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => 
     palette: {
       mode: currentTheme,
       primary: {
-        main: currentTheme === 'dark' ? '#90caf9' : '#1976d2',
-        light: currentTheme === 'dark' ? '#bbdefb' : '#42a5f5',
-        dark: currentTheme === 'dark' ? '#64b5f6' : '#1565c0',
+        main: '#082B6D', // Deep Sapphire
+        light: '#3a4e8c',
+        dark: '#061e4a',
       },
       secondary: {
-        main: currentTheme === 'dark' ? '#f48fb1' : '#e91e63',
-        light: currentTheme === 'dark' ? '#f8bbd9' : '#ec407a',
-        dark: currentTheme === 'dark' ? '#f06292' : '#c2185b',
+        main: '#97E1F5', // Sail
+        light: '#c2f1fb',
+        dark: '#6bb3c7',
       },
       background: {
         default: currentTheme === 'dark' ? '#121212' : '#ffffff',
@@ -88,12 +88,15 @@ export const AppThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => 
       fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'].join(','),
       h1: {
         fontWeight: 600,
+        color: '#082B6D', // Deep Sapphire
       },
       h2: {
         fontWeight: 600,
+        color: '#082B6D', // Deep Sapphire
       },
       h3: {
         fontWeight: 500,
+        color: '#082B6D', // Deep Sapphire
       },
       button: {
         textTransform: 'none',
