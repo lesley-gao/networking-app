@@ -23,7 +23,6 @@ import CookiePolicy from './components/CookiePolicy';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
-import { FetchData } from './components/FetchData';  
 import SignalRTest from './components/SignalRTest';
 import FAQ from './components/FAQ';
 import HelpCenter from './components/HelpCenter';
@@ -72,7 +71,6 @@ const AppContent: React.FC = () => {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/fetch-data" element={<FetchData />} />
             <Route path="/signalr-test" element={<SignalRTest />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/help" element={<HelpCenter />} />

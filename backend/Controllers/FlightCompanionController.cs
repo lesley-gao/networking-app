@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using NetworkingApp.Data;
 using NetworkingApp.Models;
+using NetworkingApp.Models.DTOs;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetworkingApp.Services;
@@ -68,28 +70,50 @@ namespace NetworkingApp.Controllers
         // ✅ EXISTING - POST: api/flightcompanion/requests
         [HttpPost("requests")]
         public async Task<ActionResult<FlightCompanionRequest>> CreateRequest(
-            [FromBody] FlightCompanionRequest request)
+            [FromBody] CreateFlightCompanionRequestDto requestDto)
         {
             try
             {
+                // Extract user ID from authentication context, or use default for testing
+                int userId = 1; // Default for testing
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int authenticatedUserId))
+                {
+                    userId = authenticatedUserId;
+                }
+
                 // Business logic validation
-                if (request.FlightDate <= DateTime.UtcNow)
+                if (requestDto.FlightDate <= DateTime.UtcNow)
                 {
                     throw ApiException.BadRequest(
                         "Flight date must be in the future.", 
-                        $"Provided date: {request.FlightDate}"
+                        $"Provided date: {requestDto.FlightDate}"
                     );
                 }
 
-                // Set default values
-                request.CreatedAt = DateTime.UtcNow;
-                request.IsActive = true;
-                request.IsMatched = false;
+                // Create the request entity from DTO
+                var request = new FlightCompanionRequest
+                {
+                    UserId = userId,
+                    FlightNumber = requestDto.FlightNumber,
+                    Airline = requestDto.Airline,
+                    FlightDate = requestDto.FlightDate,
+                    DepartureAirport = requestDto.DepartureAirport,
+                    ArrivalAirport = requestDto.ArrivalAirport,
+                    TravelerName = requestDto.TravelerName,
+                    TravelerAge = requestDto.TravelerAge,
+                    SpecialNeeds = requestDto.SpecialNeeds,
+                    OfferedAmount = requestDto.OfferedAmount,
+                    AdditionalNotes = requestDto.AdditionalNotes,
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    IsMatched = false
+                };
 
                 _context.FlightCompanionRequests.Add(request);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Created flight companion request with ID {RequestId}", request.Id);
+                _logger.LogInformation("Created flight companion request with ID {RequestId} for user {UserId}", request.Id, userId);
 
                 return CreatedAtAction(
                     nameof(GetRequest), 

@@ -55,13 +55,7 @@ const getDefaultItems = (): NavigationItem[] => [
     path: "/profile",
     icon: <ProfileIcon />,
     requiresAuth: true,
-  },
-  {
-    textKey: "fetchData",
-    path: "/fetch-data",
-    icon: <DataIcon />,
-    requiresAuth: true,
-  },
+  }
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -201,11 +195,11 @@ export const Navigation: React.FC<NavigationProps> = ({
           {!isMobile && (
             <Box className="flex items-center space-x-1">
               {navigationItems.map((item: NavigationItem) => (
-                <Box
+                <Button
                   key={item.textKey}
                   component={Link}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 no-underline ${
+                  className={`flex items-center space-x-2 px-5 py-2 text-sm font-medium transition-colors duration-200 no-underline ${
                     location.pathname === item.path
                       ? "bg-white/40" // subtle highlight for active
                       : "hover:bg-white/30"
@@ -214,7 +208,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 >
                   {item.icon}
                   <span>{t(item.textKey)}</span>
-                </Box>
+                </Button>
               ))}
 
               {/* Desktop Auth Section */}
@@ -224,7 +218,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     component={Link}
                     to="/login"
                     color="inherit"
-                    className="text-gray-700 dark:text-gray-300"
+                    sx={{ color: "var(--color-primary)" }}
                   >
                     {t("login")}
                   </Button>
@@ -233,7 +227,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                     to="/register"
                     color="inherit"
                     variant="outlined"
-                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                    sx={{ 
+                      color: "var(--color-primary)",
+                      borderColor: "var(--color-primary)"
+                    }}
                   >
                     {t("register")}
                   </Button>
@@ -242,14 +239,14 @@ export const Navigation: React.FC<NavigationProps> = ({
                 <Box className="flex items-center space-x-2 ml-4">
                   <Typography
                     variant="body2"
-                    className="text-gray-700 dark:text-gray-300"
+                    sx={{ color: "var(--color-primary)" }}
                   >
                     {t("welcome")}, {user?.firstName || t("user")}
                   </Typography>
                   <Button
                     color="inherit"
                     onClick={handleLogout}
-                    className="text-gray-700 dark:text-gray-300"
+                    sx={{ color: "var(--color-primary)" }}
                   >
                     {t("logout")}
                   </Button>

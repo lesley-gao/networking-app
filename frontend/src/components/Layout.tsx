@@ -16,7 +16,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           flex: 1,
           py: 3,
-          px: { xs: 2, sm: 3 },
+          px: 2,
         }}
       >
         {children}

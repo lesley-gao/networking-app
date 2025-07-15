@@ -33,6 +33,7 @@ import {
   Help as HelpIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import { useAppDispatch} from '../store/hooks';
 import { addNotification } from '../store/slices/uiSlice';
 import { 
@@ -43,21 +44,10 @@ import {
   type FlightCompanionOffer,
   type CreateFlightCompanionRequestData
 } from '../store/api/flightCompanionApi';
+import FlightCompanionRequestForm from './forms/FlightCompanionRequestForm';
+import FlightCompanionOfferForm from './forms/FlightCompanionOfferForm';
 
 // TypeScript Interfaces
-interface RequestFormData {
-  flightNumber: string;
-  airline: string;
-  flightDate: string;
-  departureAirport: string;
-  arrivalAirport: string;
-  travelerName: string;
-  travelerAge: string;
-  specialNeeds: string;
-  offeredAmount: number;
-  additionalNotes: string;
-}
-
 interface FlightCompanionProps {}
 
 // Main Component
@@ -65,6 +55,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   // State Management
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
+  const [formType, setFormType] = useState<'request' | 'offer'>('request');
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -100,72 +91,24 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   const isLoading = requestsLoading || offersLoading;
   const error = requestsError || offersError;
 
-  // Form Data
-  const [formData, setFormData] = useState<RequestFormData>({
-    flightNumber: '',
-    airline: '',
-    flightDate: '',
-    departureAirport: '',
-    arrivalAirport: '',
-    travelerName: '',
-    travelerAge: 'Adult',
-    specialNeeds: '',
-    offeredAmount: 0,
-    additionalNotes: '',
-  });
-
-  // Airport Options
-  const airportOptions = [
-    { value: 'AKL', label: 'Auckland (AKL)' },
-    { value: 'PVG', label: 'Shanghai (PVG)' },
-    { value: 'PEK', label: 'Beijing (PEK)' },
-    { value: 'CAN', label: 'Guangzhou (CAN)' },
-  ];
-
-  const travelerAgeOptions = [
-    { value: 'Elderly', label: 'Elderly' },
-    { value: 'Adult', label: 'Adult' },
-    { value: 'Young Adult', label: 'Young Adult' },
-  ];
-
   // Event Handlers
   const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
     setActiveTab(newValue);
   };
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ): void => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (event: SelectChangeEvent<string>): void => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    
+  const handleRequestSubmit = async (data: any): Promise<void> => {
     try {
       const requestData: CreateFlightCompanionRequestData = {
-        flightNumber: formData.flightNumber,
-        airline: formData.airline,
-        flightDate: formData.flightDate,
-        departureAirport: formData.departureAirport,
-        arrivalAirport: formData.arrivalAirport,
-        travelerName: formData.travelerName,
-        travelerAge: formData.travelerAge,
-        specialNeeds: formData.specialNeeds,
-        offeredAmount: Number(formData.offeredAmount),
-        additionalNotes: formData.additionalNotes,
+        flightNumber: data.flightNumber,
+        airline: data.airline,
+        flightDate: data.flightDate,
+        departureAirport: data.departureAirport,
+        arrivalAirport: data.arrivalAirport,
+        travelerName: data.travelerName,
+        travelerAge: data.travelerAge,
+        specialNeeds: data.specialNeeds,
+        offeredAmount: Number(data.offeredAmount),
+        additionalNotes: data.additionalNotes,
       };
 
       // Use RTK Query mutation instead of manual fetch
@@ -177,7 +120,6 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       }));
       
       setShowCreateForm(false);
-      resetForm();
       
     } catch (error) {
       console.error('Error creating request:', error);
@@ -191,20 +133,32 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
     }
   };
 
-  const resetForm = (): void => {
-    setFormData({
-      flightNumber: '',
-      airline: '',
-      flightDate: '',
-      departureAirport: '',
-      arrivalAirport: '',
-      travelerName: '',
-      travelerAge: 'Adult',
-      specialNeeds: '',
-      offeredAmount: 0,
-      additionalNotes: '',
-    });
+  const handleOfferSubmit = async (data: any): Promise<void> => {
+    try {
+      // TODO: Implement offer creation using RTK Query when API is ready
+      console.log('Offer data:', data);
+      
+      dispatch(addNotification({
+        message: 'Flight companion offer created successfully!',
+        type: 'success',
+      }));
+      
+      setShowCreateForm(false);
+      showSnackbar('Offer created successfully! (Mock implementation)', 'success');
+      
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error creating offer';
+      showSnackbar(errorMessage, 'error');
+      
+      dispatch(addNotification({
+        message: 'Failed to create flight companion offer',
+        type: 'error',
+      }));
+    }
   };
+
+
 
   const handleContactTraveler = (request: FlightCompanionRequest): void => {
     // Implementation for contacting traveler
@@ -231,8 +185,8 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
   // Render Functions
   const renderRequestCard = (request: FlightCompanionRequest): JSX.Element => (
-    <Card key={request.id} className="h-full hover:shadow-lg transition-shadow duration-200">
-      <CardContent>
+        <Card key={request.id} className="h-full hover:shadow-lg transition-shadow duration-200 flex flex-col" style={{ minHeight: '320px' }}>
+        <CardContent className="flex-grow">
         <Box className="flex justify-between items-start mb-3">
           <Box className="flex items-center space-x-2">
             <FlightIcon className="text-blue-600" />
@@ -388,9 +342,9 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   }
 
   return (
-    <Container maxWidth="lg" className="py-8">
+    <Container maxWidth={false} className="py-20 mb-20">
       {/* Header */}
-      <Paper elevation={0} className="mb-8 p-6 ">
+      <Paper elevation={0} className="mb-8 p-6">
         <Box className="text-center">
           <Typography variant="h3" component="h1" className="font-bold text-gray-900 dark:text-gray-100 mb-2">
             Flight Companion Service
@@ -411,11 +365,12 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           indicatorColor="primary"
         >
           <Tab
-            icon={<HelpIcon />}
+            icon={<FlightIcon />}
             label={`Help Requests (${requests.length})`}
             className="font-medium"
           />
           <Tab
+            icon={<VolunteerActivismIcon />}
             label={`Available Helpers (${offers.length})`}
             className="font-medium"
           />
@@ -423,13 +378,20 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       </Paper>
 
       {/* Action Button */}
-      <Box className="text-center mb-6">
+      <Box className="text-center mb-8">
         <Button
           variant="contained"
           size="large"
           startIcon={<AddIcon />}
-          onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+          onClick={() => {
+            setFormType(activeTab === 0 ? 'request' : 'offer');
+            setShowCreateForm(true);
+          }}
+          className={`px-8 py-3  my-3 text-white ${
+            activeTab === 0 
+              ? 'bg-blue-600 hover:bg-blue-700' 
+              : 'bg-green-600 hover:bg-green-700'
+          }`}
         >
           {activeTab === 0 ? 'Request Help' : 'Offer to Help'}
         </Button>
@@ -466,17 +428,17 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                     </Typography>
                   </Paper>
                 ) : (
-                  <Grid container spacing={2} className="grid-cards">
+                  <Grid container spacing={3}>
                     {requests.map((request) => (
                       <Grid 
                         item 
                         xs={12} 
-                        sm={6} 
+                        sm={12} 
                         md={6} 
                         lg={4} 
                         xl={3}
                         key={request.id}
-                        className="flex"
+                        className="flex flex-col"
                       >
                         {renderRequestCard(request)}
                       </Grid>
@@ -511,7 +473,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                 ) : (
                   <Grid container spacing={2}>
                     {offers.map((offer) => (
-                      <Grid item xs={12} md={6} lg={4} key={offer.id}>
+                      <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={offer.id}>
                         {renderOfferCard(offer)}
                       </Grid>
                     ))}
@@ -523,172 +485,32 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         )}
       </Box>
 
-      {/* Create Request Dialog */}
+      {/* Create Request/Offer Dialog */}
       <Dialog
         open={showCreateForm}
         onClose={() => setShowCreateForm(false)}
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle className="bg-gray-50 dark:bg-gray-800 border-b">
-          <Typography variant="h6" className="font-semibold">
-            Request Flight Companion Help
-          </Typography>
+        <DialogTitle className="bg-gray-50 dark:bg-gray-800 border-b font-semibold">
+          {formType === 'request' ? 'Request Flight Companion Help' : 'Offer to Help as Flight Companion'}
         </DialogTitle>
 
         <DialogContent className="p-6">
-          <form onSubmit={handleFormSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="flightNumber"
-                  label="Flight Number"
-                  value={formData.flightNumber}
-                  onChange={handleInputChange}
-                  fullWidth
-                  required
-                  placeholder="e.g., NZ289"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="airline"
-                  label="Airline"
-                  value={formData.airline}
-                  onChange={handleInputChange}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="flightDate"
-                  label="Flight Date"
-                  type="datetime-local"
-                  value={formData.flightDate}
-                  onChange={handleInputChange}
-                  fullWidth
-                  required
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>From Airport</InputLabel>
-                  <Select
-                    name="departureAirport"
-                    value={formData.departureAirport}
-                    onChange={handleSelectChange}
-                    label="From Airport"
-                  >
-                    {airportOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>To Airport</InputLabel>
-                  <Select
-                    name="arrivalAirport"
-                    value={formData.arrivalAirport}
-                    onChange={handleSelectChange}
-                    label="To Airport"
-                  >
-                    {airportOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="travelerName"
-                  label="Traveler Name (Optional)"
-                  value={formData.travelerName}
-                  onChange={handleInputChange}
-                  fullWidth
-                  placeholder="e.g., My elderly mother"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Traveler Age Group</InputLabel>
-                  <Select
-                    name="travelerAge"
-                    value={formData.travelerAge}
-                    onChange={handleSelectChange}
-                    label="Traveler Age Group"
-                  >
-                    {travelerAgeOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="specialNeeds"
-                  label="Special Assistance Needed"
-                  value={formData.specialNeeds}
-                  onChange={handleInputChange}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  placeholder="e.g., Language translation, wheelchair assistance, medication reminders..."
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="offeredAmount"
-                  label="Offered Amount (NZD)"
-                  type="number"
-                  value={formData.offeredAmount}
-                  onChange={handleInputChange}
-                  fullWidth
-                  inputProps={{ min: 0, max: 500 }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="additionalNotes"
-                  label="Additional Notes"
-                  value={formData.additionalNotes}
-                  onChange={handleInputChange}
-                  fullWidth
-                  multiline
-                  rows={2}
-                  placeholder="Any other important information..."
-                />
-              </Grid>
-            </Grid>
-          </form>
+          {formType === 'request' ? (
+            <FlightCompanionRequestForm
+              onSubmit={handleRequestSubmit}
+              onCancel={() => setShowCreateForm(false)}
+              loading={createRequestLoading}
+            />
+          ) : (
+            <FlightCompanionOfferForm
+              onSubmit={handleOfferSubmit}
+              onCancel={() => setShowCreateForm(false)}
+              loading={false}
+            />
+          )}
         </DialogContent>
-
-        <DialogActions className="p-6 pt-0">
-          <Button 
-            onClick={() => setShowCreateForm(false)}
-            className="text-gray-600"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={(event: any) => handleFormSubmit(event)}
-            variant="contained"
-            disabled={createRequestLoading}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {createRequestLoading && <CircularProgress size={20} className="mr-2" />}
-            Create Request
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Snackbar for notifications */}

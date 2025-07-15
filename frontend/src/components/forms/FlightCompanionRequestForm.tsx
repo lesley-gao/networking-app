@@ -1,8 +1,8 @@
 // ClientApp/src/components/forms/FlightCompanionForm.tsx
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Grid,
   TextField,
@@ -12,59 +12,60 @@ import {
   MenuItem,
   Box,
   Typography,
-} from '@mui/material';
-import { Button } from '../ui/Button'; // Use your custom Button component
+} from "@mui/material";
+import { Button } from "../ui/Button"; // Use your custom Button component
 
 // Validation Schema
 const flightCompanionSchema = z.object({
   flightNumber: z
     .string()
-    .min(3, 'Flight number must be at least 3 characters')
-    .max(10, 'Flight number must be less than 10 characters')
-    .regex(/^[A-Z]{2}\d{2,4}$/, 'Invalid flight number format (e.g., NZ289)'),
-  
+    .min(3, "Flight number must be at least 3 characters")
+    .max(10, "Flight number must be less than 10 characters")
+    .regex(/^[A-Z]{2}\d{2,4}$/, "Invalid flight number format (e.g., NZ289)"),
+
   airline: z
     .string()
-    .min(2, 'Airline name is required')
-    .max(50, 'Airline name must be less than 50 characters'),
-  
+    .min(2, "Airline name is required")
+    .max(50, "Airline name must be less than 50 characters"),
+
   flightDate: z
     .string()
-    .min(1, 'Flight date is required')
-    .refine((date) => new Date(date) > new Date(), 'Flight date must be in the future'),
-  
+    .min(1, "Flight date is required")
+    .refine(
+      (date) => new Date(date) > new Date(),
+      "Flight date must be in the future"
+    ),
+
   departureAirport: z
     .string()
-    .min(3, 'Departure airport is required')
-    .max(10, 'Invalid airport code'),
-  
+    .min(3, "Departure airport is required")
+    .max(10, "Invalid airport code"),
+
   arrivalAirport: z
     .string()
-    .min(3, 'Arrival airport is required')
-    .max(10, 'Invalid airport code'),
-  
+    .min(3, "Arrival airport is required")
+    .max(10, "Invalid airport code"),
+
   travelerName: z
     .string()
-    .max(100, 'Traveler name must be less than 100 characters')
+    .max(100, "Traveler name must be less than 100 characters")
     .optional(),
-  
-  travelerAge: z
-    .enum(['Young Adult', 'Adult', 'Elderly'])
-    .default('Adult'),
-  
+
+  travelerAge: z.enum(["Young Adult", "Adult", "Elderly"]).default("Adult"),
+
   specialNeeds: z
     .string()
-    .max(500, 'Special needs must be less than 500 characters')
+    .max(500, "Special needs must be less than 500 characters")
     .optional(),
-  
+
   offeredAmount: z
     .number()
-    .min(0, 'Amount cannot be negative')
-    .max(500, 'Amount cannot exceed $500'),
-  
+    .min(0, "Amount cannot be negative")
+    .max(500, "Amount cannot exceed $500"),
+
   additionalNotes: z
     .string()
-    .max(1000, 'Additional notes must be less than 1000 characters')
+    .max(1000, "Additional notes must be less than 1000 characters")
     .optional(),
 });
 
@@ -78,17 +79,17 @@ interface FlightCompanionFormProps {
 }
 
 const airportOptions = [
-  { value: 'AKL', label: 'Auckland (AKL)' },
-  { value: 'PVG', label: 'Shanghai (PVG)' },
-  { value: 'PEK', label: 'Beijing (PEK)' },
-  { value: 'CAN', label: 'Guangzhou (CAN)' },
-  { value: 'CTU', label: 'Chengdu (CTU)' },
+  { value: "AKL", label: "Auckland (AKL)" },
+  { value: "PVG", label: "Shanghai (PVG)" },
+  { value: "PEK", label: "Beijing (PEK)" },
+  { value: "CAN", label: "Guangzhou (CAN)" },
+  { value: "CTU", label: "Chengdu (CTU)" },
 ];
 
 const travelerAgeOptions = [
-  { value: 'Young Adult', label: 'Young Adult (18-30)' },
-  { value: 'Adult', label: 'Adult (31-60)' },
-  { value: 'Elderly', label: 'Elderly (60+)' },
+  { value: "Young Adult", label: "Young Adult (18-30)" },
+  { value: "Adult", label: "Adult (31-60)" },
+  { value: "Elderly", label: "Elderly (60+)" },
 ];
 
 export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
@@ -105,16 +106,16 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
   } = useForm<FlightCompanionFormData>({
     resolver: zodResolver(flightCompanionSchema),
     defaultValues: {
-      flightNumber: '',
-      airline: '',
-      flightDate: '',
-      departureAirport: '',
-      arrivalAirport: '',
-      travelerName: '',
-      travelerAge: 'Adult',
-      specialNeeds: '',
+      flightNumber: "",
+      airline: "",
+      flightDate: "",
+      departureAirport: "",
+      arrivalAirport: "",
+      travelerName: "",
+      travelerAge: "Adult",
+      specialNeeds: "",
       offeredAmount: 0,
-      additionalNotes: '',
+      additionalNotes: "",
       ...initialData,
     },
   });
@@ -124,7 +125,7 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
       await onSubmit(data);
       reset();
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error("Form submission error:", error);
     }
   };
 
@@ -134,11 +135,7 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
-      <Typography variant="h6" className="mb-4 text-gray-800 dark:text-white">
-        Request Flight Companion Help
-      </Typography>
-      
+    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} className="mt-4 mb-6">
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <Controller
@@ -292,7 +289,7 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
             render={({ field: { onChange, value, ...field } }) => (
               <TextField
                 {...field}
-                value={value || ''}
+                value={value || ""}
                 onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
                 label="Offered Amount (NZD)"
                 type="number"
@@ -348,7 +345,7 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
         </Grid>
       </Grid>
 
-      <Box className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <Box className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
           type="button"
           onClick={handleCancel}

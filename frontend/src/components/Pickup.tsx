@@ -458,7 +458,7 @@ const Pickup: React.FC<PickupProps> = () => {
   // Early return for error state
   if (error) {
     return (
-      <Container maxWidth="lg" className="py-8">
+      <Container maxWidth={false} className="py-8">
         <Paper className="p-6 text-center">
           <Typography variant="h6" color="error" className="mb-4">
             Error loading data
@@ -481,14 +481,14 @@ const Pickup: React.FC<PickupProps> = () => {
   }
 
   return (
-    <Container maxWidth="lg" className="py-8">
+    <Container maxWidth={false} className="py-20 mb-20">
       {/* Header */}
-      <Paper elevation={0} className="mb-8 p-6">
+      <Paper elevation={0} className="mb-8 p-6 ">
         <Box className="text-center">
-          <Typography variant="h3" component="h1" className="font-bold text-gray-900 mb-2">
+          <Typography variant="h3" component="h1" className="font-bold text-gray-900 dark:text-gray-100 mb-2">
             Airport Pickup Service
           </Typography>
-          <Typography variant="body1" className="text-gray-600">
+          <Typography variant="body1" className="text-gray-600 dark:text-gray-300">
             Connect with reliable drivers for airport transfers
           </Typography>
         </Box>
@@ -503,27 +503,27 @@ const Pickup: React.FC<PickupProps> = () => {
           textColor="primary"
           indicatorColor="primary"
         >
-          <Tab 
-            icon={<FlightIcon />} 
+          <Tab
+            icon={<FlightIcon />}
             label={`Pickup Requests (${requests.length})`}
-            className="text-gray-700 hover:text-blue-600"
+            className="font-medium"
           />
-          <Tab 
-            icon={<TaxiIcon />} 
+          <Tab
+            icon={<TaxiIcon />}
             label={`Available Drivers (${offers.length})`}
-            className="text-gray-700 hover:text-green-600"
+            className="font-medium"
           />
         </Tabs>
       </Paper>
 
       {/* Action Button */}
-      <Box className="text-center mb-6">
+      <Box className="text-center mb-8">
         <Button
           variant="contained"
           size="large"
           startIcon={<AddIcon />}
           onClick={() => openCreateDialog(activeTab === 0 ? 'request' : 'offer')}
-          className={`px-8 py-3 text-white ${
+          className={`px-8 py-3  my-3 text-white ${
             activeTab === 0 
               ? 'bg-blue-600 hover:bg-blue-700' 
               : 'bg-green-600 hover:bg-green-700'
@@ -534,34 +534,44 @@ const Pickup: React.FC<PickupProps> = () => {
       </Box>
 
       {/* Content */}
-      <Box>
+      <Box className="min-h-96">
         {activeTab === 0 && (
           <Box>
             {isLoading && !requests.length ? (
-              <Box className="flex justify-center py-8">
-                <CircularProgress />
+              <Box className="flex justify-center items-center py-12">
+                <CircularProgress size={40} />
               </Box>
             ) : requests.length === 0 ? (
-              <Paper className="p-12 text-center bg-gray-50">
-                <FlightIcon className="text-gray-400 text-6xl mb-4" />
-                <Typography variant="h6" className="text-gray-600 mb-2">
+              <Paper className="text-center py-12 bg-gray-50 dark:bg-gray-800">
+                <FlightIcon
+                  sx={{ fontSize: 64 }}
+                  className="text-gray-400 mb-4"
+                />
+                <Typography
+                  variant="h6"
+                  className="text-gray-600 dark:text-gray-300"
+                >
                   No pickup requests yet
                 </Typography>
-                <Typography variant="body2" className="text-gray-500">
+                <Typography
+                  variant="body2"
+                  className="text-gray-500 dark:text-gray-400 mt-2"
+                >
                   Be the first to request a pickup!
                 </Typography>
               </Paper>
             ) : (
-              <Grid container spacing={3} className="grid-cards">
+              <Grid container spacing={3}>
                 {requests.map((request) => (
                   <Grid 
                     item 
                     xs={12} 
-                    sm={6} 
+                    sm={12} 
+                    md={6} 
                     lg={4} 
                     xl={3}
                     key={request.id}
-                    className="flex"
+                    className="flex flex-col"
                   >
                     {renderRequestCard(request)}
                   </Grid>
@@ -574,23 +584,41 @@ const Pickup: React.FC<PickupProps> = () => {
         {activeTab === 1 && (
           <Box>
             {isLoading && !offers.length ? (
-              <Box className="flex justify-center py-8">
-                <CircularProgress />
+              <Box className="flex justify-center items-center py-12">
+                <CircularProgress size={40} />
               </Box>
             ) : offers.length === 0 ? (
-              <Paper className="p-12 text-center bg-gray-50">
-                <TaxiIcon className="text-gray-400 text-6xl mb-4" />
-                <Typography variant="h6" className="text-gray-600 mb-2">
+              <Paper className="text-center py-12 bg-gray-50 dark:bg-gray-800">
+                <TaxiIcon
+                  sx={{ fontSize: 64 }}
+                  className="text-gray-400 mb-4"
+                />
+                <Typography
+                  variant="h6"
+                  className="text-gray-600 dark:text-gray-300"
+                >
                   No drivers available yet
                 </Typography>
-                <Typography variant="body2" className="text-gray-500">
+                <Typography
+                  variant="body2"
+                  className="text-gray-500 dark:text-gray-400 mt-2"
+                >
                   Be the first to offer pickup services!
                 </Typography>
               </Paper>
             ) : (
               <Grid container spacing={3}>
                 {offers.map((offer) => (
-                  <Grid item xs={12} md={6} key={offer.id}>
+                  <Grid 
+                    item 
+                    xs={12} 
+                    sm={12} 
+                    md={6} 
+                    lg={4} 
+                    xl={3}
+                    key={offer.id}
+                    className="flex flex-col"
+                  >
                     {renderOfferCard(offer)}
                   </Grid>
                 ))}

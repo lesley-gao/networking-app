@@ -12,7 +12,7 @@ const Homepage: React.FC = () => {
       
       {/* Hero Section */}
       <div
-        className="flex flex-col items-center justify-center text-center min-h-screen relative"
+        className="flex flex-col justify-center min-h-screen relative p-8 md:p-16 lg:p-32"
         style={{
           backgroundImage: "url('/images/airplane.jpg')",
           backgroundSize: "cover",
@@ -24,17 +24,16 @@ const Homepage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#CBDDDF]"></div>
 
         {/* Content container */}
-        <div className="relative z-10 text-left ">
-          <h1 className="text-5xl font-bold mb-4 text-white drop-shadow-lg">
+        <div className="relative z-10 text-left max-w-2xl">
+          <h1 className="text-5xl font-bold mb-4 text-white drop-shadow-lg font-serif">
             WingCompanion
           </h1>
-          <p className="text-xl text-white max-w-xl drop-shadow-md mb-8">
-            Connecting travelers for safer, more enjoyable journeys—find trusted
-            flight companions and reliable airport pickups.
+          <p className="text-xl font-medium text-white max-w-xl mb-8 drop-shadow-lg">
+            Connecting travelers for safer, more enjoyable journeys — find trusted flight companions and reliable airport pickups.
           </p>
           
           {/* Action Buttons */}
-          <div className="flex gap-4 flex-col sm:flex-row ">
+          <div className="flex gap-4 flex-col sm:flex-row">
             <Link
               to="/flight-companion"
               className="inline-block no-underline  bg-white text-[#020F6F] font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-50 hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-center"
