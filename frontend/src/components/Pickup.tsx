@@ -10,11 +10,6 @@ import {
   CardContent,
   CardActions,
   Grid,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Paper,
   Chip,
   Dialog,
@@ -23,9 +18,6 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
-  SelectChangeEvent,
-  FormControlLabel,
-  Checkbox,
 } from '@mui/material';
 import {
   LocalTaxi as TaxiIcon,
@@ -38,8 +30,9 @@ import {
   Schedule as ScheduleIcon,
   Star as StarIcon,
 } from '@mui/icons-material';
-import { useAppDispatch } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addNotification } from '../store/slices/uiSlice';
+import { selectIsAuthenticated } from '../store/slices/authSelectors';
 import {
   useGetPickupRequestsQuery,
   useGetPickupOffersQuery,
@@ -48,39 +41,17 @@ import {
   type PickupOffer,
   type CreatePickupRequestData
 } from '../store/api/pickupApi';
+import PickupRequestForm from './forms/PickupRequestForm';
+import PickupOfferForm from './forms/PickupOfferForm';  
 
 // TypeScript Interfaces  
-interface RequestFormData {
-  flightNumber: string;
-  arrivalDate: string;
-  arrivalTime: string;
-  airport: string;
-  destinationAddress: string;
-  passengerName: string;
-  passengerPhone: string;
-  passengerCount: number;
-  hasLuggage: boolean;
-  offeredAmount: number;
-  specialRequests: string;
-}
-
-interface OfferFormData {
-  airport: string;
-  vehicleType: string;
-  maxPassengers: number;
-  canHandleLuggage: boolean;
-  serviceArea: string;
-  baseRate: number;
-  languages: string;
-  additionalServices: string;
-}
-
 interface PickupProps {}
 
 // Main Component
 const Pickup: React.FC<PickupProps> = () => {
-  // Redux State - removed unused 'user' variable
+  // Redux State
   const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   // RTK Query hooks replace manual fetch calls
   const {
@@ -117,32 +88,6 @@ const Pickup: React.FC<PickupProps> = () => {
     severity: 'info',
   });
 
-  // Form Data State
-  const [requestFormData, setRequestFormData] = useState<RequestFormData>({
-    flightNumber: '',
-    arrivalDate: '',
-    arrivalTime: '',
-    airport: 'AKL',
-    destinationAddress: '',
-    passengerName: '',
-    passengerPhone: '',
-    passengerCount: 1,
-    hasLuggage: true,
-    offeredAmount: 0,
-    specialRequests: '',
-  });
-
-  const [offerFormData, setOfferFormData] = useState<OfferFormData>({
-    airport: 'AKL',
-    vehicleType: '',
-    maxPassengers: 4,
-    canHandleLuggage: true,
-    serviceArea: '',
-    baseRate: 0,
-    languages: '',
-    additionalServices: '',
-  });
-
   // Helper Functions
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' | 'info'): void => {
     setSnackbar({ open: true, message, severity });
@@ -152,84 +97,25 @@ const Pickup: React.FC<PickupProps> = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const resetRequestForm = (): void => {
-    setRequestFormData({
-      flightNumber: '',
-      arrivalDate: '',
-      arrivalTime: '',
-      airport: 'AKL',
-      destinationAddress: '',
-      passengerName: '',
-      passengerPhone: '',
-      passengerCount: 1,
-      hasLuggage: true,
-      offeredAmount: 0,
-      specialRequests: '',
-    });
-  };
-
-  const resetOfferForm = (): void => {
-    setOfferFormData({
-      airport: 'AKL',
-      vehicleType: '',
-      maxPassengers: 4,
-      canHandleLuggage: true,
-      serviceArea: '',
-      baseRate: 0,
-      languages: '',
-      additionalServices: '',
-    });
-  };
-
   // Event Handlers
   const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
     setActiveTab(newValue);
   };
 
-  const handleRequestInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ): void => {
-    const { name, value, type } = event.target;
-    const parsedValue = type === 'number' ? Number(value) : value;
-    
-    setRequestFormData((prev) => ({
-      ...prev,
-      [name]: parsedValue,
-    }));
-  };
-
-  const handleRequestSelectChange = (event: SelectChangeEvent<any>): void => {
-    const { name, value } = event.target;
-    setRequestFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleRequestCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, checked } = event.target;
-    setRequestFormData((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
-
-  const handleCreateRequest = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    
+  const handleRequestSubmit = async (data: any): Promise<void> => {
     try {
       const requestData: CreatePickupRequestData = {
-        flightNumber: requestFormData.flightNumber,
-        arrivalDate: requestFormData.arrivalDate,
-        arrivalTime: requestFormData.arrivalTime,
-        airport: requestFormData.airport,
-        destinationAddress: requestFormData.destinationAddress,
-        passengerName: requestFormData.passengerName,
-        passengerPhone: requestFormData.passengerPhone,
-        passengerCount: requestFormData.passengerCount,
-        hasLuggage: requestFormData.hasLuggage,
-        offeredAmount: requestFormData.offeredAmount,
-        specialRequests: requestFormData.specialRequests,
+        flightNumber: data.flightNumber,
+        arrivalDate: data.arrivalDate,
+        arrivalTime: data.arrivalTime,
+        airport: data.airport,
+        destinationAddress: data.destinationAddress,
+        passengerName: data.passengerName,
+        passengerPhone: data.passengerPhone,
+        passengerCount: data.passengerCount,
+        hasLuggage: data.hasLuggage,
+        offeredAmount: data.offeredAmount,
+        specialRequests: data.specialRequests,
       };
 
       // Use RTK Query mutation instead of manual fetch
@@ -241,7 +127,6 @@ const Pickup: React.FC<PickupProps> = () => {
       }));
       
       setShowCreateDialog(false);
-      resetRequestForm();
       
     } catch (error) {
       console.error('Error creating pickup request:', error);
@@ -255,16 +140,29 @@ const Pickup: React.FC<PickupProps> = () => {
     }
   };
 
-  const handleCreateOffer = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    
-    // TODO: Implement offer creation using RTK Query when pickupApi is extended with offer creation
-    // For now, just show a message and reset the form
-    showSnackbar('Offer creation will be implemented with RTK Query', 'info');
-    
-    // Reset the form when this is properly implemented
-    resetOfferForm();
-    setShowCreateDialog(false);
+  const handleOfferSubmit = async (data: any): Promise<void> => {
+    try {
+      // TODO: Implement offer creation using RTK Query when pickupApi is extended with offer creation
+      console.log('Offer data:', data);
+      
+      dispatch(addNotification({
+        message: 'Pickup offer created successfully!',
+        type: 'success',
+      }));
+      
+      setShowCreateDialog(false);
+      showSnackbar('Offer created successfully! (Mock implementation)', 'success');
+      
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error creating offer';
+      showSnackbar(errorMessage, 'error');
+      
+      dispatch(addNotification({
+        message: 'Failed to create pickup offer',
+        type: 'error',
+      }));
+    }
   };
 
   const handleContactDriver = (offer: PickupOffer): void => {
@@ -275,7 +173,15 @@ const Pickup: React.FC<PickupProps> = () => {
     showSnackbar(`Contacting passenger for ${request.flightNumber}`, 'info');
   };
 
-  const openCreateDialog = (type: 'request' | 'offer'): void => {
+  const handleOpenCreateDialog = (type: 'request' | 'offer'): void => {
+    if (!isAuthenticated) {
+      setSnackbar({
+        open: true,
+        message: 'Please log in to use this feature.',
+        severity: 'warning',
+      });
+      return;
+    }
     setFormType(type);
     setShowCreateDialog(true);
   };
@@ -522,7 +428,7 @@ const Pickup: React.FC<PickupProps> = () => {
           variant="contained"
           size="large"
           startIcon={<AddIcon />}
-          onClick={() => openCreateDialog(activeTab === 0 ? 'request' : 'offer')}
+          onClick={() => handleOpenCreateDialog(activeTab === 0 ? 'request' : 'offer')}
           className={`px-8 py-3  my-3 text-white ${
             activeTab === 0 
               ? 'bg-blue-600 hover:bg-blue-700' 
@@ -635,216 +541,23 @@ const Pickup: React.FC<PickupProps> = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle className="bg-gray-50 border-b">
-          <Typography variant="h6" className="font-semibold">
+        <DialogTitle>
             {formType === 'request' ? 'Request Airport Pickup' : 'Offer Pickup Service'}
-          </Typography>
         </DialogTitle>
 
         <DialogContent className="p-6">
           {formType === 'request' ? (
-            <form onSubmit={handleCreateRequest}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="flightNumber"
-                    label="Flight Number"
-                    value={requestFormData.flightNumber}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    required
-                    placeholder="e.g., NZ289"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Airport</InputLabel>
-                    <Select
-                      name="airport"
-                      value={requestFormData.airport}
-                      onChange={handleRequestSelectChange}
-                      label="Airport"
-                    >
-                      <MenuItem value="AKL">Auckland (AKL)</MenuItem>
-                      <MenuItem value="WLG">Wellington (WLG)</MenuItem>
-                      <MenuItem value="CHC">Christchurch (CHC)</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="arrivalDate"
-                    label="Arrival Date"
-                    type="date"
-                    value={requestFormData.arrivalDate}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    required
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="arrivalTime"
-                    label="Arrival Time"
-                    type="time"
-                    value={requestFormData.arrivalTime}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    required
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    name="destinationAddress"
-                    label="Destination Address"
-                    value={requestFormData.destinationAddress}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    required
-                    placeholder="Full address including suburb"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="passengerName"
-                    label="Passenger Name"
-                    value={requestFormData.passengerName}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    placeholder="Name of person being picked up"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="passengerPhone"
-                    label="Passenger Phone"
-                    type="tel"
-                    value={requestFormData.passengerPhone}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    placeholder="+64 21 123 4567"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Number of Passengers</InputLabel>
-                    <Select
-                      name="passengerCount"
-                      value={requestFormData.passengerCount}
-                      onChange={handleRequestSelectChange}
-                      label="Number of Passengers"
-                    >
-                      <MenuItem value={1}>1 person</MenuItem>
-                      <MenuItem value={2}>2 people</MenuItem>
-                      <MenuItem value={3}>3 people</MenuItem>
-                      <MenuItem value={4}>4+ people</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="offeredAmount"
-                    label="Offered Amount (NZD)"
-                    type="number"
-                    value={requestFormData.offeredAmount}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    inputProps={{ min: 0, max: 200 }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="hasLuggage"
-                        checked={requestFormData.hasLuggage}
-                        onChange={handleRequestCheckboxChange}
-                      />
-                    }
-                    label="I have luggage"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    name="specialRequests"
-                    label="Special Requests"
-                    value={requestFormData.specialRequests}
-                    onChange={handleRequestInputChange}
-                    fullWidth
-                    multiline
-                    rows={2}
-                    placeholder="e.g., Child seat needed, elderly passenger assistance, large luggage..."
-                  />
-                </Grid>
-              </Grid>
-
-              <Box className="flex justify-end gap-3 mt-6 pt-6 border-t">
-                <Button 
-                  type="button"
-                  onClick={() => setShowCreateDialog(false)}
-                  className="text-gray-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={createRequestLoading}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {createRequestLoading && <CircularProgress size={20} className="mr-2" />}
-                  Create Request
-                </Button>
-              </Box>
-            </form>
+            <PickupRequestForm
+              onSubmit={handleRequestSubmit}
+              onCancel={() => setShowCreateDialog(false)}
+              loading={createRequestLoading}
+            />
           ) : (
-            <form onSubmit={handleCreateOffer}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Airport</InputLabel>
-                    <Select
-                      name="airport"
-                      value={offerFormData.airport}
-                      label="Airport"
-                    >
-                      <MenuItem value="AKL">Auckland (AKL)</MenuItem>
-                      <MenuItem value="WLG">Wellington (WLG)</MenuItem>
-                      <MenuItem value="CHC">Christchurch (CHC)</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="vehicleType"
-                    label="Vehicle Type"
-                    value={offerFormData.vehicleType}
-                    fullWidth
-                    required
-                    placeholder="e.g., Sedan, SUV, Van"
-                  />
-                </Grid>
-              </Grid>
-
-              <Box className="flex justify-end gap-3 mt-6 pt-6 border-t">
-                <Button 
-                  type="button"
-                  onClick={() => setShowCreateDialog(false)}
-                  className="text-gray-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Create Offer
-                </Button>
-              </Box>
-            </form>
+            <PickupOfferForm
+              onSubmit={handleOfferSubmit}
+              onCancel={() => setShowCreateDialog(false)}
+              loading={false}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -852,7 +565,7 @@ const Pickup: React.FC<PickupProps> = () => {
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={2000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >

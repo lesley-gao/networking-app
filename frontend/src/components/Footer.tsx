@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({
     {
       titleKey: 'support',
       links: [
-        { textKey: 'helpCenter', path: '/help' },
+        { textKey: 'helpCenter', path: '/help-center' },
         { textKey: 'contactUs', path: '/contact' },
         { textKey: 'faq', path: '/faq' }
       ]

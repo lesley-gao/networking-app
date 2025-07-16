@@ -11,7 +11,6 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
 } from "@mui/material";
 import { Button } from "../ui/Button"; // Use your custom Button component
 
@@ -135,8 +134,11 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} className="mt-4 mb-6">
-      <Grid container spacing={3}>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      style={{ marginTop: "12px" }}
+    >
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Controller
             name="flightNumber"
@@ -150,7 +152,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 helperText={errors.flightNumber?.message}
                 fullWidth
                 required
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -169,7 +170,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 helperText={errors.airline?.message}
                 fullWidth
                 required
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -189,7 +189,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 fullWidth
                 required
                 InputLabelProps={{ shrink: true }}
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -276,7 +275,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 error={!!errors.travelerName}
                 helperText={errors.travelerName?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -298,7 +296,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 error={!!errors.offeredAmount}
                 helperText={errors.offeredAmount?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -318,7 +315,6 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 error={!!errors.specialNeeds}
                 helperText={errors.specialNeeds?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -334,24 +330,29 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
                 label="Additional Notes"
                 placeholder="Any other information that might be helpful..."
                 multiline
-                rows={2}
+                rows={3}
                 error={!!errors.additionalNotes}
                 helperText={errors.additionalNotes?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
         </Grid>
       </Grid>
 
-      <Box className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <Box
+        style={{
+          marginTop: "12px",
+          display: "flex",
+          justifyContent: "flex-start",
+          gap: "12px",
+        }}
+      >
         <Button
           type="button"
           onClick={handleCancel}
           disabled={loading || isSubmitting}
           variant="text"
-          className="text-gray-600 hover:text-gray-800"
         >
           Cancel
         </Button>
@@ -360,12 +361,11 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
           variant="contained"
           loading={loading || isSubmitting}
           disabled={loading || isSubmitting}
-          className="bg-blue-600 hover:bg-blue-700 min-w-[120px]"
         >
           Create Request
         </Button>
       </Box>
-    </Box>
+    </form>
   );
 };
 

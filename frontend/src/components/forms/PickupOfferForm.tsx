@@ -1,4 +1,4 @@
-// ClientApp/src/components/forms/FlightCompanionForm.tsx
+// ClientApp/src/components/forms/PickupOfferForm.tsx
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,87 +11,84 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
-import { Button } from '../ui/Button'; // Use your custom Button component
+import { Button } from '../ui/Button';
 
 // Validation Schema
-const flightCompanionSchema = z.object({
-  flightNumber: z
+const pickupOfferSchema = z.object({
+  airport: z
     .string()
-    .min(3, 'Flight number must be at least 3 characters')
-    .max(10, 'Flight number must be less than 10 characters')
-    .regex(/^[A-Z]{2}\d{2,4}$/, 'Invalid flight number format (e.g., NZ289)'),
-  
-  airline: z
-    .string()
-    .min(2, 'Airline name is required')
-    .max(50, 'Airline name must be less than 50 characters'),
-  
-  flightDate: z
-    .string()
-    .min(1, 'Flight date is required')
-    .refine((date) => new Date(date) > new Date(), 'Flight date must be in the future'),
-  
-  departureAirport: z
-    .string()
-    .min(3, 'Departure airport is required')
+    .min(3, 'Airport is required')
     .max(10, 'Invalid airport code'),
   
-  arrivalAirport: z
+  vehicleType: z
     .string()
-    .min(3, 'Arrival airport is required')
-    .max(10, 'Invalid airport code'),
+    .min(2, 'Vehicle type is required')
+    .max(50, 'Vehicle type must be less than 50 characters'),
   
-  travelerName: z
-    .string()
-    .max(100, 'Traveler name must be less than 100 characters')
-    .optional(),
-  
-  travelerAge: z
-    .enum(['Young Adult', 'Adult', 'Elderly'])
-    .default('Adult'),
-  
-  specialNeeds: z
-    .string()
-    .max(500, 'Special needs must be less than 500 characters')
-    .optional(),
-  
-  offeredAmount: z
+  maxPassengers: z
     .number()
-    .min(0, 'Amount cannot be negative')
-    .max(500, 'Amount cannot exceed $500'),
+    .min(1, 'At least 1 passenger required')
+    .max(8, 'Maximum 8 passengers allowed'),
   
-  additionalNotes: z
+  canHandleLuggage: z.boolean().default(true),
+  
+  serviceArea: z
     .string()
-    .max(1000, 'Additional notes must be less than 1000 characters')
+    .min(5, 'Service area is required')
+    .max(200, 'Service area must be less than 200 characters'),
+  
+  baseRate: z
+    .number()
+    .min(0, 'Base rate cannot be negative')
+    .max(200, 'Base rate cannot exceed $200'),
+  
+  languages: z
+    .string()
+    .max(200, 'Languages must be less than 200 characters')
+    .optional(),
+  
+  additionalServices: z
+    .string()
+    .max(500, 'Additional services must be less than 500 characters')
     .optional(),
 });
 
-type FlightCompanionFormData = z.infer<typeof flightCompanionSchema>;
+type PickupOfferFormData = z.infer<typeof pickupOfferSchema>;
 
-interface FlightCompanionFormProps {
-  onSubmit: (data: FlightCompanionFormData) => Promise<void>;
+interface PickupOfferFormProps {
+  onSubmit: (data: PickupOfferFormData) => Promise<void>;
   onCancel?: () => void;
   loading?: boolean;
-  initialData?: Partial<FlightCompanionFormData>;
+  initialData?: Partial<PickupOfferFormData>;
 }
 
 const airportOptions = [
   { value: 'AKL', label: 'Auckland (AKL)' },
-  { value: 'PVG', label: 'Shanghai (PVG)' },
-  { value: 'PEK', label: 'Beijing (PEK)' },
-  { value: 'CAN', label: 'Guangzhou (CAN)' },
-  { value: 'CTU', label: 'Chengdu (CTU)' },
+  { value: 'WLG', label: 'Wellington (WLG)' },
+  { value: 'CHC', label: 'Christchurch (CHC)' },
+  { value: 'ZQN', label: 'Queenstown (ZQN)' },
 ];
 
-const travelerAgeOptions = [
-  { value: 'Young Adult', label: 'Young Adult (18-30)' },
-  { value: 'Adult', label: 'Adult (31-60)' },
-  { value: 'Elderly', label: 'Elderly (60+)' },
+const vehicleTypeOptions = [
+  { value: 'Sedan', label: 'Sedan (4 passengers)' },
+  { value: 'SUV', label: 'SUV (6 passengers)' },
+  { value: 'Van', label: 'Van (8 passengers)' },
+  { value: 'Luxury', label: 'Luxury Vehicle' },
 ];
 
-export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
+const maxPassengersOptions = [
+  { value: 1, label: '1 passenger' },
+  { value: 2, label: '2 passengers' },
+  { value: 3, label: '3 passengers' },
+  { value: 4, label: '4 passengers' },
+  { value: 6, label: '6 passengers' },
+  { value: 8, label: '8 passengers' },
+];
+
+export const PickupOfferForm: React.FC<PickupOfferFormProps> = ({
   onSubmit,
   onCancel,
   loading = false,
@@ -102,24 +99,22 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<FlightCompanionFormData>({
-    resolver: zodResolver(flightCompanionSchema),
+  } = useForm<PickupOfferFormData>({
+    resolver: zodResolver(pickupOfferSchema),
     defaultValues: {
-      flightNumber: '',
-      airline: '',
-      flightDate: '',
-      departureAirport: '',
-      arrivalAirport: '',
-      travelerName: '',
-      travelerAge: 'Adult',
-      specialNeeds: '',
-      offeredAmount: 0,
-      additionalNotes: '',
+      airport: 'AKL',
+      vehicleType: '',
+      maxPassengers: 4,
+      canHandleLuggage: true,
+      serviceArea: '',
+      baseRate: 0,
+      languages: '',
+      additionalServices: '',
       ...initialData,
     },
   });
 
-  const handleFormSubmit = async (data: FlightCompanionFormData) => {
+  const handleFormSubmit = async (data: PickupOfferFormData) => {
     try {
       await onSubmit(data);
       reset();
@@ -134,104 +129,18 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
-      <Typography variant="h6" className="mb-4 text-gray-800 dark:text-white">
-        Request Flight Companion Help
-      </Typography>
-      
-      <Grid container spacing={3}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ marginTop: '12px' }}>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Controller
-            name="flightNumber"
+            name="airport"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                label="Flight Number"
-                placeholder="e.g., NZ289"
-                error={!!errors.flightNumber}
-                helperText={errors.flightNumber?.message}
-                fullWidth
-                required
-                className="bg-white dark:bg-gray-700"
-              />
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Controller
-            name="airline"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Airline"
-                placeholder="e.g., Air New Zealand"
-                error={!!errors.airline}
-                helperText={errors.airline?.message}
-                fullWidth
-                required
-                className="bg-white dark:bg-gray-700"
-              />
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Controller
-            name="flightDate"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Flight Date"
-                type="datetime-local"
-                error={!!errors.flightDate}
-                helperText={errors.flightDate?.message}
-                fullWidth
-                required
-                InputLabelProps={{ shrink: true }}
-                className="bg-white dark:bg-gray-700"
-              />
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Controller
-            name="travelerAge"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth error={!!errors.travelerAge}>
-                <InputLabel>Traveler Age</InputLabel>
+              <FormControl fullWidth required error={!!errors.airport}>
+                <InputLabel>Airport</InputLabel>
                 <Select
                   {...field}
-                  label="Traveler Age"
-                  className="bg-white dark:bg-gray-700"
-                >
-                  {travelerAgeOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Controller
-            name="departureAirport"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth required error={!!errors.departureAirport}>
-                <InputLabel>From Airport</InputLabel>
-                <Select
-                  {...field}
-                  label="From Airport"
-                  className="bg-white dark:bg-gray-700"
+                  label="Airport"
                 >
                   {airportOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -246,17 +155,16 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <Controller
-            name="arrivalAirport"
+            name="vehicleType"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth required error={!!errors.arrivalAirport}>
-                <InputLabel>To Airport</InputLabel>
+              <FormControl fullWidth required error={!!errors.vehicleType}>
+                <InputLabel>Vehicle Type</InputLabel>
                 <Select
                   {...field}
-                  label="To Airport"
-                  className="bg-white dark:bg-gray-700"
+                  label="Vehicle Type"
                 >
-                  {airportOptions.map((option) => (
+                  {vehicleTypeOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
@@ -269,39 +177,42 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <Controller
-            name="travelerName"
+            name="maxPassengers"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                label="Traveler Name (Optional)"
-                placeholder="e.g., My parents"
-                error={!!errors.travelerName}
-                helperText={errors.travelerName?.message}
-                fullWidth
-                className="bg-white dark:bg-gray-700"
-              />
+              <FormControl fullWidth required error={!!errors.maxPassengers}>
+                <InputLabel>Max Passengers</InputLabel>
+                <Select
+                  {...field}
+                  label="Max Passengers"
+                >
+                  {maxPassengersOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             )}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <Controller
-            name="offeredAmount"
+            name="baseRate"
             control={control}
             render={({ field: { onChange, value, ...field } }) => (
               <TextField
                 {...field}
                 value={value || ''}
                 onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-                label="Offered Amount (NZD)"
+                label="Base Rate (NZD)"
                 type="number"
-                inputProps={{ min: 0, max: 500, step: 5 }}
+                inputProps={{ min: 0, max: 200, step: 5 }}
                 placeholder="50"
-                error={!!errors.offeredAmount}
-                helperText={errors.offeredAmount?.message}
+                error={!!errors.baseRate}
+                helperText={errors.baseRate?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -309,52 +220,84 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
 
         <Grid item xs={12}>
           <Controller
-            name="specialNeeds"
+            name="serviceArea"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Special Needs/Help Required"
-                placeholder="e.g., Language translation, wheelchair assistance, airport navigation..."
+                label="Service Area"
+                placeholder="e.g., Auckland CBD, North Shore, Airport to City"
+                error={!!errors.serviceArea}
+                helperText={errors.serviceArea?.message}
+                fullWidth
+                required
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="languages"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Languages Spoken (Optional)"
+                placeholder="e.g., English, Mandarin, Cantonese"
+                error={!!errors.languages}
+                helperText={errors.languages?.message}
+                fullWidth
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Controller
+            name="canHandleLuggage"
+            control={control}
+            render={({ field: { value, onChange, ...field } }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    {...field}
+                    checked={value}
+                    onChange={(e) => onChange(e.target.checked)}
+                  />
+                }
+                label="Can handle luggage"
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Controller
+            name="additionalServices"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Additional Services"
+                placeholder="e.g., Child seats available, wheelchair accessible, meet and greet service..."
                 multiline
                 rows={3}
-                error={!!errors.specialNeeds}
-                helperText={errors.specialNeeds?.message}
+                error={!!errors.additionalServices}
+                helperText={errors.additionalServices?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
-              />
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Controller
-            name="additionalNotes"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Additional Notes"
-                placeholder="Any other information that might be helpful..."
-                multiline
-                rows={2}
-                error={!!errors.additionalNotes}
-                helperText={errors.additionalNotes?.message}
-                fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
         </Grid>
       </Grid>
 
-      <Box className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <Box style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-start', gap: '12px' }}>
         <Button
           type="button"
           onClick={handleCancel}
           disabled={loading || isSubmitting}
           variant="text"
-          className="text-gray-600 hover:text-gray-800"
         >
           Cancel
         </Button>
@@ -363,13 +306,12 @@ export const FlightCompanionForm: React.FC<FlightCompanionFormProps> = ({
           variant="contained"
           loading={loading || isSubmitting}
           disabled={loading || isSubmitting}
-          className="bg-blue-600 hover:bg-blue-700 min-w-[120px]"
         >
-          Create Request
+          Create Offer
         </Button>
       </Box>
-    </Box>
+    </form>
   );
 };
 
-export default FlightCompanionForm;
+export default PickupOfferForm;

@@ -10,7 +10,6 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
 } from "@mui/material";
 import { Button } from "../ui/Button";
 
@@ -109,17 +108,8 @@ export const FlightCompanionOfferForm: React.FC<
   };
 
   return (
-    <Box 
-      component="form" 
-      onSubmit={handleSubmit(handleFormSubmit)}
-      sx={{ 
-        marginTop: 1, 
-        marginBottom: 1,
-        paddingTop: 1,
-        paddingBottom: 1
-      }}
-    >
-      <Grid container spacing={3}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ marginTop: '12px' }}>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Controller
             name="flightNumber"
@@ -151,25 +141,6 @@ export const FlightCompanionOfferForm: React.FC<
                 helperText={errors.airline?.message}
                 fullWidth
                 required
-                className="bg-white dark:bg-gray-700"
-              />
-            )}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Controller
-            name="flightDate"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Flight Date"
-                type="datetime-local"
-                error={!!errors.flightDate}
-                helperText={errors.flightDate?.message}
-                fullWidth
-                required
-                InputLabelProps={{ shrink: true }}
                 className="bg-white dark:bg-gray-700"
               />
             )}
@@ -221,18 +192,18 @@ export const FlightCompanionOfferForm: React.FC<
         </Grid>
         <Grid item xs={12} sm={6}>
           <Controller
-            name="availableServices"
+            name="flightDate"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Available Services"
-                placeholder="e.g., Language translation, wheelchair assistance, airport navigation..."
-                multiline
-                rows={2}
-                error={!!errors.availableServices}
-                helperText={errors.availableServices?.message}
+                label="Flight Date"
+                type="datetime-local"
+                error={!!errors.flightDate}
+                helperText={errors.flightDate?.message}
                 fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
                 className="bg-white dark:bg-gray-700"
               />
             )}
@@ -255,7 +226,26 @@ export const FlightCompanionOfferForm: React.FC<
             )}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
+          <Controller
+            name="availableServices"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Available Services"
+                placeholder="e.g., Language translation, wheelchair assistance, airport navigation..."
+                multiline
+                rows={2}
+                error={!!errors.availableServices}
+                helperText={errors.availableServices?.message}
+                fullWidth
+                className="bg-white dark:bg-gray-700"
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <Controller
             name="helpedCount"
             control={control}
@@ -286,7 +276,7 @@ export const FlightCompanionOfferForm: React.FC<
                 label="Additional Notes"
                 placeholder="Any other information that might be helpful..."
                 multiline
-                rows={2}
+                rows={3}
                 error={!!errors.additionalNotes}
                 helperText={errors.additionalNotes?.message}
                 fullWidth
@@ -296,13 +286,12 @@ export const FlightCompanionOfferForm: React.FC<
           />
         </Grid>
       </Grid>
-      <Box className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <Box style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-start', gap: '12px' }}>
         <Button
           type="button"
           onClick={handleCancel}
           disabled={loading || isSubmitting}
           variant="text"
-          className="text-gray-600 hover:text-gray-800"
         >
           Cancel
         </Button>
@@ -311,12 +300,11 @@ export const FlightCompanionOfferForm: React.FC<
           variant="contained"
           loading={loading || isSubmitting}
           disabled={loading || isSubmitting}
-          className="bg-green-600 hover:bg-green-700 min-w-[120px]"
         >
           Offer Help
         </Button>
       </Box>
-    </Box>
+    </form>
   );
 };
 

@@ -73,7 +73,7 @@ const AppContent: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/signalr-test" element={<SignalRTest />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/help-center" element={<HelpCenter />} />
             <Route path="/contact" element={<ContactUs />} />
           </Routes>
         </Layout>

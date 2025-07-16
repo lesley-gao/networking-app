@@ -16,7 +16,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   BugReport as BugReportIcon,
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // TypeScript interfaces
 interface ErrorBoundaryProps {
@@ -34,33 +34,8 @@ interface ErrorBoundaryState {
   showDetails: boolean;
 }
 
-// Styled components
-const StyledErrorContainer = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  textAlign: 'center',
-  borderRadius: theme.spacing(2),
-  border: `2px solid ${theme.palette.error.light}`,
-  backgroundColor: theme.palette.error.light || '#ffebee',
-  
-  // Responsive padding
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(3),
-    margin: theme.spacing(2),
-  },
-}));
-
-const StyledErrorIcon = styled(ErrorIcon)(({ theme }) => ({
-  fontSize: '4rem',
-  color: theme.palette.error.main,
-  marginBottom: theme.spacing(2),
-  
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '3rem',
-  },
-}));
-
-// Error Fallback Component
-const ErrorFallback: React.FC<{
+// Elegant Error Fallback Component
+const ElegantErrorFallback: React.FC<{
   error?: Error;
   errorInfo?: ErrorInfo;
   onRetry: () => void;
@@ -68,28 +43,66 @@ const ErrorFallback: React.FC<{
   onToggleDetails: () => void;
 }> = ({ error, errorInfo, onRetry, showDetails, onToggleDetails }) => {
   const isDevelopment = process.env.NODE_ENV === 'development';
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    if (!error) return;
+    const details = [
+      `Message: ${error.message}`,
+      error.stack ? `\nStack Trace:\n${error.stack}` : '',
+      errorInfo?.componentStack ? `\nComponent Stack:\n${errorInfo.componentStack}` : '',
+    ].join('\n');
+    navigator.clipboard.writeText(details);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <Container maxWidth="md" className="py-8">
-      <StyledErrorContainer elevation={3} className="animate-fade-in">
-        <StyledErrorIcon />
-        
-        <Typography 
-          variant="h4" 
-          gutterBottom 
-          className="text-red-600 dark:text-red-400 font-bold mb-4"
+    <Container maxWidth="sm" className="py-16 animate-fade-in">
+      <Paper
+        elevation={4}
+        sx={{
+          p: { xs: 3, sm: 6 },
+          borderRadius: 4,
+          border: theme => `2px solid ${theme.palette.error.light}`,
+          textAlign: 'center',
+          boxShadow: 6,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        role="alert"
+        aria-live="assertive"
+      >
+        {/* Airplane Art Image - Bottom Right Corner */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            width: { xs: 80, sm: 120 },
+            height: { xs: 80, sm: 120 },
+            opacity: 0.1,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
         >
-          Oops! Something went wrong
+          <img
+            src="/images/airplane-art.png"
+            alt="Airplane decoration"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+          />
+        </Box>
+        <ErrorIcon sx={{ fontSize: 70, color: 'error.main', mb: 2, opacity: 0.85 }} />
+        <Typography variant="h4" fontWeight={700} color="error.main" gutterBottom>
+          Something went wrong
         </Typography>
-        
-        <Typography 
-          variant="body1" 
-          className="text-gray-700 dark:text-gray-300 mb-6 max-w-md mx-auto"
-        >
-          We're sorry, but an unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          Sorry, we hit a snag. Try refreshing the page, or contact us if the problem continues.
         </Typography>
-
-        {/* Action Buttons */}
         <Box className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
           <Button
             variant="contained"
@@ -97,111 +110,116 @@ const ErrorFallback: React.FC<{
             size="large"
             startIcon={<RefreshIcon />}
             onClick={onRetry}
-            className="min-w-[140px]"
+            sx={{ minWidth: 140, fontWeight: 600, boxShadow: 2 }}
+            aria-label="Try again"
           >
             Try Again
           </Button>
-          
           <Button
             variant="outlined"
-            color="secondary"
+     
             size="large"
+            className="bg-[#DC6E6A] text-white border-[#DC6E6A]"
             onClick={() => window.location.href = '/'}
-            className="min-w-[140px]"
+            sx={{ minWidth: 140 }}
+            aria-label="Go home"
           >
             Go Home
           </Button>
         </Box>
-
-        {/* Error Details (Development Mode) */}
         {isDevelopment && error && (
-          <Box className="text-left">
+          <Box sx={{ textAlign: 'left', mt: 2 }}>
             <Button
               onClick={onToggleDetails}
               startIcon={<BugReportIcon />}
               endIcon={
-                <ExpandMoreIcon 
-                  sx={{ 
+                <ExpandMoreIcon
+                  sx={{
                     transform: showDetails ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.3s ease',
-                  }} 
+                    transition: 'transform 0.3s',
+                  }}
                 />
               }
               variant="text"
               size="small"
-              className="mb-3"
+              sx={{ mb: 1, fontWeight: 500 }}
+              aria-label="Toggle technical details"
             >
               {showDetails ? 'Hide' : 'Show'} Technical Details
             </Button>
-
             <Collapse in={showDetails} timeout={300}>
-              <Alert 
-                severity="error" 
-                className="text-left animate-slide-up"
-                sx={{ 
-                  '& .MuiAlert-message': { 
-                    width: '100%',
-                    wordBreak: 'break-word',
-                  } 
+              <Alert
+                severity="error"
+                sx={{
+                  mt: 2,
+                  fontFamily: 'monospace',
+                  background: '#fff',
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  border: '1px solid #DC6E6A',
+                  wordBreak: 'break-word',
                 }}
               >
-                <AlertTitle className="font-bold">Error Details</AlertTitle>
-                
-                <Typography variant="body2" className="font-mono mb-2">
+                <AlertTitle sx={{ fontWeight: 700 }}>Error Details</AlertTitle>
+                <Typography variant="body2" sx={{ mb: 1 }}>
                   <strong>Message:</strong> {error.message}
                 </Typography>
-                
                 {error.stack && (
-                  <Box className="mt-3">
-                    <Typography variant="body2" className="font-bold mb-1">
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" fontWeight={700} mb={0.5}>
                       Stack Trace:
                     </Typography>
-                    <pre className="whitespace-pre-wrap text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded overflow-x-auto">
-                      {error.stack}
-                    </pre>
+                    <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, background: '#fbe9e7', padding: 8, borderRadius: 4, overflowX: 'auto' }}>{error.stack}</pre>
                   </Box>
                 )}
-                
                 {errorInfo?.componentStack && (
-                  <Box className="mt-3">
-                    <Typography variant="body2" className="font-bold mb-1">
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" fontWeight={700} mb={0.5}>
                       Component Stack:
                     </Typography>
-                    <pre className="whitespace-pre-wrap text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded overflow-x-auto">
-                      {errorInfo.componentStack}
-                    </pre>
+                    <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, background: '#fbe9e7', padding: 8, borderRadius: 4, overflowX: 'auto' }}>{errorInfo.componentStack}</pre>
                   </Box>
                 )}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ContentCopyIcon />}
+                  onClick={handleCopy}
+                  sx={{ mt: 2 }}
+                  aria-label="Copy error details"
+                >
+                  {copied ? 'Copied!' : 'Copy error details'}
+                </Button>
               </Alert>
             </Collapse>
           </Box>
         )}
-
-        {/* Help Links */}
-        <Box className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-          <Typography variant="body2" className="text-gray-500 dark:text-gray-400 mb-2">
+        <Box sx={{ mt: 6, pt: 3, borderTop: '1px solid', borderColor: 'grey.200' }}>
+          <Typography variant="body2" color="text.secondary" mb={1}>
             Need help? Contact our support team
           </Typography>
           <Box className="flex flex-col sm:flex-row gap-2 justify-center">
             <Button
               variant="text"
               size="small"
-              href="mailto:support@networkingapp.co.nz"
-              className="text-blue-600 hover:text-blue-800"
+              href="mailto:support@wingcompanion.co.nz"
+              sx={{ color: 'primary.main', fontWeight: 500 }}
+              aria-label="Email support"
             >
               Email Support
             </Button>
             <Button
               variant="text"
               size="small"
-              href="/help"
-              className="text-blue-600 hover:text-blue-800"
+              href="/help-center"
+              sx={{ color: 'primary.main', fontWeight: 500 }}
+              aria-label="Help center"
             >
               Help Center
             </Button>
           </Box>
         </Box>
-      </StyledErrorContainer>
+      </Paper>
     </Container>
   );
 };
@@ -265,7 +283,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       // Default error UI
       return (
-        <ErrorFallback
+        <ElegantErrorFallback
           error={this.state.error}
           errorInfo={this.state.errorInfo}
           onRetry={this.handleRetry}

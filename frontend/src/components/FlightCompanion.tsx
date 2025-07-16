@@ -10,21 +10,14 @@ import {
   CardContent,
   CardActions,
   Grid,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Paper,
   Chip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Snackbar,
   Alert,
   CircularProgress,
-  SelectChangeEvent,
 } from '@mui/material';
 import {
   Flight as FlightIcon,
@@ -34,8 +27,9 @@ import {
   Person as PersonIcon,
 } from '@mui/icons-material';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import { useAppDispatch} from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addNotification } from '../store/slices/uiSlice';
+import { selectIsAuthenticated } from '../store/slices/authSelectors';
 import { 
   useGetFlightCompanionRequestsQuery,
   useGetFlightCompanionOffersQuery,
@@ -68,7 +62,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
   // Redux Integration
   const dispatch = useAppDispatch();
-  //const { user } = useAppSelector((state) => state.auth);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   
   // RTK Query hooks replace manual fetch calls and Redux slice integration
   const {
@@ -181,6 +175,19 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
   const closeSnackbar = (): void => {
     setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const handleOpenForm = () => {
+    if (!isAuthenticated) {
+      setSnackbar({
+        open: true,
+        message: 'Please log in to use this feature.',
+        severity: 'warning',
+      });
+      return;
+    }
+    setFormType(activeTab === 0 ? 'request' : 'offer');
+    setShowCreateForm(true);
   };
 
   // Render Functions
@@ -383,10 +390,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           variant="contained"
           size="large"
           startIcon={<AddIcon />}
-          onClick={() => {
-            setFormType(activeTab === 0 ? 'request' : 'offer');
-            setShowCreateForm(true);
-          }}
+          onClick={handleOpenForm}
           className={`px-8 py-3  my-3 text-white ${
             activeTab === 0 
               ? 'bg-blue-600 hover:bg-blue-700' 
@@ -492,11 +496,11 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle className="bg-gray-50 dark:bg-gray-800 border-b font-semibold">
+        <DialogTitle>
           {formType === 'request' ? 'Request Flight Companion Help' : 'Offer to Help as Flight Companion'}
         </DialogTitle>
 
-        <DialogContent className="p-6">
+        <DialogContent>
           {formType === 'request' ? (
             <FlightCompanionRequestForm
               onSubmit={handleRequestSubmit}
@@ -516,7 +520,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={2000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >

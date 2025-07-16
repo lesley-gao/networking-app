@@ -11,7 +11,6 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
@@ -141,12 +140,8 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
-      <Typography variant="h6" className="mb-4 text-gray-800 dark:text-white">
-        Request Airport Pickup
-      </Typography>
-      
-      <Grid container spacing={3}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ marginTop: '12px' }}>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Controller
             name="flightNumber"
@@ -160,7 +155,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 helperText={errors.flightNumber?.message}
                 fullWidth
                 required
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -203,7 +197,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 fullWidth
                 required
                 InputLabelProps={{ shrink: true }}
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -223,7 +216,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 fullWidth
                 required
                 InputLabelProps={{ shrink: true }}
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -242,7 +234,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 helperText={errors.destinationAddress?.message}
                 fullWidth
                 required
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -260,7 +251,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 error={!!errors.passengerName}
                 helperText={errors.passengerName?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -279,7 +269,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 error={!!errors.passengerPhone}
                 helperText={errors.passengerPhone?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -324,7 +313,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 error={!!errors.offeredAmount}
                 helperText={errors.offeredAmount?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
@@ -345,7 +333,6 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                   />
                 }
                 label="Has luggage"
-                className="text-gray-700 dark:text-gray-300"
               />
             )}
           />
@@ -365,20 +352,18 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
                 error={!!errors.specialRequests}
                 helperText={errors.specialRequests?.message}
                 fullWidth
-                className="bg-white dark:bg-gray-700"
               />
             )}
           />
         </Grid>
       </Grid>
 
-      <Box className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <Box style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-start', gap: '12px' }}>
         <Button
           type="button"
           onClick={handleCancel}
           disabled={loading || isSubmitting}
           variant="text"
-          className="text-gray-600 hover:text-gray-800"
         >
           Cancel
         </Button>
@@ -387,12 +372,11 @@ export const PickupRequestForm: React.FC<PickupRequestFormProps> = ({
           variant="contained"
           loading={loading || isSubmitting}
           disabled={loading || isSubmitting}
-          className="bg-blue-600 hover:bg-blue-700 min-w-[120px]"
         >
           Create Request
         </Button>
       </Box>
-    </Box>
+    </form>
   );
 };
 
