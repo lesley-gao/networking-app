@@ -21,7 +21,6 @@ import {
   LocalTaxi as PickupIcon,
   Person as ProfileIcon,
   Home as HomeIcon,
-  Storage as DataIcon,
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -241,7 +240,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     variant="body2"
                     sx={{ color: "var(--color-primary)" }}
                   >
-                    {t("welcome")}, {user?.firstName || t("user")}
+                    {t("Hi")}, {user?.firstName || t("user")}
                   </Typography>
                   <Button
                     color="inherit"

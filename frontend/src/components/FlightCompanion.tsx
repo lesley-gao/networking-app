@@ -290,13 +290,12 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           label={request.isMatched ? "Matched" : "Looking for Helper"}
           color={request.isMatched ? "warning" : "success"}
           variant="outlined"
-          size="small"
         />
         <Button
-          variant="contained"
+          variant="outlined"
           size="small"
           startIcon={<ContactIcon />}
-          className="bg-[#0B3866] hover:bg-[#0B3866]/90"
+          className="text-[#0B3866] border-[#0B3866] hover:bg-[#0B3866]/10"
           onClick={() => handleContactTraveler(request)}
         >
           Contact
@@ -308,9 +307,10 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   const renderOfferCard = (offer: FlightCompanionOffer): JSX.Element => (
     <Card
       key={offer.id}
-      className="h-full hover:shadow-lg transition-shadow duration-200"
+      className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200"
+      style={{ minHeight: 340, height: 340, width: '100%' }}
     >
-      <CardContent>
+      <CardContent style={{ flexGrow: 1 }}>
         <Box className="flex justify-between items-start mb-3">
           <Box className="flex items-center space-x-2">
             <FlightIcon className="text-[#168046]" />
@@ -359,18 +359,17 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         </Typography>
       </CardContent>
 
-      <CardActions className="justify-between bg-gray-50 dark:bg-gray-800">
+      <CardActions className="justify-between bg-gray-50 dark:bg-gray-800 mt-auto">
         <Chip
           label="Available"
           color="success"
           variant="outlined"
-          size="small"
         />
         <Button
-          variant="contained"
+          variant="outlined"
           size="small"
           startIcon={<ContactIcon />}
-          className="bg-[#168046] hover:bg-[#168046]/90"
+          className="text-[#168046] border-[#168046]  hover:bg-[#168046]/10"
           onClick={() => handleContactHelper(offer)}
         >
           Contact
@@ -538,7 +537,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                     </Typography>
                   </Paper>
                 ) : (
-                  <Grid container spacing={2} >
+                  <Grid container spacing={2}>
                     {offers.map((offer) => (
                       <Grid
                         item

@@ -341,19 +341,18 @@ const Pickup: React.FC<PickupProps> = () => {
         </Box>
       </CardContent>
 
-      <CardActions className="justify-between bg-gray-50">
+      <CardActions className="justify-between bg-gray-50 mt-auto">
         <Chip 
           label="Available"
           color="success"
           variant="outlined"
-          size="small"
         />
         <Button
-          variant="contained"
+          variant="outlined"
           size="small"
           startIcon={<ContactIcon />}
           onClick={() => handleContactDriver(offer)}
-          className="bg-[#168046] hover:bg-[#168046]/90"
+          className="text-[#168046] border-[#168046]  hover:bg-[#168046]/10"
         >
           Contact
         </Button>

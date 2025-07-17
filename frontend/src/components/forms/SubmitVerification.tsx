@@ -68,8 +68,15 @@ const SubmitVerification: React.FC = () => {
         type="file"
         accept="image/*,application/pdf"
         onChange={handleFileChange}
-        style={{ marginBottom: 20 }}
+        style={{ marginBottom: 8 }}
       />
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mb: 2, display: "block" }}
+      >
+        Accepted file types: Images (JPG, PNG, GIF, etc.) or PDF
+      </Typography>
       <Box>
         <Button type="submit" variant="contained" disabled={uploading || !file}>
           {uploading ? <CircularProgress size={20} /> : "Upload"}
