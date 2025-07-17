@@ -40,6 +40,7 @@ import { useAppSelector } from "../store/hooks";
 import PaymentHistory from "./PaymentHistory";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import SubmitVerification from "./forms/SubmitVerification";
 
 // TypeScript interfaces
 interface UserProfile {
@@ -360,7 +361,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
   return (
     <Container maxWidth="lg" className="py-6">
       {/* Header */}
-      <Box className="mb-6">
+      <Box className="mb-6 mt-10">
         <Typography
           variant="h3"
           component="h1"
@@ -702,60 +703,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          <Typography variant="h5" className="flex items-center gap-2">
-            <SecurityIcon />
-            {t("submitVerificationDocuments")}
-          </Typography>
-        </DialogTitle>
-
-        <form
-          onSubmit={verificationForm.handleSubmit(handleVerificationSubmit)}
-        >
-          <DialogContent>
-            <Typography variant="body2" className="mb-4 text-gray-600">
-              {t("verificationDialogDesc")}
-            </Typography>
-
-            <Controller
-              name="documentReferences"
-              control={verificationForm.control}
-              render={({ field, fieldState }) => (
-                <Input.TextField
-                  {...field}
-                  label={t("documentReferences")}
-                  error={!!fieldState.error}
-                  helperText={
-                    fieldState.error?.message || t("documentReferencesHelper")
-                  }
-                  fullWidth
-                  multiline
-                  rows={4}
-                  placeholder={t("documentReferencesPlaceholder")}
-                />
-              )}
-            />
-          </DialogContent>
-
-          <DialogActions className="p-4">
-            <Button
-              onClick={() => setShowVerificationDialog(false)}
-              disabled={loading}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              startIcon={
-                loading ? <CircularProgress size={20} /> : <UploadIcon />
-              }
-            >
-              {loading ? t("submitting") : t("submit")}
-            </Button>
-          </DialogActions>
-        </form>
+          <SubmitVerification />
       </Dialog>
 
       {/* Snackbar */}
@@ -776,8 +724,12 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       </Snackbar>
 
       {/* Payment History */}
-      <Box className="mt-6">
-        <Typography variant="h4" component="h2" className="mb-4 font-bold text-gray-800 dark:text-white">
+      <Box className="mt-20">
+        <Typography
+          variant="h4"
+          component="h2"
+          className="mb-4 font-bold text-gray-800 dark:text-white"
+        >
           {t("paymentHistory")}
         </Typography>
         <PaymentHistory />

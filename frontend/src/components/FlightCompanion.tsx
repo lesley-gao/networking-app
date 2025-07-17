@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Container,
@@ -18,28 +18,28 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Flight as FlightIcon,
   Add as AddIcon,
   ContactMail as ContactIcon,
   Help as HelpIcon,
   Person as PersonIcon,
-} from '@mui/icons-material';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { addNotification } from '../store/slices/uiSlice';
-import { selectIsAuthenticated } from '../store/slices/authSelectors';
-import { 
+} from "@mui/icons-material";
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { addNotification } from "../store/slices/uiSlice";
+import { selectIsAuthenticated } from "../store/slices/authSelectors";
+import {
   useGetFlightCompanionRequestsQuery,
   useGetFlightCompanionOffersQuery,
   useCreateFlightCompanionRequestMutation,
   type FlightCompanionRequest,
   type FlightCompanionOffer,
-  type CreateFlightCompanionRequestData
-} from '../store/api/flightCompanionApi';
-import FlightCompanionRequestForm from './forms/FlightCompanionRequestForm';
-import FlightCompanionOfferForm from './forms/FlightCompanionOfferForm';
+  type CreateFlightCompanionRequestData,
+} from "../store/api/flightCompanionApi";
+import FlightCompanionRequestForm from "./forms/FlightCompanionRequestForm";
+import FlightCompanionOfferForm from "./forms/FlightCompanionOfferForm";
 
 // TypeScript Interfaces
 interface FlightCompanionProps {}
@@ -49,44 +49,48 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   // State Management
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
-  const [formType, setFormType] = useState<'request' | 'offer'>('request');
+  const [formType, setFormType] = useState<"request" | "offer">("request");
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
+    severity: "success" | "error" | "info" | "warning";
   }>({
     open: false,
-    message: '',
-    severity: 'info',
+    message: "",
+    severity: "info",
   });
 
   // Redux Integration
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  
+
   // RTK Query hooks replace manual fetch calls and Redux slice integration
   const {
     data: requests = [],
     isLoading: requestsLoading,
     error: requestsError,
-    refetch: refetchRequests
+    refetch: refetchRequests,
   } = useGetFlightCompanionRequestsQuery();
-  
+
   const {
     data: offers = [],
     isLoading: offersLoading,
     error: offersError,
-    refetch: refetchOffers
+    refetch: refetchOffers,
   } = useGetFlightCompanionOffersQuery();
-  
-  const [createRequest, { isLoading: createRequestLoading }] = useCreateFlightCompanionRequestMutation();
+
+  const [createRequest, { isLoading: createRequestLoading }] =
+    useCreateFlightCompanionRequestMutation();
 
   // Loading and error states
   const isLoading = requestsLoading || offersLoading;
   const error = requestsError || offersError;
 
   // Event Handlers
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
+  const handleTabChange = (
+    event: React.SyntheticEvent,
+    newValue: number
+  ): void => {
     setActiveTab(newValue);
   };
 
@@ -107,97 +111,113 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
       // Use RTK Query mutation instead of manual fetch
       await createRequest(requestData).unwrap();
-      
-      dispatch(addNotification({
-        message: 'Flight companion request created successfully!',
-        type: 'success',
-      }));
-      
+
+      dispatch(
+        addNotification({
+          message: "Flight companion request created successfully!",
+          type: "success",
+        })
+      );
+
       setShowCreateForm(false);
-      
     } catch (error) {
-      console.error('Error creating request:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error creating request';
-      showSnackbar(errorMessage, 'error');
-      
-      dispatch(addNotification({
-        message: 'Failed to create flight companion request',
-        type: 'error',
-      }));
+      console.error("Error creating request:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error creating request";
+      showSnackbar(errorMessage, "error");
+
+      dispatch(
+        addNotification({
+          message: "Failed to create flight companion request",
+          type: "error",
+        })
+      );
     }
   };
 
   const handleOfferSubmit = async (data: any): Promise<void> => {
     try {
       // TODO: Implement offer creation using RTK Query when API is ready
-      console.log('Offer data:', data);
-      
-      dispatch(addNotification({
-        message: 'Flight companion offer created successfully!',
-        type: 'success',
-      }));
-      
+      console.log("Offer data:", data);
+
+      dispatch(
+        addNotification({
+          message: "Flight companion offer created successfully!",
+          type: "success",
+        })
+      );
+
       setShowCreateForm(false);
-      showSnackbar('Offer created successfully! (Mock implementation)', 'success');
-      
+      showSnackbar(
+        "Offer created successfully! (Mock implementation)",
+        "success"
+      );
     } catch (error) {
-      console.error('Error creating offer:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error creating offer';
-      showSnackbar(errorMessage, 'error');
-      
-      dispatch(addNotification({
-        message: 'Failed to create flight companion offer',
-        type: 'error',
-      }));
+      console.error("Error creating offer:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error creating offer";
+      showSnackbar(errorMessage, "error");
+
+      dispatch(
+        addNotification({
+          message: "Failed to create flight companion offer",
+          type: "error",
+        })
+      );
     }
   };
 
-
-
   const handleContactTraveler = (request: FlightCompanionRequest): void => {
     // Implementation for contacting traveler
-    console.log('Contacting traveler:', request);
-    showSnackbar('Contact feature coming soon!', 'info');
+    console.log("Contacting traveler:", request);
+    showSnackbar("Contact feature coming soon!", "info");
   };
 
   const handleContactHelper = (offer: FlightCompanionOffer): void => {
     // Implementation for contacting helper
-    console.log('Contacting helper:', offer);
-    showSnackbar('Contact feature coming soon!', 'info');
+    console.log("Contacting helper:", offer);
+    showSnackbar("Contact feature coming soon!", "info");
   };
 
   const showSnackbar = (
     message: string,
-    severity: 'success' | 'error' | 'info' | 'warning'
+    severity: "success" | "error" | "info" | "warning"
   ): void => {
     setSnackbar({ open: true, message, severity });
   };
 
   const closeSnackbar = (): void => {
-    setSnackbar(prev => ({ ...prev, open: false }));
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   const handleOpenForm = () => {
     if (!isAuthenticated) {
       setSnackbar({
         open: true,
-        message: 'Please log in to use this feature.',
-        severity: 'warning',
+        message: "Please log in to use this feature.",
+        severity: "warning",
       });
       return;
     }
-    setFormType(activeTab === 0 ? 'request' : 'offer');
+    setFormType(activeTab === 0 ? "request" : "offer");
     setShowCreateForm(true);
   };
 
   // Render Functions
   const renderRequestCard = (request: FlightCompanionRequest): JSX.Element => (
-        <Card key={request.id} className="h-full hover:shadow-lg transition-shadow duration-200 flex flex-col" style={{ minHeight: '320px' }}>
-        <CardContent className="flex-grow">
+    <Card
+      key={request.id}
+      className="h-full hover:shadow-lg transition-shadow duration-200 flex flex-col"
+      style={{ minHeight: "320px" }}
+    >
+      <CardContent className="flex-grow">
         <Box className="flex justify-between items-start mb-3">
           <Box className="flex items-center space-x-2">
-            <FlightIcon className="text-blue-600" />
-            <Typography variant="h6" className="font-semibold text-gray-900 dark:text-gray-100">
+            <FlightIcon className="text-[#0B3866]" />
+            <Typography
+              variant="h6"
+              className="font-semibold text-gray-900 dark:text-gray-100"
+            >
               {request.flightNumber} - {request.airline}
             </Typography>
           </Box>
@@ -209,12 +229,19 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         </Box>
 
         <Box className="space-y-2 mb-3">
-          <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
-            <strong>Date:</strong> {new Date(request.flightDate).toLocaleDateString()}
+          <Typography
+            variant="body2"
+            className="text-gray-600 dark:text-gray-300"
+          >
+            <strong>Date:</strong>{" "}
+            {new Date(request.flightDate).toLocaleDateString()}
           </Typography>
 
           {request.travelerName && (
-            <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
+            <Typography
+              variant="body2"
+              className="text-gray-600 dark:text-gray-300"
+            >
               <PersonIcon className="inline w-4 h-4 mr-1" />
               <strong>Traveler:</strong> {request.travelerName}
             </Typography>
@@ -222,18 +249,27 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
           {request.specialNeeds && (
             <Box className="mb-2">
-              <Typography variant="body2" className="text-gray-600 dark:text-gray-300">
+              <Typography
+                variant="body2"
+                className="text-gray-600 dark:text-gray-300"
+              >
                 <HelpIcon className="inline w-4 h-4 mr-1" />
                 <strong>Help Needed:</strong>
               </Typography>
-              <Typography variant="body2" className="ml-5 text-gray-700 dark:text-gray-200">
+              <Typography
+                variant="body2"
+                className="ml-5 text-gray-700 dark:text-gray-200"
+              >
                 {request.specialNeeds}
               </Typography>
             </Box>
           )}
 
           {request.additionalNotes && (
-            <Typography variant="body2" className="mb-2 text-gray-600 dark:text-gray-300">
+            <Typography
+              variant="body2"
+              className="mb-2 text-gray-600 dark:text-gray-300"
+            >
               <strong>Notes:</strong> {request.additionalNotes}
             </Typography>
           )}
@@ -251,8 +287,8 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
       <CardActions className="justify-between bg-gray-50 dark:bg-gray-800">
         <Chip
-          label={request.isMatched ? 'Matched' : 'Looking for Helper'}
-          color={request.isMatched ? 'warning' : 'success'}
+          label={request.isMatched ? "Matched" : "Looking for Helper"}
+          color={request.isMatched ? "warning" : "success"}
           variant="outlined"
           size="small"
         />
@@ -260,7 +296,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           variant="contained"
           size="small"
           startIcon={<ContactIcon />}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-[#0B3866] hover:bg-[#0B3866]/90"
           onClick={() => handleContactTraveler(request)}
         >
           Contact
@@ -270,12 +306,18 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   );
 
   const renderOfferCard = (offer: FlightCompanionOffer): JSX.Element => (
-    <Card key={offer.id} className="h-full hover:shadow-lg transition-shadow duration-200">
+    <Card
+      key={offer.id}
+      className="h-full hover:shadow-lg transition-shadow duration-200"
+    >
       <CardContent>
         <Box className="flex justify-between items-start mb-3">
           <Box className="flex items-center space-x-2">
-            <FlightIcon className="text-green-600" />
-            <Typography variant="h6" className="font-semibold text-gray-900 dark:text-gray-100">
+            <FlightIcon className="text-[#168046]" />
+            <Typography
+              variant="h6"
+              className="font-semibold text-gray-900 dark:text-gray-100"
+            >
               {offer.flightNumber} - {offer.airline}
             </Typography>
           </Box>
@@ -286,19 +328,33 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           />
         </Box>
 
-        <Typography variant="body2" className="mb-2 text-gray-600 dark:text-gray-300">
-          <strong>Date:</strong> {new Date(offer.flightDate).toLocaleDateString()}
+        <Typography
+          variant="body2"
+          className="mb-2 text-gray-600 dark:text-gray-300"
+        >
+          <strong>Date:</strong>{" "}
+          {new Date(offer.flightDate).toLocaleDateString()}
         </Typography>
 
-        <Typography variant="body2" className="mb-2 text-gray-600 dark:text-gray-300">
-          <strong>Services:</strong> {offer.availableServices || 'General assistance'}
+        <Typography
+          variant="body2"
+          className="mb-2 text-gray-600 dark:text-gray-300"
+        >
+          <strong>Services:</strong>{" "}
+          {offer.availableServices || "General assistance"}
         </Typography>
 
-        <Typography variant="body2" className="mb-2 text-gray-600 dark:text-gray-300">
-          <strong>Languages:</strong> {offer.languages || 'Not specified'}
+        <Typography
+          variant="body2"
+          className="mb-2 text-gray-600 dark:text-gray-300"
+        >
+          <strong>Languages:</strong> {offer.languages || "Not specified"}
         </Typography>
 
-        <Typography variant="body2" className="mb-2 text-gray-600 dark:text-gray-300">
+        <Typography
+          variant="body2"
+          className="mb-2 text-gray-600 dark:text-gray-300"
+        >
           <strong>Experience:</strong> Helped {offer.helpedCount} travelers
         </Typography>
       </CardContent>
@@ -314,7 +370,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           variant="contained"
           size="small"
           startIcon={<ContactIcon />}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#168046] hover:bg-[#168046]/90"
           onClick={() => handleContactHelper(offer)}
         >
           Contact
@@ -334,8 +390,8 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           <Typography variant="body2" className="mb-4">
             {error.toString()}
           </Typography>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={() => {
               refetchRequests();
               refetchOffers();
@@ -353,10 +409,17 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       {/* Header */}
       <Paper elevation={0} className="mb-8 p-6">
         <Box className="text-center">
-          <Typography variant="h3" component="h1" className="font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <Typography
+            variant="h3"
+            component="h1"
+            className="font-bold text-gray-900 dark:text-gray-100 mb-2"
+          >
             Flight Companion Service
           </Typography>
-          <Typography variant="body1" className="text-gray-600 dark:text-gray-300">
+          <Typography
+            variant="body1"
+            className="text-gray-600 dark:text-gray-300"
+          >
             Connect with helpful travelers on your flight route
           </Typography>
         </Box>
@@ -364,8 +427,8 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
       {/* Navigation Tabs */}
       <Paper elevation={1} className="mb-6">
-        <Tabs 
-          value={activeTab} 
+        <Tabs
+          value={activeTab}
           onChange={handleTabChange}
           className="border-b border-gray-200"
           textColor="primary"
@@ -392,12 +455,12 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           startIcon={<AddIcon />}
           onClick={handleOpenForm}
           className={`px-8 py-3  my-3 text-white ${
-            activeTab === 0 
-              ? 'bg-blue-600 hover:bg-blue-700' 
-              : 'bg-green-600 hover:bg-green-700'
+            activeTab === 0
+              ? "bg-[#0B3866] hover:bg-[#0B3866]/90"
+              : "bg-[#168046] hover:bg-[#168046]/90"
           }`}
         >
-          {activeTab === 0 ? 'Request Help' : 'Offer to Help'}
+          {activeTab === 0 ? "Request Help" : "Offer to Help"}
         </Button>
       </Box>
 
@@ -434,12 +497,12 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                 ) : (
                   <Grid container spacing={3}>
                     {requests.map((request) => (
-                      <Grid 
-                        item 
-                        xs={12} 
-                        sm={12} 
-                        md={6} 
-                        lg={4} 
+                      <Grid
+                        item
+                        xs={12}
+                        sm={12}
+                        md={6}
+                        lg={4}
                         xl={3}
                         key={request.id}
                         className="flex flex-col"
@@ -475,9 +538,17 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                     </Typography>
                   </Paper>
                 ) : (
-                  <Grid container spacing={2}>
+                  <Grid container spacing={2} >
                     {offers.map((offer) => (
-                      <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={offer.id}>
+                      <Grid
+                        item
+                        xs={12}
+                        sm={12}
+                        md={6}
+                        lg={4}
+                        xl={4}
+                        key={offer.id}
+                      >
                         {renderOfferCard(offer)}
                       </Grid>
                     ))}
@@ -497,11 +568,13 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         fullWidth
       >
         <DialogTitle>
-          {formType === 'request' ? 'Request Flight Companion Help' : 'Offer to Help as Flight Companion'}
+          {formType === "request"
+            ? "Request Flight Companion Help"
+            : "Offer to Help as Flight Companion"}
         </DialogTitle>
 
         <DialogContent>
-          {formType === 'request' ? (
+          {formType === "request" ? (
             <FlightCompanionRequestForm
               onSubmit={handleRequestSubmit}
               onCancel={() => setShowCreateForm(false)}
@@ -522,10 +595,10 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         open={snackbar.open}
         autoHideDuration={2000}
         onClose={closeSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert 
-          onClose={closeSnackbar} 
+        <Alert
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           variant="filled"
         >

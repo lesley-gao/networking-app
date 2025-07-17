@@ -192,7 +192,7 @@ const Pickup: React.FC<PickupProps> = () => {
       <CardContent>
         <Box className="flex justify-between items-start mb-4">
           <Box className="flex items-center space-x-3">
-            <FlightIcon className="text-blue-600" />
+            <FlightIcon className="text-[#0B3866]" />
             <Box>
               <Typography variant="h6" className="font-semibold text-gray-900">
                 {request.flightNumber}
@@ -266,7 +266,7 @@ const Pickup: React.FC<PickupProps> = () => {
           size="small"
           startIcon={<ContactIcon />}
           onClick={() => handleContactPassenger(request)}
-          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+          className="text-[#0B3866] border-[#0B3866] hover:bg-[#0B3866]/10"
         >
           Contact
         </Button>
@@ -279,7 +279,7 @@ const Pickup: React.FC<PickupProps> = () => {
       <CardContent>
         <Box className="flex justify-between items-start mb-4">
           <Box className="flex items-center space-x-3">
-            <TaxiIcon className="text-green-600" />
+            <TaxiIcon className="text-[#168046]" />
             <Box>
               <Typography variant="h6" className="font-semibold text-gray-900">
                 {offer.vehicleType}
@@ -353,7 +353,7 @@ const Pickup: React.FC<PickupProps> = () => {
           size="small"
           startIcon={<ContactIcon />}
           onClick={() => handleContactDriver(offer)}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#168046] hover:bg-[#168046]/90"
         >
           Contact
         </Button>
@@ -431,8 +431,8 @@ const Pickup: React.FC<PickupProps> = () => {
           onClick={() => handleOpenCreateDialog(activeTab === 0 ? 'request' : 'offer')}
           className={`px-8 py-3  my-3 text-white ${
             activeTab === 0 
-              ? 'bg-blue-600 hover:bg-blue-700' 
-              : 'bg-green-600 hover:bg-green-700'
+              ? 'bg-[#0B3866] hover:bg-[#0B3866]/90' 
+              : 'bg-[#168046] hover:bg-[#168046]/90'
           }`}
         >
           {activeTab === 0 ? 'Request Pickup' : 'Offer Service'}

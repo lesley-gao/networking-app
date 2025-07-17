@@ -13,11 +13,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Navigation />
       <Container
         maxWidth="lg"
-        sx={{
-          flex: 1,
-          py: 3,
-          px: 2,
-        }}
       >
         {children}
       </Container>

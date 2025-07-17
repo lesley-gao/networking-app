@@ -138,7 +138,7 @@ const Register: React.FC = () => {
         maxWidth={800}
         mx="auto"
         my={6}
-        p={3}
+        p={6}
         boxShadow={2}
         borderRadius={2}
         bgcolor="background.paper"
@@ -315,7 +315,7 @@ const Register: React.FC = () => {
                 color="primary"
                 fullWidth
                 disabled={isLoading}
-                sx={{ mt: 2 }}
+                sx={{ mt: 2, padding: 2, fontSize: 16, fontWeight: "bold" }}
               >
                 {isLoading ? t("registering", "Registering...") : t("register")}
               </Button>
