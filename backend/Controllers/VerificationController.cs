@@ -43,19 +43,50 @@ namespace NetworkingApp.Controllers
         [HttpPost("upload")]
         [Authorize]
         [RequestSizeLimit(10 * 1024 * 1024)] // 10MB limit
-        public async Task<IActionResult> UploadDocument([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadDocument()
         {
+            _logger.LogInformation("=== UploadDocument method called ===");
+            _logger.LogInformation("Request Content-Type: {ContentType}", Request.ContentType);
+            _logger.LogInformation("Request has form: {HasForm}", Request.HasFormContentType);
             try
             {
+                // Manually extract the file from the request
+                var file = Request.Form.Files.FirstOrDefault();
+                _logger.LogInformation("Files in request: {FileCount}", Request.Form.Files.Count);
+                _logger.LogInformation("Form fields count: {FormFieldsCount}", Request.Form.Count);
+
+                _logger.LogInformation("Starting upload for file: {FileName}, Size: {FileSize}, ContentType: {ContentType}", 
+                    file?.FileName, file?.Length, file?.ContentType);
+
                 if (file == null || file.Length == 0)
                 {
+                    _logger.LogWarning("No file uploaded or file is empty");
                     return BadRequest(new { message = "No file uploaded" });
                 }
 
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                _logger.LogInformation("User ID from claims: {UserId}", userIdClaim);
+
                 if (!int.TryParse(userIdClaim, out int userId))
                 {
+                    _logger.LogWarning("Invalid user ID claim: {UserIdClaim}", userIdClaim);
                     return Unauthorized(new { message = "Invalid user context" });
+                }
+
+                _logger.LogInformation("About to call BlobStorageService.UploadVerificationDocumentAsync");
+
+                // Upload to blob storage
+                using var fileStream = file.OpenReadStream();
+                var uploadResult = await _blobStorageService.UploadVerificationDocumentAsync(
+                    fileStream, file.FileName, file.ContentType, userId);
+
+                _logger.LogInformation("BlobStorageService result: IsSuccess={IsSuccess}, ErrorMessage={ErrorMessage}", 
+                    uploadResult.IsSuccess, uploadResult.ErrorMessage);
+
+                if (!uploadResult.IsSuccess)
+                {
+                    _logger.LogWarning("Blob storage upload failed: {ErrorMessage}", uploadResult.ErrorMessage);
+                    return BadRequest(new { message = uploadResult.ErrorMessage });
                 }
 
                 // Check if user already has a verification document
@@ -65,16 +96,6 @@ namespace NetworkingApp.Controllers
                 if (existingDocument != null && !existingDocument.IsRejected)
                 {
                     return BadRequest(new { message = "User already has a verification document. Only rejected documents can be replaced." });
-                }
-
-                // Upload to blob storage
-                using var fileStream = file.OpenReadStream();
-                var uploadResult = await _blobStorageService.UploadVerificationDocumentAsync(
-                    fileStream, file.FileName, file.ContentType, userId);
-
-                if (!uploadResult.IsSuccess)
-                {
-                    return BadRequest(new { message = uploadResult.ErrorMessage });
                 }
 
                 // Save metadata to database
@@ -118,6 +139,49 @@ namespace NetworkingApp.Controllers
                     ["controller"] = "VerificationController"
                 });
                 return StatusCode(500, new { message = "An error occurred while uploading the document" });
+            }
+        }
+
+        /// <summary>
+        /// Test endpoint to verify the route is working
+        /// </summary>
+        [HttpGet("test")]
+        [Authorize]
+        public IActionResult Test()
+        {
+            _logger.LogInformation("=== Test endpoint called ===");
+            return Ok(new { message = "Verification controller is working", timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// Temporary endpoint to create the VerificationDocuments table
+        /// </summary>
+        [HttpPost("create-table")]
+        [Authorize]
+        public IActionResult CreateTable()
+        {
+            try
+            {
+                _db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS VerificationDocuments (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        UserId INTEGER NOT NULL,
+                        FileName TEXT NOT NULL,
+                        BlobUri TEXT NOT NULL,
+                        ContentType TEXT,
+                        UploadedAt TEXT NOT NULL,
+                        IsApproved INTEGER NOT NULL DEFAULT 0,
+                        IsRejected INTEGER NOT NULL DEFAULT 0,
+                        AdminComment TEXT,
+                        FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id)
+                    );");
+                
+                return Ok(new { message = "VerificationDocuments table created successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating VerificationDocuments table");
+                return StatusCode(500, new { message = "Error creating table", error = ex.Message });
             }
         }
 

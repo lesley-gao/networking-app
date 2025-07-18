@@ -131,6 +131,7 @@
   "completedServices": "已完成服务",
   "averageRating": "平均评分",
   "profileUpdated": "个人资料更新成功！",
+  "languageChanged": "语言已更改为",
   "errorLoadingProfile": "加载个人资料时出错",
   "errorUpdatingProfile": "更新个人资料时出错",
   "errorLoadingStats": "加载统计信息时出错",

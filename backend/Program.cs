@@ -89,6 +89,26 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
 });
 
+// Configure form options for file uploads
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = int.MaxValue;
+});
+
+// Configure request size limits
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+});
+
+// Configure Kestrel for larger request sizes
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+});
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -215,6 +235,3 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
-
-// Make Program class accessible for testing
-public partial class Program { }

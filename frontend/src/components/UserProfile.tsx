@@ -17,9 +17,8 @@ import {
   Snackbar,
   CircularProgress,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -71,9 +70,67 @@ interface UserStats {
 
 interface UserProfileProps {}
 
+// Custom Phone Number Input Component
+interface PhoneNumberInputProps {
+  label: string;
+  value: string | undefined;
+  onChange: (value: string) => void;
+  error?: boolean;
+  helperText?: string;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
+  label,
+  value,
+  onChange,
+  error,
+  helperText,
+  disabled,
+  placeholder = "21 123 4567"
+}) => {
+  // Remove +64 prefix for display and add it back when saving
+  const displayValue = (value || '').startsWith('+64') ? (value || '').substring(3) : value || '';
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    // Only allow numbers and spaces
+    const cleanedValue = inputValue.replace(/[^0-9\s]/g, '');
+    // Add +64 prefix
+    const fullValue = cleanedValue ? `+64${cleanedValue}` : '';
+    onChange(fullValue);
+  };
+
+  return (
+    <TextField
+      label={label}
+      value={displayValue || ''}
+      onChange={handleChange}
+      error={error}
+      helperText={helperText}
+      disabled={disabled}
+      placeholder={placeholder}
+      fullWidth
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <PhoneIcon className="text-gray-400" sx={{ mr: 1 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                +64
+              </Typography>
+            </Box>
+          </InputAdornment>
+        )
+      }}
+    />
+  );
+};
+
 // UserProfile Component
 const UserProfile: React.FC<UserProfileProps> = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Zod schemas and types (must be inside component, before useForm)
   const userProfileSchema = React.useMemo(
@@ -209,6 +266,14 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         emergencyContact: data.emergencyContact || "",
         emergencyPhone: data.emergencyPhone || "",
       });
+
+      // Sync UI language with user's preferred language
+      const currentUILanguage = i18n.language?.split('-')[0] || 'en';
+      const userPreferredLanguageCode = data.preferredLanguage === "Chinese" ? "zh" : "en";
+      
+      if (currentUILanguage !== userPreferredLanguageCode) {
+        i18n.changeLanguage(userPreferredLanguageCode);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
       showSnackbar(t("errorLoadingProfile"), "error");
@@ -273,6 +338,16 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       setProfile(updatedProfile);
       setIsEditing(false);
       showSnackbar(t("profileUpdated"), "success");
+
+      // Update UI language if preferred language changed
+      if (data.preferredLanguage !== profile?.preferredLanguage) {
+        const languageCode = data.preferredLanguage === "Chinese" ? "zh" : "en";
+        i18n.changeLanguage(languageCode);
+        
+        // Show language change notification
+        const languageName = data.preferredLanguage === "Chinese" ? "中文" : "English";
+        showSnackbar(`${t("languageChanged")} ${languageName}`, "info");
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       showSnackbar(t("errorUpdatingProfile"), "error");
@@ -457,20 +532,16 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       name="phoneNumber"
                       control={profileForm.control}
                       render={({ field, fieldState }) => (
-                        <Input.TextField
-                          {...field}
+                        <PhoneNumberInput
                           label={t("phoneNumber")}
-                          disabled={!isEditing}
+                          value={field.value}
+                          onChange={field.onChange}
                           error={!!fieldState.error}
                           helperText={
                             fieldState.error?.message ||
                             t("validation.phoneNumberFormat")
                           }
-                          fullWidth
-                          placeholder="+64 21 123 4567"
-                          startAdornment={
-                            <PhoneIcon className="text-gray-400" />
-                          }
+                          disabled={!isEditing}
                         />
                       )}
                     />
@@ -489,8 +560,8 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                           helperText={fieldState.error?.message}
                           fullWidth
                           options={[
-                            { value: "English", label: t("english") },
-                            { value: "Chinese", label: t("chinese") },
+                            { value: "English", label: t("English") },
+                            { value: "Chinese", label: t("Chinese") },
                           ]}
                         />
                       )}
@@ -533,20 +604,16 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                       name="emergencyPhone"
                       control={profileForm.control}
                       render={({ field, fieldState }) => (
-                        <Input.TextField
-                          {...field}
+                        <PhoneNumberInput
                           label={t("emergencyPhone")}
-                          disabled={!isEditing}
+                          value={field.value}
+                          onChange={field.onChange}
                           error={!!fieldState.error}
                           helperText={
                             fieldState.error?.message ||
                             t("validation.phoneNumberFormat")
                           }
-                          fullWidth
-                          placeholder="+64 21 123 4567"
-                          startAdornment={
-                            <PhoneIcon className="text-gray-400" />
-                          }
+                          disabled={!isEditing}
                         />
                       )}
                     />

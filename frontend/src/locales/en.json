@@ -131,6 +131,7 @@
   "completedServices": "Completed Services",
   "averageRating": "Average Rating",
   "profileUpdated": "Profile updated successfully!",
+  "languageChanged": "Language changed to",
   "errorLoadingProfile": "Error loading profile",
   "errorUpdatingProfile": "Error updating profile",
   "errorLoadingStats": "Error loading statistics",
