@@ -40,6 +40,8 @@ import PaymentHistory from "./PaymentHistory";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import SubmitVerification from "./forms/SubmitVerification";
+import { useTheme } from "../themes/ThemeProvider";
+import useIsDarkMode from "../themes/useIsDarkMode";
 
 // TypeScript interfaces
 interface UserProfile {
@@ -131,6 +133,8 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
 // UserProfile Component
 const UserProfile: React.FC<UserProfileProps> = () => {
   const { t, i18n } = useTranslation();
+  const { muiTheme } = useTheme();
+  const isDarkMode = useIsDarkMode();
 
   // Zod schemas and types (must be inside component, before useForm)
   const userProfileSchema = React.useMemo(
@@ -219,14 +223,6 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       preferredLanguage: "English",
       emergencyContact: "",
       emergencyPhone: "",
-    },
-  });
-
-  // Verification Form
-  const verificationForm = useForm<VerificationFormData>({
-    resolver: zodResolver(verificationSchema),
-    defaultValues: {
-      documentReferences: "",
     },
   });
 
@@ -356,37 +352,6 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     }
   };
 
-  const handleVerificationSubmit = async (
-    data: VerificationFormData
-  ): Promise<void> => {
-    try {
-      setLoading(true);
-
-      const response = await fetch("/api/user/submit-verification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error("Failed to submit verification");
-
-      showSnackbar(t("verificationDocumentsSubmitted"), "success");
-      setShowVerificationDialog(false);
-      verificationForm.reset();
-
-      // Refresh profile to get updated verification status
-      await fetchProfile();
-    } catch (error) {
-      console.error("Error submitting verification:", error);
-      showSnackbar(t("errorSubmittingVerificationDocuments"), "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Effects
   useEffect(() => {
     if (isAuthenticated) {
@@ -418,7 +383,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
   // Render Stars for Rating
   const renderStars = (rating: number): JSX.Element => (
-    <Box className="flex items-center">
+    <Box className="flex items-center justify-center">
       {[1, 2, 3, 4, 5].map((star) => (
         <StarIcon
           key={star}
@@ -427,7 +392,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
           }`}
         />
       ))}
-      <Typography variant="body2" className="ml-2 text-gray-600">
+      <Typography variant="body2" className="ml-2 text-gray-600 dark:text-gray-100">
         {rating.toFixed(1)} ({profile.totalRatings} {t("reviews")})
       </Typography>
     </Box>
@@ -452,7 +417,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       <Grid container spacing={4}>
         {/* Profile Information */}
         <Grid item xs={12} md={8}>
-          <Card>
+          <Card sx={{ background: isDarkMode ? muiTheme.palette.background.paper : undefined }}>
             <CardContent className="p-6">
               <Box className="flex justify-between items-center mb-6">
                 <Typography variant="h5" className="font-semibold">
@@ -463,6 +428,30 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   startIcon={isEditing ? <CancelIcon /> : <EditIcon />}
                   onClick={handleEditToggle}
                   disabled={loading}
+                  sx={
+                    !isEditing && isDarkMode
+                      ? {
+                          color: '#00BCD4',
+                          borderColor: '#00BCD4',
+                          backgroundColor: 'transparent',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 188, 212, 0.1)',
+                            borderColor: '#00BCD4',
+                            color: '#00BCD4',
+                          },
+                        }
+                      : isEditing && isDarkMode
+                      ? {
+                          color: '#00BCD4',
+                          borderColor: '#00BCD4',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 188, 212, 0.1)',
+                            borderColor: '#00BCD4',
+                            color: '#00BCD4',
+                          },
+                        }
+                      : {}
+                  }
                 >
                   {isEditing ? t("cancel") : t("edit")}
                 </Button>
@@ -650,8 +639,8 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         {/* Sidebar */}
         <Grid item xs={12} md={4}>
           {/* Profile Summary */}
-          <Card className="mb-4">
-            <CardContent className="text-center p-6">
+          <Card className="mb-4" sx={{ background: isDarkMode ? muiTheme.palette.background.paper : undefined }}>
+            <CardContent className="text-center p-6" sx={{ background: isDarkMode ? muiTheme.palette.background.paper : undefined }}>
               <Avatar
                 className="mx-auto mb-4 w-20 h-20 bg-blue-600"
                 sx={{ width: 80, height: 80 }}
@@ -689,7 +678,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
               {renderStars(profile.rating)}
 
-              <Typography variant="body2" className="text-gray-600 mt-3">
+              <Typography variant="body2" className="text-gray-600 mt-3 dark:text-gray-100">
                 {t("memberSince")}{" "}
                 {new Date(profile.createdAt).toLocaleDateString()}
               </Typography>
@@ -701,6 +690,15 @@ const UserProfile: React.FC<UserProfileProps> = () => {
                   onClick={() => setShowVerificationDialog(true)}
                   className="mt-4"
                   fullWidth
+                  sx={isDarkMode ? {
+                    color: '#00BCD4',
+                    borderColor: '#00BCD4',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 188, 212, 0.1)',
+                      borderColor: '#00BCD4',
+                      color: '#00BCD4',
+                    },
+                  } : {}}
                 >
                   {t("submitVerification")}
                 </Button>
@@ -710,8 +708,8 @@ const UserProfile: React.FC<UserProfileProps> = () => {
 
           {/* Statistics */}
           {stats && (
-            <Card>
-              <CardContent className="p-6">
+            <Card sx={{ background: isDarkMode ? muiTheme.palette.background.paper : undefined }}>
+              <CardContent className="p-6" sx={{ background: isDarkMode ? muiTheme.palette.background.paper : undefined }}>
                 <Typography variant="h6" className="font-semibold mb-4">
                   {t("activityStatistics")}
                 </Typography>

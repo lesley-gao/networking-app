@@ -100,7 +100,7 @@ const Login: React.FC = () => {
         borderRadius={2}
         bgcolor="background.paper"
       >
-        <Typography variant="h5" mb={2}>
+        <Typography variant="h5" mb={2} className="text-center">
           Login
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>

@@ -40,6 +40,8 @@ import {
 } from "../store/api/flightCompanionApi";
 import FlightCompanionRequestForm from "./forms/FlightCompanionRequestForm";
 import FlightCompanionOfferForm from "./forms/FlightCompanionOfferForm";
+import { useTheme } from "../themes/ThemeProvider";
+import useIsDarkMode from "../themes/useIsDarkMode";
 
 // TypeScript Interfaces
 interface FlightCompanionProps {}
@@ -203,17 +205,27 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
     setShowCreateForm(true);
   };
 
+  const { muiTheme } = useTheme();
+  const isDarkMode = useIsDarkMode();
+
   // Render Functions
   const renderRequestCard = (request: FlightCompanionRequest): JSX.Element => (
     <Card
       key={request.id}
       className="h-full hover:shadow-lg transition-shadow duration-200 flex flex-col"
-      style={{ minHeight: "320px" }}
+      style={{
+        minHeight: "320px",
+        background: isDarkMode ? muiTheme.palette.background.paper : undefined,
+      }}
     >
       <CardContent className="flex-grow">
         <Box className="flex justify-between items-start mb-3">
           <Box className="flex items-center space-x-2">
-            <FlightIcon className="text-[#0B3866]" />
+            <FlightIcon
+              sx={{
+                color: isDarkMode ? "#00BCD4" : "#0B3866",
+              }}
+            />
             <Typography
               variant="h6"
               className="font-semibold text-gray-900 dark:text-gray-100"
@@ -295,7 +307,15 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           variant="outlined"
           size="small"
           startIcon={<ContactIcon />}
-          className="text-[#0B3866] border-[#0B3866] hover:bg-[#0B3866]/10"
+          sx={{
+            color: isDarkMode ? "#00BCD4" : "#0B3866",
+            borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+            "&:hover": {
+              backgroundColor: isDarkMode
+                ? "rgba(0, 188, 212, 0.1)"
+                : "rgba(11, 56, 102, 0.1)",
+            },
+          }}
           onClick={() => handleContactTraveler(request)}
         >
           Contact
@@ -308,7 +328,12 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
     <Card
       key={offer.id}
       className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200"
-      style={{ minHeight: 340, height: 340, width: '100%' }}
+      style={{
+        minHeight: 340,
+        height: 340,
+        width: "100%",
+        background: isDarkMode ? muiTheme.palette.background.paper : undefined,
+      }}
     >
       <CardContent style={{ flexGrow: 1 }}>
         <Box className="flex justify-between items-start mb-3">
@@ -360,11 +385,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       </CardContent>
 
       <CardActions className="justify-between bg-gray-50 dark:bg-gray-800 mt-auto">
-        <Chip
-          label="Available"
-          color="success"
-          variant="outlined"
-        />
+        <Chip label="Available" color="success" variant="outlined" />
         <Button
           variant="outlined"
           size="small"
@@ -404,7 +425,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   }
 
   return (
-    <Container maxWidth={false} className="py-20 mb-20">
+    <Container maxWidth={false} className="py-20 mb-20 ">
       {/* Header */}
       <Paper elevation={0} className="mb-8 p-6">
         <Box className="text-center">
@@ -432,16 +453,29 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           className="border-b border-gray-200"
           textColor="primary"
           indicatorColor="primary"
+          sx={{
+            "& .MuiTabs-indicator": isDarkMode
+              ? { backgroundColor: "#00BCD4" }
+              : {},
+          }}
         >
           <Tab
             icon={<FlightIcon />}
             label={`Help Requests (${requests.length})`}
             className="font-medium"
+            sx={{
+              color: isDarkMode ? "#fff" : undefined,
+              "&.Mui-selected": isDarkMode ? { color: "#00BCD4" } : {},
+            }}
           />
           <Tab
             icon={<VolunteerActivismIcon />}
             label={`Available Helpers (${offers.length})`}
             className="font-medium"
+            sx={{
+              color: isDarkMode ? "#fff" : undefined,
+              "&.Mui-selected": isDarkMode ? { color: "#00BCD4" } : {},
+            }}
           />
         </Tabs>
       </Paper>
@@ -453,11 +487,23 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           size="large"
           startIcon={<AddIcon />}
           onClick={handleOpenForm}
-          className={`px-8 py-3  my-3 text-white ${
-            activeTab === 0
-              ? "bg-[#0B3866] hover:bg-[#0B3866]/90"
-              : "bg-[#168046] hover:bg-[#168046]/90"
-          }`}
+          sx={{
+            backgroundColor:
+              activeTab === 0
+                ? isDarkMode
+                  ? "#00BCD4"
+                  : "#0B3866"
+                : "#168046",
+            "&:hover": {
+              backgroundColor:
+                activeTab === 0
+                  ? isDarkMode
+                    ? "rgba(0, 188, 212, 0.9)"
+                    : "rgba(11, 56, 102, 0.9)"
+                  : "rgba(22, 128, 70, 0.9)",
+            },
+          }}
+          className="px-8 py-3 my-3 text-white"
         >
           {activeTab === 0 ? "Request Help" : "Offer to Help"}
         </Button>

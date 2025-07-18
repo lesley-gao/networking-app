@@ -18,13 +18,13 @@ export const LanguageSwitcher: React.FC = () => {
 
   return (
     <Box display="flex" alignItems="center" ml={2}>
-      <LanguageIcon className="mr-1 text-gray-600 dark:text-gray-300" />
+      <LanguageIcon className="mr-1 text-[#020F6F]" />
       <Select
         value={currentLang}
         onChange={handleChange}
         variant="standard"
         disableUnderline
-        sx={{ minWidth: 80, color: 'text.primary', fontWeight: 500 }}
+        sx={{ minWidth: 80, color: 'text.primary' }}
       >
         {languages.map((lang) => (
           <MenuItem key={lang.code} value={lang.code}>

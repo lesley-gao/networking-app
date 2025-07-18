@@ -43,7 +43,7 @@ const Features: React.FC = () => {
   return (
     <div className="w-full max-w-5xl mx-auto animate-fade-in px-0 py-28 ">
       <h2
-        className="text-3xl font-bold mb-10 tracking-tight text-white text-center"
+        className="text-3xl font-bold mb-10 tracking-tight text-white text-center dark:text-[#00BCD4]"
       >
         Features
       </h2>

@@ -6,6 +6,8 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { useTheme } from "../../themes/ThemeProvider";
+import useIsDarkMode from "../../themes/useIsDarkMode";
 
 interface VerificationStatus {
   status: string;
@@ -15,6 +17,8 @@ interface VerificationStatus {
 }
 
 const SubmitVerification: React.FC = () => {
+  const { muiTheme } = useTheme();
+  const isDarkMode = useIsDarkMode();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -149,7 +153,7 @@ const SubmitVerification: React.FC = () => {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mx: 5, my: 5 }}>
-      <Typography variant="h5" gutterBottom style={{ color: "#020F6F" }}>
+      <Typography variant="h5" gutterBottom style={{ color: "#020F6F" }} >
         Submit Verification Documents
       </Typography>
       <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
