@@ -114,12 +114,12 @@ const HelpCenter: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-gray-900">
+    <div className="max-w-7xl mx-auto px-6 py-20">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Table of Contents */}
         <div className="lg:col-span-1 hidden lg:block">
           <div className="sticky top-6 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Help Center</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-300">Help Center</h3>
             <ul className="space-y-2 pl-0 list-none">
               {HELP_SECTIONS.map((item) => (
                 <li key={item.id} className="cursor-pointer list-none">
@@ -138,14 +138,14 @@ const HelpCenter: React.FC = () => {
         {/* Main Content */}
         <div className="lg:col-span-3">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Help Center</h1>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">Help Center</h1>
             <p className="text-gray-600 dark:text-gray-300">Last updated: {lastUpdated}</p>
           </div>
 
           <div className="prose prose-lg max-w-none dark:prose-invert">
             {HELP_SECTIONS.map(({ id, title, content, index }) => (
               <section className="mb-8" id={id} key={id}>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">{index}. {title}</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-300 mb-4">{index}. {title}</h2>
                 <div className="text-gray-700 dark:text-gray-300">{content}</div>
               </section>
             ))}

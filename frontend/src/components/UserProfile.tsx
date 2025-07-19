@@ -789,7 +789,7 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       </Snackbar>
 
       {/* Payment History */}
-      <Box className="mt-20">
+      <Box className="my-20">
         <Typography
           variant="h4"
           component="h2"

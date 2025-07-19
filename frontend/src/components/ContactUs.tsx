@@ -110,12 +110,12 @@ const ContactUs: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-gray-900">
+    <div className="max-w-7xl mx-auto px-6 py-20">
       <div className="gap-8">
         {/* Main Content */}
         <div>
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">
               Contact Us
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
@@ -127,7 +127,7 @@ const ContactUs: React.FC = () => {
             {CONTACT_SECTIONS.map(({ id, title, content, index }) =>
               id !== "contact-form" ? (
                 <section className="mb-8" id={id} key={id}>
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-300 mb-4">
                     {index}. {title}
                   </h2>
                   <div className="text-gray-700 dark:text-gray-300">
