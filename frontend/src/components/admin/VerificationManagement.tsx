@@ -80,7 +80,13 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
       }
 
       const data = await response.json();
-      setVerifications(data);
+      // Transform the data to ensure each row has an 'id' field
+      const transformedData = data.map((item: any) => ({
+        ...item,
+        id: item.documentId || item.id, // Use documentId as id if available
+        userEmail: item.userName || item.userEmail, // Map userName to userEmail for display
+      }));
+      setVerifications(transformedData);
     } catch (error) {
       console.error('Error fetching verifications:', error);
       showSnackbar(t('admin.verifications.fetchError', 'Failed to fetch verification documents'), 'error');
@@ -126,6 +132,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
       uploadedAt: '2024-07-10T16:45:00Z',
       isApproved: true,
       isRejected: false,
+      documentReferences: 'ID Card: ID987654321, issued by New Zealand Government, expires 2028-05-15',
       adminComment: 'Document verified successfully. Clear photo and valid ID.',
     },
   ];
@@ -279,7 +286,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
       field: 'uploadedAt',
       headerName: t('admin.verifications.columns.uploadedAt', 'Uploaded'),
       width: 140,
-      valueFormatter: (params) => {
+      valueFormatter: (params: any) => {
         return new Date(params.value).toLocaleDateString();
       },
     },
@@ -340,6 +347,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
               paginationModel: { pageSize: 10 },
             },
           }}
+          getRowId={(row) => row.documentId || row.id}
           slots={{
             toolbar: GridToolbar,
           }}

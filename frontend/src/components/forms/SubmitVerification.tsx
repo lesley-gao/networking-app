@@ -6,8 +6,6 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { useTheme } from "../../themes/ThemeProvider";
-import useIsDarkMode from "../../themes/useIsDarkMode";
 
 interface VerificationStatus {
   status: string;
@@ -17,8 +15,6 @@ interface VerificationStatus {
 }
 
 const SubmitVerification: React.FC = () => {
-  const { muiTheme } = useTheme();
-  const isDarkMode = useIsDarkMode();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -100,28 +96,6 @@ const SubmitVerification: React.FC = () => {
       setSuccess(false);
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleTestEndpoint = async () => {
-    try {
-      const res = await fetch("https://localhost:5001/api/verification/test", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMessage(`Test successful: ${data.message}`);
-        setSuccess(true);
-      } else {
-        setMessage(`Test failed: ${res.status} ${res.statusText}`);
-        setSuccess(false);
-      }
-    } catch (err) {
-      setMessage(`Test error: ${err}`);
-      setSuccess(false);
     }
   };
 
@@ -210,13 +184,6 @@ const SubmitVerification: React.FC = () => {
           <Box>
             <Button type="submit" variant="contained" disabled={uploading || !file}>
               {uploading ? <CircularProgress size={20} /> : "Upload"}
-            </Button>
-            <Button 
-              variant="outlined" 
-              onClick={handleTestEndpoint} 
-              sx={{ ml: 2 }}
-            >
-              Test Endpoint
             </Button>
           </Box>
         </>

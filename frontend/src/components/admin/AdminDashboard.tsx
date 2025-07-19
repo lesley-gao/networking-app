@@ -17,8 +17,6 @@ import {
   VerifiedUser as VerifiedIcon,
   Gavel as DisputeIcon,
   Assessment as StatsIcon,
-  Security as SecurityIcon,
-  Notifications as NotificationsIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../store/hooks';
