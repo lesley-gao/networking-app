@@ -5,6 +5,7 @@
   "logout": "登出",
   "register": "注册",
   "profile": "个人资料",
+  "adminDashboard": "管理员仪表板",
   "fetchData": "获取数据",
   "user": "用户",
   "settings": "设置",

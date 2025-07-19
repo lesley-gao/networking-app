@@ -227,11 +227,12 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
-    await DatabaseSeeder.SeedAsync(context, userManager, logger);
-    await roleService.InitializeRolesAsync();
+    // Seed data including roles and admin user
+    await DatabaseSeeder.SeedAsync(context, userManager, roleManager, logger);
 }
 
 app.Run();

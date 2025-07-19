@@ -96,6 +96,8 @@ const AppContent: React.FC = () => {
         transition="slide"
         autoHideDuration={6000}
       />
+      
+      {/* Admin Navigation Link - Removed since admin dashboard is now in main navigation */}
     </ErrorBoundary>
   );
 };

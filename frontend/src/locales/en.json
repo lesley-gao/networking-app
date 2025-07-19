@@ -5,6 +5,7 @@
   "logout": "Logout",
   "register": "Register",
   "profile": "Profile",
+  "adminDashboard": "Admin Dashboard",
   "fetchData": "Fetch Data",
   "user": "User",
   "settings": "Settings",

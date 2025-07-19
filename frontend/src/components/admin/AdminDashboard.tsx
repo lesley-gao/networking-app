@@ -82,7 +82,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className }) => {
           // Decode JWT token to check for admin role (simplified)
           // In production, use a proper JWT library
           const payload = JSON.parse(atob(token.split('.')[1]));
-          const userRoles = payload?.role || payload?.roles || [];
+          // Check for role in different possible claim names
+          const userRoles = payload?.role || 
+                           payload?.roles || 
+                           payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
+                           [];
           const hasAdminRole = Array.isArray(userRoles) 
             ? userRoles.includes('Admin')
             : userRoles === 'Admin';

@@ -21,6 +21,7 @@ import {
   LocalTaxi as PickupIcon,
   Person as ProfileIcon,
   Home as HomeIcon,
+  AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -41,21 +42,41 @@ interface NavigationProps {
   items?: NavigationItem[];
 }
 
-const getDefaultItems = (): NavigationItem[] => [
-  { textKey: "home", path: "/", icon: <HomeIcon /> },
-  {
-    textKey: "flightCompanion",
-    path: "/flight-companion",
-    icon: <FlightIcon />,
-  },
-  { textKey: "pickupService", path: "/pickup", icon: <PickupIcon /> },
-  {
-    textKey: "profile",
-    path: "/profile",
-    icon: <ProfileIcon />,
-    requiresAuth: true,
+const getDefaultItems = (isAdmin: boolean = false): NavigationItem[] => {
+  const baseItems = [
+    { textKey: "home", path: "/", icon: <HomeIcon /> },
+    {
+      textKey: "flightCompanion",
+      path: "/flight-companion",
+      icon: <FlightIcon />,
+    },
+    { textKey: "pickupService", path: "/pickup", icon: <PickupIcon /> },
+  ];
+
+  if (isAdmin) {
+    // For admin users, show admin dashboard instead of profile
+    return [
+      ...baseItems,
+      {
+        textKey: "adminDashboard",
+        path: "/admin",
+        icon: <AdminIcon />,
+        requiresAuth: true,
+      }
+    ];
+  } else {
+    // For regular users, show profile
+    return [
+      ...baseItems,
+      {
+        textKey: "profile",
+        path: "/profile",
+        icon: <ProfileIcon />,
+        requiresAuth: true,
+      }
+    ];
   }
-];
+};
 
 export const Navigation: React.FC<NavigationProps> = ({
   title = "WingCompanion",
@@ -73,8 +94,30 @@ export const Navigation: React.FC<NavigationProps> = ({
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const user = useAppSelector((state) => state.auth.user);
 
-  // Use default items if none provided, filtered by auth state
-  const allNavigationItems = items || getDefaultItems();
+  // Check if user is admin
+  const isAdmin = React.useMemo(() => {
+    if (!isAuthenticated || !user) return false;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRoles = payload?.role || 
+                         payload?.roles || 
+                         payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
+                         [];
+        return Array.isArray(userRoles) 
+          ? userRoles.includes('Admin')
+          : userRoles === 'Admin';
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+    return false;
+  }, [isAuthenticated, user]);
+
+  // Use default items if none provided, filtered by auth state and user role
+  const allNavigationItems = items || getDefaultItems(isAdmin);
   const navigationItems = allNavigationItems.filter(
     (item) => !item.requiresAuth || isAuthenticated
   );
@@ -240,7 +283,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     variant="body2"
                     sx={{ color: "var(--color-primary)" }}
                   >
-                    {t("Hi")}, {user?.firstName || t("user")}
+                    {t("Hi")}, {isAdmin ? "Admin" : (user?.firstName || t("user"))}
                   </Typography>
                   <Button
                     color="inherit"
