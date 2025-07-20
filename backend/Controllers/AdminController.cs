@@ -48,17 +48,18 @@ namespace NetworkingApp.Controllers
                         u.Email,
                         u.FirstName,
                         u.LastName,
+                        u.PhoneNumber,
+                        u.PreferredLanguage,
                         u.CreatedAt,
+                        u.LastLoginAt,
                         u.IsVerified,
-                        u.IsActive
+                        u.IsActive,
+                        u.Rating,
+                        u.TotalRatings
                     })
                     .ToListAsync();
 
-                return Ok(new
-                {
-                    total = users.Count,
-                    users = users
-                });
+                return Ok(users);
             }
             catch (Exception ex)
             {

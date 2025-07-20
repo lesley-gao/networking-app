@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NetworkingApp.Migrations
 {
     /// <inheritdoc />
-    public partial class AddVerificationDocumentsTable : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,6 +37,7 @@ namespace NetworkingApp.Migrations
                     PreferredLanguage = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
                     IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
                     VerificationDocuments = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    ProfilePictureUrl = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
                     EmergencyContact = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     EmergencyPhone = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
                     Rating = table.Column<decimal>(type: "decimal(3,2)", nullable: false),

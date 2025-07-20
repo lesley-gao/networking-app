@@ -54,13 +54,68 @@ namespace NetworkingApp.Controllers
         {
             if (User.IsInRole("Admin"))
             {
-                var all = await _dbContext.Disputes.Include(d => d.Payment).ToListAsync();
-                return Ok(all);
+                var all = await _dbContext.Disputes
+                    .Include(d => d.Payment)
+                    .Include(d => d.RaisedByUser)
+                    .Include(d => d.ResolvedByAdmin)
+                    .ToListAsync();
+                
+                var disputesWithDetails = all.Select(d => new
+                {
+                    d.Id,
+                    d.PaymentId,
+                    d.RaisedByUserId,
+                    raisedByUser = new
+                    {
+                        name = $"{d.RaisedByUser.FirstName} {d.RaisedByUser.LastName}",
+                        email = d.RaisedByUser.Email,
+                        avatar = d.RaisedByUser.ProfilePictureUrl
+                    },
+                    d.Reason,
+                    d.EvidenceUrl,
+                    d.Status,
+                    d.AdminNotes,
+                    d.ResolvedByAdminId,
+                    createdAt = d.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    resolvedAt = d.ResolvedAt?.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    paymentAmount = d.Payment?.Amount ?? 0,
+                    serviceName = d.Payment?.RequestType ?? "Unknown Service"
+                });
+                
+                return Ok(disputesWithDetails);
             }
             else if (userId.HasValue)
             {
-                var mine = await _dbContext.Disputes.Where(d => d.RaisedByUserId == userId).Include(d => d.Payment).ToListAsync();
-                return Ok(mine);
+                var mine = await _dbContext.Disputes
+                    .Where(d => d.RaisedByUserId == userId)
+                    .Include(d => d.Payment)
+                    .Include(d => d.RaisedByUser)
+                    .Include(d => d.ResolvedByAdmin)
+                    .ToListAsync();
+                
+                var disputesWithDetails = mine.Select(d => new
+                {
+                    d.Id,
+                    d.PaymentId,
+                    d.RaisedByUserId,
+                    raisedByUser = new
+                    {
+                        name = $"{d.RaisedByUser.FirstName} {d.RaisedByUser.LastName}",
+                        email = d.RaisedByUser.Email,
+                        avatar = d.RaisedByUser.ProfilePictureUrl
+                    },
+                    d.Reason,
+                    d.EvidenceUrl,
+                    d.Status,
+                    d.AdminNotes,
+                    d.ResolvedByAdminId,
+                    createdAt = d.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    resolvedAt = d.ResolvedAt?.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    paymentAmount = d.Payment?.Amount ?? 0,
+                    serviceName = d.Payment?.RequestType ?? "Unknown Service"
+                });
+                
+                return Ok(disputesWithDetails);
             }
             return Forbid();
         }

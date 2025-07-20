@@ -376,3 +376,11 @@ h1, h2, h3 {
 .text-secondary {
   color: var(--color-secondary);
 }
+
+.dark .MuiTabs-indicator {
+  background-color: #00BCD4 !important;
+}
+.dark .MuiTab-root.Mui-selected {
+  color: #00BCD4 !important;
+}
+

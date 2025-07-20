@@ -11,8 +11,8 @@ using NetworkingApp.Data;
 namespace NetworkingApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250718005653_AddVerificationDocumentsTable")]
-    partial class AddVerificationDocumentsTable
+    [Migration("20250720125439_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -868,6 +868,10 @@ namespace NetworkingApp.Migrations
                     b.Property<string>("PreferredLanguage")
                         .IsRequired()
                         .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Rating")

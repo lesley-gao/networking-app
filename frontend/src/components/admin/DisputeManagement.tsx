@@ -79,7 +79,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/disputes', {
+      const response = await fetch('/api/dispute', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -165,7 +165,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
   const handleResolveDispute = async (disputeId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/disputes/resolve', {
+      const response = await fetch('/api/dispute/resolve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -288,7 +288,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       field: 'createdAt',
       headerName: t('admin.disputes.columns.createdAt', 'Created'),
       width: 120,
-      valueFormatter: (params) => {
+      valueFormatter: (params: any) => {
         return new Date(params.value).toLocaleDateString();
       },
     },

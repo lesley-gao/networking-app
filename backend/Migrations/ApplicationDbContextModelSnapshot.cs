@@ -867,6 +867,10 @@ namespace NetworkingApp.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(3,2)");
 

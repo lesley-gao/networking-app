@@ -70,6 +70,11 @@ namespace NetworkingApp.Data.SeedData
                 await context.Payments.AddRangeAsync(payments);
                 logger.LogInformation($"Seeded {payments.Count} payments");
 
+                // Seed Disputes
+                var disputes = DisputeSeedDataFactory.CreateSeedDisputes();
+                await context.Disputes.AddRangeAsync(disputes);
+                logger.LogInformation($"Seeded {disputes.Count} disputes");
+
                 // Seed Notifications
                 var notifications = NotificationSeedDataFactory.CreateSeedNotifications();
                 await context.Notifications.AddRangeAsync(notifications);

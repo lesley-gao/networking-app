@@ -23,6 +23,9 @@ namespace NetworkingApp.Models
         [StringLength(500)]
         public string? VerificationDocuments { get; set; }
         
+        [StringLength(200)]
+        public string? ProfilePictureUrl { get; set; }
+        
         [StringLength(100)]
         public string? EmergencyContact { get; set; }
         
