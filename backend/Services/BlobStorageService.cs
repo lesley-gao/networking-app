@@ -61,20 +61,19 @@ namespace NetworkingApp.Services
             _logger = logger;
             _telemetryService = telemetryService;
 
-            var storageAccountName = _configuration["BlobStorage:AccountName"];
             var verificationContainerName = _configuration["BlobStorage:VerificationContainer"];
             var quarantineContainerName = _configuration["BlobStorage:QuarantineContainer"];
 
-            if (string.IsNullOrEmpty(storageAccountName))
+            // Use connection string from environment or config
+            var connectionString = _configuration["AZURE_BLOB_CONNECTION_STRING"]
+                ?? Environment.GetEnvironmentVariable("AZURE_BLOB_CONNECTION_STRING");
+
+            if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("BlobStorage:AccountName configuration is required");
+                throw new InvalidOperationException("AZURE_BLOB_CONNECTION_STRING is required in environment or configuration.");
             }
 
-            // Use Azure Identity for authentication (managed identity in production)
-            var credential = new DefaultAzureCredential();
-            var blobServiceUri = new Uri($"https://{storageAccountName}.blob.core.windows.net");
-            
-            _blobServiceClient = new BlobServiceClient(blobServiceUri, credential);
+            _blobServiceClient = new BlobServiceClient(connectionString);
             _verificationContainer = _blobServiceClient.GetBlobContainerClient(verificationContainerName ?? "verification-documents");
             _quarantineContainer = _blobServiceClient.GetBlobContainerClient(quarantineContainerName ?? "quarantine");
         }

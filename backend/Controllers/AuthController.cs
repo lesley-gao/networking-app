@@ -71,17 +71,23 @@ namespace NetworkingApp.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid credentials." });
 
+            // Block login for deactivated users
+            if (!user.IsActive)
+                return Unauthorized(new { message = "Your account has been deactivated. Please contact support." });
+
             var result = await _signInManager.PasswordSignInAsync(user, dto.Password, dto.RememberMe, lockoutOnFailure: true);
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid credentials or account locked." });
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenService.GenerateToken(user, roles);
-            
+
             // Return both user data and token
-            return Ok(new { 
+            return Ok(new
+            {
                 token,
-                user = new {
+                user = new
+                {
                     id = user.Id,
                     email = user.Email,
                     firstName = user.FirstName,

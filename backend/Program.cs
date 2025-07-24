@@ -13,6 +13,7 @@ using Stripe;
 using Microsoft.AspNetCore.DataProtection; // Add this using directive
 using NetworkingApp.Configuration; // Add this for logging configuration
 using Serilog;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,17 @@ builder.Services.AddStructuredLoggingServices();
 // Stripe configuration
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:ApiKey"];
+
+// Load environment variables from backend/.env
+try
+{
+    DotNetEnv.Env.Load(".env");
+    Console.WriteLine("Loaded .env file. AZURE_BLOB_CONNECTION_STRING starts with: " + (Environment.GetEnvironmentVariable("AZURE_BLOB_CONNECTION_STRING")?.Substring(0, 30) ?? "null"));
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[INFO] Could not load backend/.env: {ex.Message}");
+}
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

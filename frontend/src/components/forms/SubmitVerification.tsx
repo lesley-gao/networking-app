@@ -187,11 +187,11 @@ const SubmitVerification: React.FC = () => {
             </Button>
           </Box>
         </>
-      ) : (
+      ) : verificationStatus.status === 'pending' ? (
         <Alert severity="info" sx={{ mb: 2 }}>
           You already have a verification document in the system. Please wait for admin review or contact support if you need to update your document.
         </Alert>
-      )}
+      ) : null}
 
       {message && (
         <Alert sx={{ mt: 2 }} severity={success ? "success" : "error"}>

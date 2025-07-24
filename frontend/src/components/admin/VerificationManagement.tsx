@@ -60,6 +60,9 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
     message: '',
     severity: 'success' as 'success' | 'error' | 'warning' | 'info',
   });
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
+  const [fileLoading, setFileLoading] = useState(false);
 
   useEffect(() => {
     fetchVerifications();
@@ -141,10 +144,33 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
     setSnackbar({ open: true, message, severity });
   };
 
-  const handleReviewVerification = (verification: VerificationDocument) => {
+  const handleReviewVerification = async (verification: VerificationDocument) => {
     setSelectedVerification(verification);
     setAdminComment(verification.adminComment || '');
     setReviewDialogOpen(true);
+    setFileUrl(null);
+    setFileType(null);
+    if (verification.id) {
+      setFileLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/verification/download/${verification.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error('Failed to fetch file URL');
+        const data = await response.json();
+        setFileUrl(data.downloadUrl);
+        setFileType(verification.contentType);
+      } catch (error) {
+        setFileUrl(null);
+        setFileType(null);
+        showSnackbar(t('admin.verifications.fileFetchError', 'Failed to fetch file for preview'), 'error');
+      } finally {
+        setFileLoading(false);
+      }
+    }
   };
 
   const handleApproveVerification = async (verificationId: number) => {
@@ -256,7 +282,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
           >
             {params.row.userName.split(' ').map((n: string) => n[0]).join('')}
           </Avatar>
-          <Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, lineHeight: 1 }}>
             <Typography variant="body2" className="font-medium">
               {params.row.userName}
             </Typography>
@@ -272,7 +298,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
       headerName: t('admin.verifications.columns.document', 'Document'),
       width: 200,
       renderCell: (params: GridRenderCellParams) => (
-        <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, lineHeight: 1 }}>
           <Typography variant="body2" className="font-medium">
             {params.value}
           </Typography>
@@ -313,7 +339,7 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <Box className="flex space-x-1">
+        <Box className="flex space-x-1" sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
           <Button
             size="small"
             startIcon={<ViewIcon />}
@@ -433,6 +459,48 @@ const VerificationManagement: React.FC<VerificationManagementProps> = ({ classNa
                       <Typography variant="body2" className="bg-gray-50 p-3 rounded">
                         {selectedVerification.documentReferences}
                       </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                {/* File Preview Section */}
+                <Grid item xs={12}>
+                  <Card className="mb-4">
+                    <CardContent>
+                      <Typography variant="h6" className="mb-2">
+                        {t('admin.verifications.reviewDialog.filePreview', 'File Preview')}
+                      </Typography>
+                      {fileLoading ? (
+                        <Typography variant="body2">{t('loading', 'Loading...')}</Typography>
+                      ) : fileUrl && fileType ? (
+                        fileType.startsWith('image/') ? (
+                          <img
+                            src={fileUrl}
+                            alt={selectedVerification.fileName}
+                            style={{ maxWidth: '100%', maxHeight: 400, borderRadius: 8, border: '1px solid #eee' }}
+                          />
+                        ) : fileType === 'application/pdf' ? (
+                          <iframe
+                            src={fileUrl}
+                            title="PDF Preview"
+                            width="100%"
+                            height="400px"
+                            style={{ border: '1px solid #eee', borderRadius: 8 }}
+                          />
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t('admin.verifications.reviewDialog.downloadFile', 'Download File')}
+                          </Button>
+                        )
+                      ) : (
+                        <Typography variant="body2" color="textSecondary">
+                          {t('admin.verifications.reviewDialog.noPreview', 'No preview available.')}
+                        </Typography>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>

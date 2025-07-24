@@ -19,7 +19,7 @@
   "cancel": "取消",
   "error": "发生错误，请重试。",
   "success": "操作成功！",
-  "communityGuidelines": "社区指南",
+  "communityGuidelines": "社区指南",  
   "termsOfService": "服务条款",
   "services": "服务",
   "support": "支持",
@@ -282,7 +282,7 @@
     "accessDenied": "访问被拒绝。需要管理员权限。",
     "dashboard": {
       "title": "管理员仪表板",
-      "subtitle": "管理用户、验证、争议并监控平台健康状况"
+      "subtitle": "管理用户和验证"
     },
     "stats": {
       "totalUsers": "总用户数",

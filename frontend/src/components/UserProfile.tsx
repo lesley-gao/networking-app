@@ -764,7 +764,10 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       {/* Verification Dialog */}
       <Dialog
         open={showVerificationDialog}
-        onClose={() => setShowVerificationDialog(false)}
+        onClose={() => {
+          setShowVerificationDialog(false);
+          fetchProfile(); // Refetch profile when dialog closes
+        }}
         maxWidth="sm"
         fullWidth
       >

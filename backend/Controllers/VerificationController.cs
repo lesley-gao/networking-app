@@ -263,11 +263,31 @@ namespace NetworkingApp.Controllers
                     return Forbid();
                 }
 
-                // Generate secure download URL
-                var downloadUrl = await _blobStorageService.GenerateSecureDownloadUrlAsync(
-                    Path.GetFileName(verificationDocument.BlobUri), TimeSpan.FromMinutes(15));
-
-                return Ok(new { downloadUrl = downloadUrl });
+                try
+                {
+                    // Robustly extract blob name from BlobUri
+                    var blobUri = new Uri(verificationDocument.BlobUri);
+                    var containerName = "verification-documents";
+                    var path = blobUri.AbsolutePath;
+                    var containerIndex = path.IndexOf(containerName + "/", StringComparison.OrdinalIgnoreCase);
+                    if (containerIndex >= 0)
+                    {
+                        var blobName = path.Substring(containerIndex + containerName.Length + 1);
+                        var downloadUrl = await _blobStorageService.GenerateSecureDownloadUrlAsync(
+                            blobName, TimeSpan.FromMinutes(15));
+                        return Ok(new { downloadUrl = downloadUrl });
+                    }
+                    else
+                    {
+                        _logger.LogError("Could not extract blob name from BlobUri: {BlobUri}", verificationDocument.BlobUri);
+                        return StatusCode(500, new { message = "Could not extract blob name from BlobUri" });
+                    }
+                }
+                catch (FileNotFoundException ex)
+                {
+                    _logger.LogWarning(ex, "Blob not found for document {DocumentId}", documentId);
+                    return NotFound(new { message = "Document file not found in storage" });
+                }
             }
             catch (Exception ex)
             {
@@ -336,6 +356,17 @@ namespace NetworkingApp.Controllers
                 verificationDocument.IsApproved = dto.Approve;
                 verificationDocument.IsRejected = !dto.Approve;
                 verificationDocument.AdminComment = dto.Comment;
+
+                // Update user verification status
+                if (verificationDocument.User != null)
+                {
+                    verificationDocument.User.IsVerified = dto.Approve;
+                    _db.Entry(verificationDocument.User).Property(u => u.IsVerified).IsModified = true;
+                }
+                else
+                {
+                    _logger.LogWarning("User entity is null for verification document {DocumentId}", documentId);
+                }
 
                 await _db.SaveChangesAsync();
 

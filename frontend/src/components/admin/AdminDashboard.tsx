@@ -27,7 +27,7 @@ import {
 // Import admin components
 import UserManagement from "./UserManagement";
 import VerificationManagement from "./VerificationManagement";
-import DisputeManagement from "./DisputeManagement";
+//import DisputeManagement from "./DisputeManagement";
 
 interface AdminDashboardProps {
   className?: string;
@@ -187,7 +187,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className }) => {
         >
           {t(
             "admin.dashboard.subtitle",
-            "Manage users, verifications, disputes, and monitor platform health"
+            "Manage users and verifications"
           )}
         </Typography>
       </Box>
@@ -284,12 +284,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className }) => {
               id="admin-tab-1"
               aria-controls="admin-tabpanel-1"
             />
-            <Tab
+            {/* TODO: Add disputes tab & component */}
+            {/* <Tab
               icon={<DisputeIcon />}
               label={t("admin.tabs.disputes", "Disputes")}
               id="admin-tab-2"
               aria-controls="admin-tabpanel-2"
-            />
+            /> */}
           </Tabs>
         </Box>
 
@@ -301,9 +302,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ className }) => {
           <VerificationManagement />
         </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
+        {/* TODO: Add disputes tab & component later when time permits */}
+        {/* <TabPanel value={tabValue} index={2}>
           <DisputeManagement />
-        </TabPanel>
+        </TabPanel> */}
       </Paper>
     </Container>
   );

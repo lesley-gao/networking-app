@@ -22,11 +22,14 @@ import {
   selectAuthLoading,
 } from "../store/slices/authSelectors";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const Register: React.FC = () => {
   const { t } = useTranslation();
   const [apiError, setApiError] = React.useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
+  const navigate = useNavigate();
   // Refactor schema to use t() for validation messages
   const schema = React.useMemo(
     () =>
@@ -84,6 +87,10 @@ const Register: React.FC = () => {
     });
     if (response.ok) {
       await dispatch(loginUser({ email: data.email, password: data.password }));
+      setSuccessSnackbarOpen(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } else {
       // Always show backend top-level message
       let errorMsg = "Registration failed.";
@@ -133,6 +140,20 @@ const Register: React.FC = () => {
           {apiError}
         </Alert>
       </Snackbar>
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSuccessSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="success"
+          onClose={() => setSuccessSnackbarOpen(false)}
+          sx={{ width: "100%" }}
+        >
+          {t("registrationSuccess", "Registration successful! Welcome to the platform.")}
+        </Alert>
+      </Snackbar>
       
       <Box
         maxWidth={800}
@@ -146,11 +167,6 @@ const Register: React.FC = () => {
         <Typography variant="h5" mb={2} align="center">
           {t("registerTitle")}
         </Typography>
-        {error && (
-          <Typography color="error" mb={2}>
-            {t(error)}
-          </Typography>
-        )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <Grid container spacing={1}>

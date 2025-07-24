@@ -282,7 +282,7 @@
     "accessDenied": "Access denied. Admin privileges required.",
     "dashboard": {
       "title": "Admin Dashboard",
-      "subtitle": "Manage users, verifications, disputes, and monitor platform health"
+      "subtitle": "Manage users and verifications"
     },
     "stats": {
       "totalUsers": "Total Users",

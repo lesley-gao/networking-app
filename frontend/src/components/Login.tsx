@@ -60,9 +60,33 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     setApiError(null);
     setSnackbarOpen(false);
-    // Save email to localStorage on submit (in case browser autofill bypasses watch)
     localStorage.setItem("savedEmail", data.email);
     const result = await dispatch(loginUser(data));
+
+    // Always extract the message string
+    let errorMsg = "Login failed.";
+    if (result?.payload) {
+      if (typeof result.payload === "string") {
+        try {
+          // Try to parse as JSON
+          const parsed = JSON.parse(result.payload);
+          if (parsed && typeof parsed.message === "string") {
+            errorMsg = parsed.message;
+          } else {
+            errorMsg = result.payload;
+          }
+        } catch {
+          // Not JSON, use as-is
+          errorMsg = result.payload;
+        }
+      } else if (typeof result.payload === "object" && typeof result.payload.message === "string") {
+        errorMsg = result.payload.message;
+      }
+    } else if (error) {
+      errorMsg = error;
+    }
+
+
     if (
       result?.type &&
       result.type.endsWith("/fulfilled") &&
@@ -70,7 +94,7 @@ const Login: React.FC = () => {
     ) {
       navigate("/flight-companion");
     } else {
-      setApiError(result?.payload?.message || error || "Login failed.");
+      setApiError(errorMsg);
       setSnackbarOpen(true);
     }
   };

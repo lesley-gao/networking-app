@@ -108,5 +108,44 @@ namespace NetworkingApp.Controllers
                 timestamp = DateTime.UtcNow
             });
         }
+
+        [HttpPut("users/{userId}/verify")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> VerifyUser(int userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            user.IsVerified = true;
+            _context.Entry(user).Property(u => u.IsVerified).IsModified = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User verified successfully" });
+        }
+
+        [HttpPut("users/{userId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUserStatus(int userId, [FromBody] UpdateUserStatusDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            user.IsActive = dto.IsActive;
+            _context.Entry(user).Property(u => u.IsActive).IsModified = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User status updated successfully" });
+        }
+
+        public class UpdateUserStatusDto
+        {
+            public bool IsActive { get; set; }
+        }
     }
 } 

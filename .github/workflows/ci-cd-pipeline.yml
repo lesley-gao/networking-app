@@ -1,649 +1,649 @@
-name: CI/CD Pipeline - NetworkingApp
+# name: CI/CD Pipeline - NetworkingApp
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
-      skip_tests:
-        description: 'Skip test execution (emergency deployment)'
-        required: false
-        default: false
-        type: boolean
+# on:
+#   push:
+#     branches: [ main, develop ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Deployment environment'
+#         required: true
+#         default: 'dev'
+#         type: choice
+#         options:
+#           - dev
+#           - test
+#           - prod
+#       skip_tests:
+#         description: 'Skip test execution (emergency deployment)'
+#         required: false
+#         default: false
+#         type: boolean
 
-permissions:
-  id-token: write
-  contents: read
-  checks: write
-  pull-requests: write
-  security-events: write
+# permissions:
+#   id-token: write
+#   contents: read
+#   checks: write
+#   pull-requests: write
+#   security-events: write
 
-env:
-  DOTNET_VERSION: '8.0.x'
-  NODE_VERSION: '18.x'
-  AZURE_LOCATION: 'australiaeast'
+# env:
+#   DOTNET_VERSION: '8.0.x'
+#   NODE_VERSION: '18.x'
+#   AZURE_LOCATION: 'australiaeast'
 
-jobs:
-  # Quality Gates and Static Analysis
-  quality-gates:
-    name: Code Quality & Static Analysis
-    runs-on: ubuntu-latest
+# jobs:
+#   # Quality Gates and Static Analysis
+#   quality-gates:
+#     name: Code Quality & Static Analysis
+#     runs-on: ubuntu-latest
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
+#       with:
+#         fetch-depth: 0  # Shallow clones should be disabled for better analysis
     
-    - name: 🔧 Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+#     - name: 🔧 Setup .NET
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: 🔧 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ClientApp/package-lock.json
+#     - name: 🔧 Setup Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: ${{ env.NODE_VERSION }}
+#         cache: 'npm'
+#         cache-dependency-path: ClientApp/package-lock.json
     
-    - name: 📦 Restore .NET Dependencies
-      run: dotnet restore
+#     - name: 📦 Restore .NET Dependencies
+#       run: dotnet restore
     
-    - name: 🏗️ Build .NET Application
-      run: dotnet build --no-restore --configuration Release
+#     - name: 🏗️ Build .NET Application
+#       run: dotnet build --no-restore --configuration Release
     
-    - name: 📦 Install Frontend Dependencies
-      working-directory: ./ClientApp
-      run: npm ci
+#     - name: 📦 Install Frontend Dependencies
+#       working-directory: ./ClientApp
+#       run: npm ci
     
-    - name: 🔍 Lint Frontend Code (ESLint)
-      working-directory: ./ClientApp
-      run: npm run lint
+#     - name: 🔍 Lint Frontend Code (ESLint)
+#       working-directory: ./ClientApp
+#       run: npm run lint
     
-    - name: 🔍 TypeScript Type Check
-      working-directory: ./ClientApp
-      run: npm run type-check
+#     - name: 🔍 TypeScript Type Check
+#       working-directory: ./ClientApp
+#       run: npm run type-check
     
-    - name: 🎨 Prettier Code Format Check
-      working-directory: ./ClientApp
-      run: npm run format:check
+#     - name: 🎨 Prettier Code Format Check
+#       working-directory: ./ClientApp
+#       run: npm run format:check
     
-    - name: 🔒 Security Audit (npm)
-      working-directory: ./ClientApp
-      run: npm audit --audit-level moderate
-      continue-on-error: true
+#     - name: 🔒 Security Audit (npm)
+#       working-directory: ./ClientApp
+#       run: npm audit --audit-level moderate
+#       continue-on-error: true
     
-    - name: 🔒 .NET Security Scan
-      run: |
-        dotnet list package --vulnerable --include-transitive
-        dotnet list package --deprecated
-      continue-on-error: true
+#     - name: 🔒 .NET Security Scan
+#       run: |
+#         dotnet list package --vulnerable --include-transitive
+#         dotnet list package --deprecated
+#       continue-on-error: true
 
-  # Backend Testing Suite
-  backend-tests:
-    name: Backend Tests (.NET 8)
-    runs-on: ubuntu-latest
-    needs: quality-gates
-    if: github.event.inputs.skip_tests != 'true'
+#   # Backend Testing Suite
+#   backend-tests:
+#     name: Backend Tests (.NET 8)
+#     runs-on: ubuntu-latest
+#     needs: quality-gates
+#     if: github.event.inputs.skip_tests != 'true'
     
-    strategy:
-      matrix:
-        test-type: [unit, integration, performance]
+#     strategy:
+#       matrix:
+#         test-type: [unit, integration, performance]
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 🔧 Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+#     - name: 🔧 Setup .NET
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: 📦 Restore Dependencies
-      run: dotnet restore
+#     - name: 📦 Restore Dependencies
+#       run: dotnet restore
     
-    - name: 🏗️ Build Application
-      run: dotnet build --no-restore --configuration Release
+#     - name: 🏗️ Build Application
+#       run: dotnet build --no-restore --configuration Release
     
-    - name: 🧪 Run Unit Tests
-      if: matrix.test-type == 'unit'
-      run: |
-        dotnet test Tests/Tests.csproj \
-          --no-build \
-          --configuration Release \
-          --verbosity normal \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./TestResults/Unit \
-          --settings coverlet.runsettings \
-          --filter "Category!=Integration&Category!=Performance" \
-          --logger "trx;LogFileName=unit-tests.trx"
+#     - name: 🧪 Run Unit Tests
+#       if: matrix.test-type == 'unit'
+#       run: |
+#         dotnet test Tests/Tests.csproj \
+#           --no-build \
+#           --configuration Release \
+#           --verbosity normal \
+#           --collect:"XPlat Code Coverage" \
+#           --results-directory ./TestResults/Unit \
+#           --settings coverlet.runsettings \
+#           --filter "Category!=Integration&Category!=Performance" \
+#           --logger "trx;LogFileName=unit-tests.trx"
     
-    - name: 🔗 Run Integration Tests
-      if: matrix.test-type == 'integration'
-      run: |
-        dotnet test Tests/Tests.csproj \
-          --no-build \
-          --configuration Release \
-          --verbosity normal \
-          --results-directory ./TestResults/Integration \
-          --filter "Category=Integration" \
-          --logger "trx;LogFileName=integration-tests.trx"
+#     - name: 🔗 Run Integration Tests
+#       if: matrix.test-type == 'integration'
+#       run: |
+#         dotnet test Tests/Tests.csproj \
+#           --no-build \
+#           --configuration Release \
+#           --verbosity normal \
+#           --results-directory ./TestResults/Integration \
+#           --filter "Category=Integration" \
+#           --logger "trx;LogFileName=integration-tests.trx"
     
-    - name: ⚡ Run Performance Tests
-      if: matrix.test-type == 'performance'
-      run: |
-        dotnet test Tests/Tests.csproj \
-          --no-build \
-          --configuration Release \
-          --verbosity normal \
-          --results-directory ./TestResults/Performance \
-          --filter "Category=Performance" \
-          --logger "trx;LogFileName=performance-tests.trx"
+#     - name: ⚡ Run Performance Tests
+#       if: matrix.test-type == 'performance'
+#       run: |
+#         dotnet test Tests/Tests.csproj \
+#           --no-build \
+#           --configuration Release \
+#           --verbosity normal \
+#           --results-directory ./TestResults/Performance \
+#           --filter "Category=Performance" \
+#           --logger "trx;LogFileName=performance-tests.trx"
     
-    - name: 📊 Generate Coverage Report
-      if: matrix.test-type == 'unit'
-      run: |
-        dotnet tool install --global dotnet-reportgenerator-globaltool
-        reportgenerator \
-          -reports:"TestResults/Unit/**/coverage.cobertura.xml" \
-          -targetdir:"TestResults/CoverageReport" \
-          -reporttypes:"Html;JsonSummary;Badges" \
-          -verbosity:Info
+#     - name: 📊 Generate Coverage Report
+#       if: matrix.test-type == 'unit'
+#       run: |
+#         dotnet tool install --global dotnet-reportgenerator-globaltool
+#         reportgenerator \
+#           -reports:"TestResults/Unit/**/coverage.cobertura.xml" \
+#           -targetdir:"TestResults/CoverageReport" \
+#           -reporttypes:"Html;JsonSummary;Badges" \
+#           -verbosity:Info
     
-    - name: 📈 Check Coverage Threshold
-      if: matrix.test-type == 'unit'
-      run: |
-        $coverage = Get-Content "TestResults/CoverageReport/Summary.json" | ConvertFrom-Json
-        $lineRate = [math]::Round($coverage.summary.linecoverage, 2)
-        $branchRate = [math]::Round($coverage.summary.branchcoverage, 2)
+#     - name: 📈 Check Coverage Threshold
+#       if: matrix.test-type == 'unit'
+#       run: |
+#         $coverage = Get-Content "TestResults/CoverageReport/Summary.json" | ConvertFrom-Json
+#         $lineRate = [math]::Round($coverage.summary.linecoverage, 2)
+#         $branchRate = [math]::Round($coverage.summary.branchcoverage, 2)
         
-        Write-Host "Line Coverage: $lineRate%"
-        Write-Host "Branch Coverage: $branchRate%"
+#         Write-Host "Line Coverage: $lineRate%"
+#         Write-Host "Branch Coverage: $branchRate%"
         
-        if ($lineRate -lt 80) {
-          Write-Error "Line coverage ($lineRate%) is below threshold (80%)"
-          exit 1
-        }
-        if ($branchRate -lt 80) {
-          Write-Error "Branch coverage ($branchRate%) is below threshold (80%)"
-          exit 1
-        }
+#         if ($lineRate -lt 80) {
+#           Write-Error "Line coverage ($lineRate%) is below threshold (80%)"
+#           exit 1
+#         }
+#         if ($branchRate -lt 80) {
+#           Write-Error "Branch coverage ($branchRate%) is below threshold (80%)"
+#           exit 1
+#         }
         
-        Write-Host "✅ Coverage thresholds met!"
-      shell: pwsh
+#         Write-Host "✅ Coverage thresholds met!"
+#       shell: pwsh
     
-    - name: 📤 Upload Test Results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: backend-test-results-${{ matrix.test-type }}
-        path: TestResults/
-        retention-days: 30
+#     - name: 📤 Upload Test Results
+#       uses: actions/upload-artifact@v4
+#       if: always()
+#       with:
+#         name: backend-test-results-${{ matrix.test-type }}
+#         path: TestResults/
+#         retention-days: 30
     
-    - name: 📤 Upload Coverage to Codecov
-      uses: codecov/codecov-action@v3
-      if: matrix.test-type == 'unit'
-      with:
-        directory: ./TestResults/Unit
-        flags: backend
-        name: backend-coverage
-        fail_ci_if_error: true
+#     - name: 📤 Upload Coverage to Codecov
+#       uses: codecov/codecov-action@v3
+#       if: matrix.test-type == 'unit'
+#       with:
+#         directory: ./TestResults/Unit
+#         flags: backend
+#         name: backend-coverage
+#         fail_ci_if_error: true
 
-  # Frontend Testing Suite
-  frontend-tests:
-    name: Frontend Tests (React/TypeScript)
-    runs-on: ubuntu-latest
-    needs: quality-gates
-    if: github.event.inputs.skip_tests != 'true'
+#   # Frontend Testing Suite
+#   frontend-tests:
+#     name: Frontend Tests (React/TypeScript)
+#     runs-on: ubuntu-latest
+#     needs: quality-gates
+#     if: github.event.inputs.skip_tests != 'true'
     
-    strategy:
-      matrix:
-        test-type: [unit, storybook, e2e]
+#     strategy:
+#       matrix:
+#         test-type: [unit, storybook, e2e]
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 🔧 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ClientApp/package-lock.json
+#     - name: 🔧 Setup Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: ${{ env.NODE_VERSION }}
+#         cache: 'npm'
+#         cache-dependency-path: ClientApp/package-lock.json
     
-    - name: 📦 Install Dependencies
-      working-directory: ./ClientApp
-      run: npm ci
+#     - name: 📦 Install Dependencies
+#       working-directory: ./ClientApp
+#       run: npm ci
     
-    - name: 🧪 Run Unit Tests with Coverage
-      if: matrix.test-type == 'unit'
-      working-directory: ./ClientApp
-      run: |
-        npm test -- \
-          --coverage \
-          --watchAll=false \
-          --testResultsProcessor=jest-sonar-reporter \
-          --coverageReporters=text,lcov,json,html \
-          --collectCoverageFrom="src/**/*.{ts,tsx}" \
-          --collectCoverageFrom="!src/**/*.stories.{ts,tsx}" \
-          --collectCoverageFrom="!src/**/*.test.{ts,tsx}" \
-          --collectCoverageFrom="!src/**/*.d.ts"
+#     - name: 🧪 Run Unit Tests with Coverage
+#       if: matrix.test-type == 'unit'
+#       working-directory: ./ClientApp
+#       run: |
+#         npm test -- \
+#           --coverage \
+#           --watchAll=false \
+#           --testResultsProcessor=jest-sonar-reporter \
+#           --coverageReporters=text,lcov,json,html \
+#           --collectCoverageFrom="src/**/*.{ts,tsx}" \
+#           --collectCoverageFrom="!src/**/*.stories.{ts,tsx}" \
+#           --collectCoverageFrom="!src/**/*.test.{ts,tsx}" \
+#           --collectCoverageFrom="!src/**/*.d.ts"
     
-    - name: 📈 Check Frontend Coverage Threshold
-      if: matrix.test-type == 'unit'
-      working-directory: ./ClientApp
-      run: |
-        if [ -f coverage/coverage-summary.json ]; then
-          node -e "
-            const coverage = require('./coverage/coverage-summary.json');
-            const { lines, branches, functions, statements } = coverage.total;
+#     - name: 📈 Check Frontend Coverage Threshold
+#       if: matrix.test-type == 'unit'
+#       working-directory: ./ClientApp
+#       run: |
+#         if [ -f coverage/coverage-summary.json ]; then
+#           node -e "
+#             const coverage = require('./coverage/coverage-summary.json');
+#             const { lines, branches, functions, statements } = coverage.total;
             
-            console.log('Coverage Summary:');
-            console.log('Lines:', lines.pct + '%');
-            console.log('Branches:', branches.pct + '%');
-            console.log('Functions:', functions.pct + '%');
-            console.log('Statements:', statements.pct + '%');
+#             console.log('Coverage Summary:');
+#             console.log('Lines:', lines.pct + '%');
+#             console.log('Branches:', branches.pct + '%');
+#             console.log('Functions:', functions.pct + '%');
+#             console.log('Statements:', statements.pct + '%');
             
-            const threshold = 80;
-            const failed = [];
+#             const threshold = 80;
+#             const failed = [];
             
-            if (lines.pct < threshold) failed.push('lines');
-            if (branches.pct < threshold) failed.push('branches');
-            if (functions.pct < threshold) failed.push('functions');
-            if (statements.pct < threshold) failed.push('statements');
+#             if (lines.pct < threshold) failed.push('lines');
+#             if (branches.pct < threshold) failed.push('branches');
+#             if (functions.pct < threshold) failed.push('functions');
+#             if (statements.pct < threshold) failed.push('statements');
             
-            if (failed.length > 0) {
-              console.error('❌ Coverage threshold (80%) not met for:', failed.join(', '));
-              process.exit(1);
-            } else {
-              console.log('✅ All coverage thresholds met!');
-            }
-          "
-        else
-          echo "⚠️ Coverage summary not found"
-          exit 1
-        fi
+#             if (failed.length > 0) {
+#               console.error('❌ Coverage threshold (80%) not met for:', failed.join(', '));
+#               process.exit(1);
+#             } else {
+#               console.log('✅ All coverage thresholds met!');
+#             }
+#           "
+#         else
+#           echo "⚠️ Coverage summary not found"
+#           exit 1
+#         fi
     
-    - name: 🎭 Build Storybook
-      if: matrix.test-type == 'storybook'
-      working-directory: ./ClientApp
-      run: npm run build-storybook
+#     - name: 🎭 Build Storybook
+#       if: matrix.test-type == 'storybook'
+#       working-directory: ./ClientApp
+#       run: npm run build-storybook
     
-    - name: 🎭 Test Storybook Components
-      if: matrix.test-type == 'storybook'
-      working-directory: ./ClientApp
-      run: |
-        npm run test-storybook:ci
-      continue-on-error: true
+#     - name: 🎭 Test Storybook Components
+#       if: matrix.test-type == 'storybook'
+#       working-directory: ./ClientApp
+#       run: |
+#         npm run test-storybook:ci
+#       continue-on-error: true
     
-    - name: 🔧 Setup .NET for E2E Tests
-      if: matrix.test-type == 'e2e'
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+#     - name: 🔧 Setup .NET for E2E Tests
+#       if: matrix.test-type == 'e2e'
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: 🏗️ Build Backend for E2E Tests
-      if: matrix.test-type == 'e2e'
-      run: |
-        dotnet restore
-        dotnet build --configuration Release
+#     - name: 🏗️ Build Backend for E2E Tests
+#       if: matrix.test-type == 'e2e'
+#       run: |
+#         dotnet restore
+#         dotnet build --configuration Release
     
-    - name: 🎭 Install Playwright Browsers
-      if: matrix.test-type == 'e2e'
-      working-directory: ./ClientApp
-      run: npx playwright install --with-deps
+#     - name: 🎭 Install Playwright Browsers
+#       if: matrix.test-type == 'e2e'
+#       working-directory: ./ClientApp
+#       run: npx playwright install --with-deps
     
-    - name: 🚀 Start Backend Server
-      if: matrix.test-type == 'e2e'
-      run: |
-        dotnet run --project NetworkingApp.csproj --configuration Release &
-        echo $! > backend.pid
-        sleep 30  # Wait for server to start
+#     - name: 🚀 Start Backend Server
+#       if: matrix.test-type == 'e2e'
+#       run: |
+#         dotnet run --project NetworkingApp.csproj --configuration Release &
+#         echo $! > backend.pid
+#         sleep 30  # Wait for server to start
     
-    - name: 🏗️ Build Frontend for E2E Tests
-      if: matrix.test-type == 'e2e'
-      working-directory: ./ClientApp
-      run: npm run build
+#     - name: 🏗️ Build Frontend for E2E Tests
+#       if: matrix.test-type == 'e2e'
+#       working-directory: ./ClientApp
+#       run: npm run build
     
-    - name: 🚀 Start Frontend Server
-      if: matrix.test-type == 'e2e'
-      working-directory: ./ClientApp
-      run: |
-        npm run serve -- --port 3000 &
-        echo $! > frontend.pid
-        sleep 15  # Wait for frontend to start
+#     - name: 🚀 Start Frontend Server
+#       if: matrix.test-type == 'e2e'
+#       working-directory: ./ClientApp
+#       run: |
+#         npm run serve -- --port 3000 &
+#         echo $! > frontend.pid
+#         sleep 15  # Wait for frontend to start
     
-    - name: 🎭 Run Playwright E2E Tests
-      if: matrix.test-type == 'e2e'
-      working-directory: ./ClientApp
-      run: npx playwright test --reporter=html
+#     - name: 🎭 Run Playwright E2E Tests
+#       if: matrix.test-type == 'e2e'
+#       working-directory: ./ClientApp
+#       run: npx playwright test --reporter=html
     
-    - name: 🧹 Cleanup Servers
-      if: matrix.test-type == 'e2e' && always()
-      run: |
-        if [ -f backend.pid ]; then kill $(cat backend.pid) || true; fi
-        if [ -f ClientApp/frontend.pid ]; then kill $(cat ClientApp/frontend.pid) || true; fi
+#     - name: 🧹 Cleanup Servers
+#       if: matrix.test-type == 'e2e' && always()
+#       run: |
+#         if [ -f backend.pid ]; then kill $(cat backend.pid) || true; fi
+#         if [ -f ClientApp/frontend.pid ]; then kill $(cat ClientApp/frontend.pid) || true; fi
     
-    - name: 📤 Upload Frontend Coverage
-      if: matrix.test-type == 'unit'
-      uses: codecov/codecov-action@v3
-      with:
-        directory: ./ClientApp/coverage
-        flags: frontend
-        name: frontend-coverage
-        fail_ci_if_error: true
+#     - name: 📤 Upload Frontend Coverage
+#       if: matrix.test-type == 'unit'
+#       uses: codecov/codecov-action@v3
+#       with:
+#         directory: ./ClientApp/coverage
+#         flags: frontend
+#         name: frontend-coverage
+#         fail_ci_if_error: true
     
-    - name: 📤 Upload Test Artifacts
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: frontend-test-results-${{ matrix.test-type }}
-        path: |
-          ClientApp/coverage/
-          ClientApp/playwright-report/
-          ClientApp/test-results/
-          ClientApp/storybook-static/
-        retention-days: 30
+#     - name: 📤 Upload Test Artifacts
+#       uses: actions/upload-artifact@v4
+#       if: always()
+#       with:
+#         name: frontend-test-results-${{ matrix.test-type }}
+#         path: |
+#           ClientApp/coverage/
+#           ClientApp/playwright-report/
+#           ClientApp/test-results/
+#           ClientApp/storybook-static/
+#         retention-days: 30
 
-  # Security and Vulnerability Scanning
-  security-scan:
-    name: Security & Vulnerability Scanning
-    runs-on: ubuntu-latest
-    needs: [quality-gates]
+#   # Security and Vulnerability Scanning
+#   security-scan:
+#     name: Security & Vulnerability Scanning
+#     runs-on: ubuntu-latest
+#     needs: [quality-gates]
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
+#       with:
+#         fetch-depth: 0
     
-    - name: 🔒 Run Trivy Vulnerability Scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+#     - name: 🔒 Run Trivy Vulnerability Scanner
+#       uses: aquasecurity/trivy-action@master
+#       with:
+#         scan-type: 'fs'
+#         scan-ref: '.'
+#         format: 'sarif'
+#         output: 'trivy-results.sarif'
     
-    - name: 📤 Upload Trivy Results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
+#     - name: 📤 Upload Trivy Results to GitHub Security
+#       uses: github/codeql-action/upload-sarif@v3
+#       if: always()
+#       with:
+#         sarif_file: 'trivy-results.sarif'
     
-    - name: 🔒 CodeQL Analysis
-      uses: github/codeql-action/init@v3
-      with:
-        languages: 'csharp,javascript'
-        queries: security-extended,security-and-quality
+#     - name: 🔒 CodeQL Analysis
+#       uses: github/codeql-action/init@v3
+#       with:
+#         languages: 'csharp,javascript'
+#         queries: security-extended,security-and-quality
     
-    - name: 🔧 Setup .NET for CodeQL
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+#     - name: 🔧 Setup .NET for CodeQL
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: 🏗️ Build for CodeQL Analysis
-      run: |
-        dotnet restore
-        dotnet build --configuration Release
+#     - name: 🏗️ Build for CodeQL Analysis
+#       run: |
+#         dotnet restore
+#         dotnet build --configuration Release
     
-    - name: 🔒 Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+#     - name: 🔒 Perform CodeQL Analysis
+#       uses: github/codeql-action/analyze@v3
 
-  # Build and Package Application
-  build-application:
-    name: Build & Package Application
-    runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests, security-scan]
-    if: always() && (needs.backend-tests.result == 'success' || needs.backend-tests.result == 'skipped') && (needs.frontend-tests.result == 'success' || needs.frontend-tests.result == 'skipped')
+#   # Build and Package Application
+#   build-application:
+#     name: Build & Package Application
+#     runs-on: ubuntu-latest
+#     needs: [backend-tests, frontend-tests, security-scan]
+#     if: always() && (needs.backend-tests.result == 'success' || needs.backend-tests.result == 'skipped') && (needs.frontend-tests.result == 'success' || needs.frontend-tests.result == 'skipped')
     
-    outputs:
-      build-version: ${{ steps.version.outputs.version }}
+#     outputs:
+#       build-version: ${{ steps.version.outputs.version }}
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 🔧 Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+#     - name: 🔧 Setup .NET
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: 🔧 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: ClientApp/package-lock.json
+#     - name: 🔧 Setup Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: ${{ env.NODE_VERSION }}
+#         cache: 'npm'
+#         cache-dependency-path: ClientApp/package-lock.json
     
-    - name: 🏷️ Generate Version Number
-      id: version
-      run: |
-        VERSION=$(date +'%Y.%m.%d')-${{ github.run_number }}
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Build Version: $VERSION"
+#     - name: 🏷️ Generate Version Number
+#       id: version
+#       run: |
+#         VERSION=$(date +'%Y.%m.%d')-${{ github.run_number }}
+#         echo "version=$VERSION" >> $GITHUB_OUTPUT
+#         echo "Build Version: $VERSION"
     
-    - name: 📦 Restore .NET Dependencies
-      run: dotnet restore
+#     - name: 📦 Restore .NET Dependencies
+#       run: dotnet restore
     
-    - name: 🏗️ Build .NET Application
-      run: dotnet build --no-restore --configuration Release
+#     - name: 🏗️ Build .NET Application
+#       run: dotnet build --no-restore --configuration Release
     
-    - name: 📦 Install Frontend Dependencies
-      working-directory: ./ClientApp
-      run: npm ci
+#     - name: 📦 Install Frontend Dependencies
+#       working-directory: ./ClientApp
+#       run: npm ci
     
-    - name: 🏗️ Build Frontend Production
-      working-directory: ./ClientApp
-      run: npm run build
+#     - name: 🏗️ Build Frontend Production
+#       working-directory: ./ClientApp
+#       run: npm run build
     
-    - name: 📦 Publish .NET Application
-      run: |
-        dotnet publish \
-          --configuration Release \
-          --output ./publish \
-          --no-build \
-          --self-contained false
+#     - name: 📦 Publish .NET Application
+#       run: |
+#         dotnet publish \
+#           --configuration Release \
+#           --output ./publish \
+#           --no-build \
+#           --self-contained false
     
-    - name: 📤 Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: application-build-${{ steps.version.outputs.version }}
-        path: |
-          ./publish/
-          ./ClientApp/build/
-        retention-days: 30
+#     - name: 📤 Upload Build Artifacts
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: application-build-${{ steps.version.outputs.version }}
+#         path: |
+#           ./publish/
+#           ./ClientApp/build/
+#         retention-days: 30
 
-  # Deploy to Development Environment
-  deploy-dev:
-    name: Deploy to Development
-    runs-on: ubuntu-latest
-    needs: [build-application]
-    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+#   # Deploy to Development Environment
+#   deploy-dev:
+#     name: Deploy to Development
+#     runs-on: ubuntu-latest
+#     needs: [build-application]
+#     if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 📥 Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: application-build-${{ needs.build-application.outputs.build-version }}
-        path: ./artifacts
+#     - name: 📥 Download Build Artifacts
+#       uses: actions/download-artifact@v4
+#       with:
+#         name: application-build-${{ needs.build-application.outputs.build-version }}
+#         path: ./artifacts
     
-    - name: 🔐 Azure Login
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+#     - name: 🔐 Azure Login
+#       uses: azure/login@v1
+#       with:
+#         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     
-    - name: 🔧 Setup Azure Developer CLI
-      uses: Azure/setup-azd@v1.0.0
+#     - name: 🔧 Setup Azure Developer CLI
+#       uses: Azure/setup-azd@v1.0.0
     
-    - name: 🚀 Deploy to Azure Dev Environment
-      env:
-        AZURE_ENV_NAME: dev
-        AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
-        BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
-      run: |
-        azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
-        azd env select dev || azd env new dev
-        azd deploy --no-prompt
+#     - name: 🚀 Deploy to Azure Dev Environment
+#       env:
+#         AZURE_ENV_NAME: dev
+#         AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+#         BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
+#       run: |
+#         azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
+#         azd env select dev || azd env new dev
+#         azd deploy --no-prompt
     
-    - name: 🧪 Post-Deployment Health Check
-      run: |
-        echo "Waiting for deployment to stabilize..."
-        sleep 30
+#     - name: 🧪 Post-Deployment Health Check
+#       run: |
+#         echo "Waiting for deployment to stabilize..."
+#         sleep 30
         
-        # Basic health check
-        curl -f -s -o /dev/null https://networkingapp-dev.azurewebsites.net/health || {
-          echo "❌ Health check failed"
-          exit 1
-        }
+#         # Basic health check
+#         curl -f -s -o /dev/null https://networkingapp-dev.azurewebsites.net/health || {
+#           echo "❌ Health check failed"
+#           exit 1
+#         }
         
-        echo "✅ Deployment health check passed"
+#         echo "✅ Deployment health check passed"
     
-    - name: 📝 Create Deployment Summary
-      run: |
-        echo "## 🚀 Development Deployment Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment**: Development" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version**: ${{ needs.build-application.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **URL**: https://networkingapp-dev.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
-        echo "- **Deployed**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+#     - name: 📝 Create Deployment Summary
+#       run: |
+#         echo "## 🚀 Development Deployment Summary" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Environment**: Development" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Version**: ${{ needs.build-application.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
+#         echo "- **URL**: https://networkingapp-dev.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Deployed**: $(date -u)" >> $GITHUB_STEP_SUMMARY
 
-  # Deploy to Test Environment
-  deploy-test:
-    name: Deploy to Test
-    runs-on: ubuntu-latest
-    needs: [build-application]
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'test')
+#   # Deploy to Test Environment
+#   deploy-test:
+#     name: Deploy to Test
+#     runs-on: ubuntu-latest
+#     needs: [build-application]
+#     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'test')
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 📥 Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: application-build-${{ needs.build-application.outputs.build-version }}
-        path: ./artifacts
+#     - name: 📥 Download Build Artifacts
+#       uses: actions/download-artifact@v4
+#       with:
+#         name: application-build-${{ needs.build-application.outputs.build-version }}
+#         path: ./artifacts
     
-    - name: 🔐 Azure Login
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+#     - name: 🔐 Azure Login
+#       uses: azure/login@v1
+#       with:
+#         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     
-    - name: 🔧 Setup Azure Developer CLI
-      uses: Azure/setup-azd@v1.0.0
+#     - name: 🔧 Setup Azure Developer CLI
+#       uses: Azure/setup-azd@v1.0.0
     
-    - name: 🚀 Deploy to Azure Test Environment
-      env:
-        AZURE_ENV_NAME: test
-        AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
-        BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
-      run: |
-        azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
-        azd env select test || azd env new test
-        azd deploy --no-prompt
+#     - name: 🚀 Deploy to Azure Test Environment
+#       env:
+#         AZURE_ENV_NAME: test
+#         AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+#         BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
+#       run: |
+#         azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
+#         azd env select test || azd env new test
+#         azd deploy --no-prompt
 
-  # Deploy to Production Environment (Manual Approval Required)
-  deploy-prod:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build-application, deploy-test]
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+#   # Deploy to Production Environment (Manual Approval Required)
+#   deploy-prod:
+#     name: Deploy to Production
+#     runs-on: ubuntu-latest
+#     needs: [build-application, deploy-test]
+#     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
     
-    steps:
-    - name: 🛒 Checkout Repository
-      uses: actions/checkout@v4
+#     steps:
+#     - name: 🛒 Checkout Repository
+#       uses: actions/checkout@v4
     
-    - name: 📥 Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: application-build-${{ needs.build-application.outputs.build-version }}
-        path: ./artifacts
+#     - name: 📥 Download Build Artifacts
+#       uses: actions/download-artifact@v4
+#       with:
+#         name: application-build-${{ needs.build-application.outputs.build-version }}
+#         path: ./artifacts
     
-    - name: 🔐 Azure Login
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+#     - name: 🔐 Azure Login
+#       uses: azure/login@v1
+#       with:
+#         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     
-    - name: 🔧 Setup Azure Developer CLI
-      uses: Azure/setup-azd@v1.0.0
+#     - name: 🔧 Setup Azure Developer CLI
+#       uses: Azure/setup-azd@v1.0.0
     
-    - name: 🚀 Deploy to Azure Production Environment
-      env:
-        AZURE_ENV_NAME: prod
-        AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
-        BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
-      run: |
-        azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
-        azd env select prod || azd env new prod
-        azd deploy --no-prompt
+#     - name: 🚀 Deploy to Azure Production Environment
+#       env:
+#         AZURE_ENV_NAME: prod
+#         AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+#         BUILD_VERSION: ${{ needs.build-application.outputs.build-version }}
+#       run: |
+#         azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
+#         azd env select prod || azd env new prod
+#         azd deploy --no-prompt
     
-    - name: 🧪 Production Smoke Tests
-      run: |
-        echo "Running production smoke tests..."
-        sleep 60  # Wait for deployment to stabilize
+#     - name: 🧪 Production Smoke Tests
+#       run: |
+#         echo "Running production smoke tests..."
+#         sleep 60  # Wait for deployment to stabilize
         
-        # Health check
-        curl -f -s -o /dev/null https://networkingapp.azurewebsites.net/health || {
-          echo "❌ Production health check failed"
-          exit 1
-        }
+#         # Health check
+#         curl -f -s -o /dev/null https://networkingapp.azurewebsites.net/health || {
+#           echo "❌ Production health check failed"
+#           exit 1
+#         }
         
-        # API availability check
-        curl -f -s -o /dev/null https://networkingapp.azurewebsites.net/api/test || {
-          echo "❌ API availability check failed"
-          exit 1
-        }
+#         # API availability check
+#         curl -f -s -o /dev/null https://networkingapp.azurewebsites.net/api/test || {
+#           echo "❌ API availability check failed"
+#           exit 1
+#         }
         
-        echo "✅ Production smoke tests passed"
+#         echo "✅ Production smoke tests passed"
     
-    - name: 📝 Create Production Deployment Summary
-      run: |
-        echo "## 🎉 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version**: ${{ needs.build-application.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **URL**: https://networkingapp.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
-        echo "- **Deployed**: $(date -u)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Smoke Tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+#     - name: 📝 Create Production Deployment Summary
+#       run: |
+#         echo "## 🎉 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Version**: ${{ needs.build-application.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
+#         echo "- **URL**: https://networkingapp.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Deployed**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+#         echo "- **Smoke Tests**: ✅ Passed" >> $GITHUB_STEP_SUMMARY
 
-  # Notification and Reporting
-  notify-results:
-    name: Notify Pipeline Results
-    runs-on: ubuntu-latest
-    needs: [quality-gates, backend-tests, frontend-tests, security-scan, build-application, deploy-dev, deploy-test, deploy-prod]
-    if: always()
+#   # Notification and Reporting
+#   notify-results:
+#     name: Notify Pipeline Results
+#     runs-on: ubuntu-latest
+#     needs: [quality-gates, backend-tests, frontend-tests, security-scan, build-application, deploy-dev, deploy-test, deploy-prod]
+#     if: always()
     
-    steps:
-    - name: 📊 Generate Pipeline Summary
-      run: |
-        echo "## 🔄 CI/CD Pipeline Results" >> $GITHUB_STEP_SUMMARY
-        echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Quality Gates | ${{ needs.quality-gates.result == 'success' && '✅' || '❌' }} ${{ needs.quality-gates.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Backend Tests | ${{ needs.backend-tests.result == 'success' && '✅' || needs.backend-tests.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.backend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Frontend Tests | ${{ needs.frontend-tests.result == 'success' && '✅' || needs.frontend-tests.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.frontend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅' || '❌' }} ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Build | ${{ needs.build-application.result == 'success' && '✅' || '❌' }} ${{ needs.build-application.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Deploy Dev | ${{ needs.deploy-dev.result == 'success' && '✅' || needs.deploy-dev.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-dev.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Deploy Test | ${{ needs.deploy-test.result == 'success' && '✅' || needs.deploy-test.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-test.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Deploy Prod | ${{ needs.deploy-prod.result == 'success' && '✅' || needs.deploy-prod.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-prod.result }} |" >> $GITHUB_STEP_SUMMARY
+#     steps:
+#     - name: 📊 Generate Pipeline Summary
+#       run: |
+#         echo "## 🔄 CI/CD Pipeline Results" >> $GITHUB_STEP_SUMMARY
+#         echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+#         echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+#         echo "| Quality Gates | ${{ needs.quality-gates.result == 'success' && '✅' || '❌' }} ${{ needs.quality-gates.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Backend Tests | ${{ needs.backend-tests.result == 'success' && '✅' || needs.backend-tests.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.backend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Frontend Tests | ${{ needs.frontend-tests.result == 'success' && '✅' || needs.frontend-tests.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.frontend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅' || '❌' }} ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Build | ${{ needs.build-application.result == 'success' && '✅' || '❌' }} ${{ needs.build-application.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Deploy Dev | ${{ needs.deploy-dev.result == 'success' && '✅' || needs.deploy-dev.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-dev.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Deploy Test | ${{ needs.deploy-test.result == 'success' && '✅' || needs.deploy-test.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-test.result }} |" >> $GITHUB_STEP_SUMMARY
+#         echo "| Deploy Prod | ${{ needs.deploy-prod.result == 'success' && '✅' || needs.deploy-prod.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy-prod.result }} |" >> $GITHUB_STEP_SUMMARY

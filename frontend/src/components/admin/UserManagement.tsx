@@ -21,7 +21,6 @@ import {
   GridToolbar,
 } from "@mui/x-data-grid";
 import {
-  Edit as EditIcon,
   Block as BlockIcon,
   CheckCircle as ActivateIcon,
   VerifiedUser as VerifyIcon,
@@ -93,11 +92,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ className }) => {
     severity: "success" | "error" | "warning" | "info"
   ) => {
     setSnackbar({ open: true, message, severity });
-  };
-
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setEditDialogOpen(true);
   };
 
   const handleToggleUserStatus = async (
@@ -273,16 +267,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ className }) => {
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <Box className="flex space-x-1">
-          <Tooltip title={t("admin.users.actions.edit", "Edit User")}>
-            <IconButton
-              size="small"
-              onClick={() => handleEditUser(params.row)}
-              className="text-blue-600 hover:bg-blue-50"
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+        <Box className="flex space-x-1" sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
 
           {!params.row.isVerified && (
             <Tooltip title={t("admin.users.actions.verify", "Verify User")}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -19,19 +19,19 @@ import {
   FormControl,
   InputLabel,
   Avatar,
-} from '@mui/material';
+} from "@mui/material";
 import {
   DataGrid,
   GridColDef,
   GridRenderCellParams,
   GridToolbar,
-} from '@mui/x-data-grid';
+} from "@mui/x-data-grid";
 import {
   Gavel as ResolveIcon,
   Visibility as ViewIcon,
   AttachMoney as RefundIcon,
-} from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+} from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface Dispute {
   id: number;
@@ -44,7 +44,7 @@ interface Dispute {
   };
   reason: string;
   evidenceUrl?: string;
-  status: 'Open' | 'UnderReview' | 'Resolved' | 'Refunded' | 'Rejected';
+  status: "Open" | "UnderReview" | "Resolved" | "Refunded" | "Rejected";
   adminNotes?: string;
   resolvedByAdminId?: number;
   createdAt: string;
@@ -63,12 +63,14 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
   const [loading, setLoading] = useState(true);
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [adminNotes, setAdminNotes] = useState('');
-  const [resolutionStatus, setResolutionStatus] = useState<'Resolved' | 'Refunded' | 'Rejected'>('Resolved');
+  const [adminNotes, setAdminNotes] = useState("");
+  const [resolutionStatus, setResolutionStatus] = useState<
+    "Resolved" | "Refunded" | "Rejected"
+  >("Resolved");
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success' as 'success' | 'error' | 'warning' | 'info',
+    message: "",
+    severity: "success" as "success" | "error" | "warning" | "info",
   });
 
   useEffect(() => {
@@ -78,22 +80,25 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
   const fetchDisputes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/dispute', {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/dispute", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch disputes');
+        throw new Error("Failed to fetch disputes");
       }
 
       const data = await response.json();
       setDisputes(data);
     } catch (error) {
-      console.error('Error fetching disputes:', error);
-      showSnackbar(t('admin.disputes.fetchError', 'Failed to fetch disputes'), 'error');
+      console.error("Error fetching disputes:", error);
+      showSnackbar(
+        t("admin.disputes.fetchError", "Failed to fetch disputes"),
+        "error"
+      );
       // For demo purposes, set mock data
       setDisputes(generateMockDisputes());
     } finally {
@@ -107,69 +112,72 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       paymentId: 101,
       raisedByUserId: 2,
       raisedByUser: {
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
+        name: "Jane Smith",
+        email: "jane.smith@example.com",
       },
-      reason: 'Service not provided as agreed',
-      status: 'Open',
-      createdAt: '2024-07-11T10:30:00Z',
-      paymentAmount: 50.00,
-      serviceName: 'Airport Pickup Service',
+      reason: "Service not provided as agreed",
+      status: "Open",
+      createdAt: "2024-07-11T10:30:00Z",
+      paymentAmount: 50.0,
+      serviceName: "Airport Pickup Service",
     },
     {
       id: 2,
       paymentId: 102,
       raisedByUserId: 3,
       raisedByUser: {
-        name: 'Wei Li',
-        email: 'wei.li@example.com',
+        name: "Wei Li",
+        email: "wei.li@example.com",
       },
-      reason: 'Driver was late and unprofessional',
-      evidenceUrl: 'https://example.com/evidence/photos.jpg',
-      status: 'UnderReview',
-      adminNotes: 'Reviewing evidence provided by both parties.',
-      createdAt: '2024-07-10T16:45:00Z',
-      paymentAmount: 75.00,
-      serviceName: 'Flight Companion Service',
+      reason: "Driver was late and unprofessional",
+      evidenceUrl: "https://example.com/evidence/photos.jpg",
+      status: "UnderReview",
+      adminNotes: "Reviewing evidence provided by both parties.",
+      createdAt: "2024-07-10T16:45:00Z",
+      paymentAmount: 75.0,
+      serviceName: "Flight Companion Service",
     },
     {
       id: 3,
       paymentId: 103,
       raisedByUserId: 4,
       raisedByUser: {
-        name: 'Chen Wei',
-        email: 'chen.wei@example.com',
+        name: "Chen Wei",
+        email: "chen.wei@example.com",
       },
-      reason: 'Payment charged twice for same service',
-      status: 'Resolved',
-      adminNotes: 'Duplicate charge confirmed. Refund processed.',
+      reason: "Payment charged twice for same service",
+      status: "Resolved",
+      adminNotes: "Duplicate charge confirmed. Refund processed.",
       resolvedByAdminId: 1,
-      createdAt: '2024-07-09T14:20:00Z',
-      resolvedAt: '2024-07-10T09:15:00Z',
-      paymentAmount: 40.00,
-      serviceName: 'Airport Pickup Service',
+      createdAt: "2024-07-09T14:20:00Z",
+      resolvedAt: "2024-07-10T09:15:00Z",
+      paymentAmount: 40.0,
+      serviceName: "Airport Pickup Service",
     },
   ];
 
-  const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' | 'info') => {
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "warning" | "info"
+  ) => {
     setSnackbar({ open: true, message, severity });
   };
 
   const handleReviewDispute = (dispute: Dispute) => {
     setSelectedDispute(dispute);
-    setAdminNotes(dispute.adminNotes || '');
-    setResolutionStatus('Resolved');
+    setAdminNotes(dispute.adminNotes || "");
+    setResolutionStatus("Resolved");
     setReviewDialogOpen(true);
   };
 
   const handleResolveDispute = async (disputeId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/dispute/resolve', {
-        method: 'POST',
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/dispute/resolve", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           disputeId,
@@ -180,73 +188,116 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to resolve dispute');
+        throw new Error("Failed to resolve dispute");
       }
 
       // Update local state
-      setDisputes(prev => prev.map(dispute => 
-        dispute.id === disputeId 
-          ? { 
-              ...dispute, 
-              status: resolutionStatus,
-              adminNotes,
-              resolvedAt: new Date().toISOString(),
-              resolvedByAdminId: 1,
-            }
-          : dispute
-      ));
+      setDisputes((prev) =>
+        prev.map((dispute) =>
+          dispute.id === disputeId
+            ? {
+                ...dispute,
+                status: resolutionStatus,
+                adminNotes,
+                resolvedAt: new Date().toISOString(),
+                resolvedByAdminId: 1,
+              }
+            : dispute
+        )
+      );
 
       showSnackbar(
-        t('admin.disputes.resolveSuccess', 'Dispute resolved successfully'),
-        'success'
+        t("admin.disputes.resolveSuccess", "Dispute resolved successfully"),
+        "success"
       );
       setReviewDialogOpen(false);
     } catch (error) {
-      console.error('Error resolving dispute:', error);
+      console.error("Error resolving dispute:", error);
       showSnackbar(
-        t('admin.disputes.resolveError', 'Failed to resolve dispute'),
-        'error'
+        t("admin.disputes.resolveError", "Failed to resolve dispute"),
+        "error"
       );
     }
   };
 
   const getStatusChip = (status: string) => {
     const statusConfig = {
-      Open: { color: 'error' as const, label: t('admin.disputes.status.open', 'Open') },
-      UnderReview: { color: 'warning' as const, label: t('admin.disputes.status.underReview', 'Under Review') },
-      Resolved: { color: 'success' as const, label: t('admin.disputes.status.resolved', 'Resolved') },
-      Refunded: { color: 'info' as const, label: t('admin.disputes.status.refunded', 'Refunded') },
-      Rejected: { color: 'default' as const, label: t('admin.disputes.status.rejected', 'Rejected') },
+      Open: {
+        color: "error" as const,
+        label: t("admin.disputes.status.open", "Open"),
+      },
+      UnderReview: {
+        color: "warning" as const,
+        label: t("admin.disputes.status.underReview", "Under Review"),
+      },
+      Resolved: {
+        color: "success" as const,
+        label: t("admin.disputes.status.resolved", "Resolved"),
+      },
+      Refunded: {
+        color: "info" as const,
+        label: t("admin.disputes.status.refunded", "Refunded"),
+      },
+      Rejected: {
+        color: "default" as const,
+        label: t("admin.disputes.status.rejected", "Rejected"),
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.Open;
+    const config =
+      statusConfig[status as keyof typeof statusConfig] || statusConfig.Open;
     return <Chip label={config.label} color={config.color} size="small" />;
   };
 
   const columns: GridColDef[] = [
     {
-      field: 'id',
-      headerName: t('admin.disputes.columns.id', 'ID'),
+      field: "id",
+      headerName: t("admin.disputes.columns.id", "ID"),
       width: 70,
     },
     {
-      field: 'raisedByUser',
-      headerName: t('admin.disputes.columns.user', 'Reported By'),
+      field: "raisedByUser",
+      headerName: t("admin.disputes.columns.user", "Reported By"),
       width: 200,
       renderCell: (params: GridRenderCellParams) => (
-        <Box className="flex items-center space-x-2">
-          <Avatar 
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            height: "100%",
+          }}
+        >
+          <Avatar
             src={params.row.raisedByUser.avatar}
             alt={params.row.raisedByUser.name}
             sx={{ width: 32, height: 32 }}
           >
-            {params.row.raisedByUser.name.split(' ').map((n: string) => n[0]).join('')}
+            {params.row.raisedByUser.name
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")}
           </Avatar>
-          <Box>
-            <Typography variant="body2" className="font-medium">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              lineHeight: 1,
+            }}
+          >
+            <Typography
+              variant="body2"
+              className="font-medium"
+              sx={{ m: 0, p: 0 }}
+            >
               {params.row.raisedByUser.name}
             </Typography>
-            <Typography variant="caption" className="text-gray-500">
+            <Typography
+              variant="caption"
+              className="text-gray-500"
+              sx={{ m: 0, p: 0 }}
+            >
               {params.row.raisedByUser.email}
             </Typography>
           </Box>
@@ -254,60 +305,78 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       ),
     },
     {
-      field: 'serviceName',
-      headerName: t('admin.disputes.columns.service', 'Service'),
+      field: "serviceName",
+      headerName: t("admin.disputes.columns.service", "Service"),
       width: 160,
     },
     {
-      field: 'paymentAmount',
-      headerName: t('admin.disputes.columns.amount', 'Amount'),
+      field: "paymentAmount",
+      headerName: t("admin.disputes.columns.amount", "Amount"),
       width: 100,
       renderCell: (params: GridRenderCellParams) => (
-        <Typography variant="body2" className="font-medium">
-          ${params.value.toFixed(2)}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Typography
+            variant="body2"
+            className="font-medium"
+            sx={{ m: 0, p: 0 }}
+          >
+            ${params.value.toFixed(2)}
+          </Typography>
+        </Box>
       ),
     },
     {
-      field: 'reason',
-      headerName: t('admin.disputes.columns.reason', 'Reason'),
+      field: "reason",
+      headerName: t("admin.disputes.columns.reason", "Reason"),
       width: 250,
       renderCell: (params: GridRenderCellParams) => (
-        <Typography variant="body2" className="truncate" title={params.value}>
-          {params.value}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Typography
+            variant="body2"
+            className="truncate"
+            title={params.value}
+            sx={{ m: 0, p: 0 }}
+          >
+            {params.value}
+          </Typography>
+        </Box>
       ),
     },
     {
-      field: 'status',
-      headerName: t('admin.disputes.columns.status', 'Status'),
+      field: "status",
+      headerName: t("admin.disputes.columns.status", "Status"),
       width: 130,
       renderCell: (params: GridRenderCellParams) => getStatusChip(params.value),
     },
     {
-      field: 'createdAt',
-      headerName: t('admin.disputes.columns.createdAt', 'Created'),
+      field: "createdAt",
+      headerName: t("admin.disputes.columns.createdAt", "Created"),
       width: 120,
       valueFormatter: (params: any) => {
         return new Date(params.value).toLocaleDateString();
       },
     },
     {
-      field: 'actions',
-      headerName: t('admin.disputes.columns.actions', 'Actions'),
+      field: "actions",
+      headerName: t("admin.disputes.columns.actions", "Actions"),
       width: 150,
       sortable: false,
       filterable: false,
+
       renderCell: (params: GridRenderCellParams) => (
-        <Box className="flex space-x-1">
-          {params.row.status === 'Open' || params.row.status === 'UnderReview' ? (
+        <Box
+          className="flex space-x-1"
+          sx={{ display: "flex", alignItems: "center", height: "100%" }}
+        >
+          {params.row.status === "Open" ||
+          params.row.status === "UnderReview" ? (
             <Button
               size="small"
               startIcon={<ResolveIcon />}
               onClick={() => handleReviewDispute(params.row)}
               className="text-blue-600"
             >
-              {t('admin.disputes.actions.resolve', 'Resolve')}
+              {t("admin.disputes.actions.resolve", "Resolve")}
             </Button>
           ) : (
             <Button
@@ -316,7 +385,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
               onClick={() => handleReviewDispute(params.row)}
               className="text-gray-600"
             >
-              {t('admin.disputes.actions.view', 'View')}
+              {t("admin.disputes.actions.view", "View")}
             </Button>
           )}
         </Box>
@@ -328,11 +397,11 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
     <Box className={className}>
       <Box className="mb-4 flex justify-between items-center">
         <Typography variant="h6" className="font-semibold">
-          {t('admin.disputes.title', 'Dispute Management')}
+          {t("admin.disputes.title", "Dispute Management")}
         </Typography>
       </Box>
 
-      <Box style={{ height: 600, width: '100%' }}>
+      <Box style={{ height: 600, width: "100%" }}>
         <DataGrid
           rows={disputes}
           columns={columns}
@@ -358,17 +427,20 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       </Box>
 
       {/* Review/Resolve Dialog */}
-      <Dialog 
-        open={reviewDialogOpen} 
+      <Dialog
+        open={reviewDialogOpen}
         onClose={() => setReviewDialogOpen(false)}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>
-          {selectedDispute?.status === 'Open' || selectedDispute?.status === 'UnderReview'
-            ? t('admin.disputes.resolveDialog.title', 'Resolve Dispute')
-            : t('admin.disputes.resolveDialog.viewTitle', 'View Dispute Details')
-          }
+          {selectedDispute?.status === "Open" ||
+          selectedDispute?.status === "UnderReview"
+            ? t("admin.disputes.resolveDialog.title", "Resolve Dispute")
+            : t(
+                "admin.disputes.resolveDialog.viewTitle",
+                "View Dispute Details"
+              )}
         </DialogTitle>
         <DialogContent>
           {selectedDispute && (
@@ -378,23 +450,55 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                   <Card className="mb-4">
                     <CardContent>
                       <Typography variant="h6" className="mb-2">
-                        {t('admin.disputes.resolveDialog.disputeInfo', 'Dispute Information')}
+                        {t(
+                          "admin.disputes.resolveDialog.disputeInfo",
+                          "Dispute Information"
+                        )}
                       </Typography>
                       <Box className="space-y-2">
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.disputeId', 'Dispute ID')}:</strong> #{selectedDispute.id}
+                          <strong>
+                            {t(
+                              "admin.disputes.resolveDialog.disputeId",
+                              "Dispute ID"
+                            )}
+                            :
+                          </strong>{" "}
+                          #{selectedDispute.id}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.paymentId', 'Payment ID')}:</strong> #{selectedDispute.paymentId}
+                          <strong>
+                            {t(
+                              "admin.disputes.resolveDialog.paymentId",
+                              "Payment ID"
+                            )}
+                            :
+                          </strong>{" "}
+                          #{selectedDispute.paymentId}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.amount', 'Amount')}:</strong> ${selectedDispute.paymentAmount.toFixed(2)}
+                          <strong>
+                            {t("admin.disputes.resolveDialog.amount", "Amount")}
+                            :
+                          </strong>{" "}
+                          ${selectedDispute.paymentAmount.toFixed(2)}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.service', 'Service')}:</strong> {selectedDispute.serviceName}
+                          <strong>
+                            {t(
+                              "admin.disputes.resolveDialog.service",
+                              "Service"
+                            )}
+                            :
+                          </strong>{" "}
+                          {selectedDispute.serviceName}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.status', 'Status')}:</strong> {getStatusChip(selectedDispute.status)}
+                          <strong>
+                            {t("admin.disputes.resolveDialog.status", "Status")}
+                            :
+                          </strong>{" "}
+                          {getStatusChip(selectedDispute.status)}
                         </Typography>
                       </Box>
                     </CardContent>
@@ -405,11 +509,17 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                   <Card className="mb-4">
                     <CardContent>
                       <Typography variant="h6" className="mb-2">
-                        {t('admin.disputes.resolveDialog.userInfo', 'Reported By')}
+                        {t(
+                          "admin.disputes.resolveDialog.userInfo",
+                          "Reported By"
+                        )}
                       </Typography>
                       <Box className="flex items-center space-x-2">
                         <Avatar src={selectedDispute.raisedByUser.avatar}>
-                          {selectedDispute.raisedByUser.name.split(' ').map(n => n[0]).join('')}
+                          {selectedDispute.raisedByUser.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </Avatar>
                         <Box>
                           <Typography variant="body1" className="font-medium">
@@ -422,11 +532,27 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                       </Box>
                       <Box className="mt-3">
                         <Typography variant="body2">
-                          <strong>{t('admin.disputes.resolveDialog.createdAt', 'Created At')}:</strong> {new Date(selectedDispute.createdAt).toLocaleString()}
+                          <strong>
+                            {t(
+                              "admin.disputes.resolveDialog.createdAt",
+                              "Created At"
+                            )}
+                            :
+                          </strong>{" "}
+                          {new Date(selectedDispute.createdAt).toLocaleString()}
                         </Typography>
                         {selectedDispute.resolvedAt && (
                           <Typography variant="body2">
-                            <strong>{t('admin.disputes.resolveDialog.resolvedAt', 'Resolved At')}:</strong> {new Date(selectedDispute.resolvedAt).toLocaleString()}
+                            <strong>
+                              {t(
+                                "admin.disputes.resolveDialog.resolvedAt",
+                                "Resolved At"
+                              )}
+                              :
+                            </strong>{" "}
+                            {new Date(
+                              selectedDispute.resolvedAt
+                            ).toLocaleString()}
                           </Typography>
                         )}
                       </Box>
@@ -438,15 +564,27 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                   <Card className="mb-4">
                     <CardContent>
                       <Typography variant="h6" className="mb-2">
-                        {t('admin.disputes.resolveDialog.reason', 'Dispute Reason')}
+                        {t(
+                          "admin.disputes.resolveDialog.reason",
+                          "Dispute Reason"
+                        )}
                       </Typography>
-                      <Typography variant="body2" className="bg-gray-50 p-3 rounded">
+                      <Typography
+                        variant="body2"
+                        className="bg-gray-50 p-3 rounded"
+                      >
                         {selectedDispute.reason}
                       </Typography>
                       {selectedDispute.evidenceUrl && (
                         <Box className="mt-2">
                           <Typography variant="body2" className="mb-1">
-                            <strong>{t('admin.disputes.resolveDialog.evidence', 'Evidence')}:</strong>
+                            <strong>
+                              {t(
+                                "admin.disputes.resolveDialog.evidence",
+                                "Evidence"
+                              )}
+                              :
+                            </strong>
                           </Typography>
                           <Button
                             size="small"
@@ -454,7 +592,10 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            {t('admin.disputes.resolveDialog.viewEvidence', 'View Evidence')}
+                            {t(
+                              "admin.disputes.resolveDialog.viewEvidence",
+                              "View Evidence"
+                            )}
                           </Button>
                         </Box>
                       )}
@@ -462,23 +603,48 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                   </Card>
                 </Grid>
 
-                {(selectedDispute.status === 'Open' || selectedDispute.status === 'UnderReview') && (
+                {(selectedDispute.status === "Open" ||
+                  selectedDispute.status === "UnderReview") && (
                   <Grid item xs={12}>
                     <FormControl fullWidth className="mb-4">
-                      <InputLabel>{t('admin.disputes.resolveDialog.resolution', 'Resolution')}</InputLabel>
+                      <InputLabel>
+                        {t(
+                          "admin.disputes.resolveDialog.resolution",
+                          "Resolution"
+                        )}
+                      </InputLabel>
                       <Select
                         value={resolutionStatus}
-                        onChange={(e) => setResolutionStatus(e.target.value as 'Resolved' | 'Refunded' | 'Rejected')}
-                        label={t('admin.disputes.resolveDialog.resolution', 'Resolution')}
+                        onChange={(e) =>
+                          setResolutionStatus(
+                            e.target.value as
+                              | "Resolved"
+                              | "Refunded"
+                              | "Rejected"
+                          )
+                        }
+                        label={t(
+                          "admin.disputes.resolveDialog.resolution",
+                          "Resolution"
+                        )}
                       >
                         <MenuItem value="Resolved">
-                          {t('admin.disputes.resolution.resolved', 'Resolved - No refund')}
+                          {t(
+                            "admin.disputes.resolution.resolved",
+                            "Resolved - No refund"
+                          )}
                         </MenuItem>
                         <MenuItem value="Refunded">
-                          {t('admin.disputes.resolution.refunded', 'Refunded - Issue refund')}
+                          {t(
+                            "admin.disputes.resolution.refunded",
+                            "Refunded - Issue refund"
+                          )}
                         </MenuItem>
                         <MenuItem value="Rejected">
-                          {t('admin.disputes.resolution.rejected', 'Rejected - Invalid dispute')}
+                          {t(
+                            "admin.disputes.resolution.rejected",
+                            "Rejected - Invalid dispute"
+                          )}
                         </MenuItem>
                       </Select>
                     </FormControl>
@@ -490,12 +656,21 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
                     fullWidth
                     multiline
                     rows={3}
-                    label={t('admin.disputes.resolveDialog.adminNotes', 'Admin Notes')}
+                    label={t(
+                      "admin.disputes.resolveDialog.adminNotes",
+                      "Admin Notes"
+                    )}
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder={t('admin.disputes.resolveDialog.notesPlaceholder', 'Add resolution notes...')}
+                    placeholder={t(
+                      "admin.disputes.resolveDialog.notesPlaceholder",
+                      "Add resolution notes..."
+                    )}
                     variant="outlined"
-                    disabled={selectedDispute.status !== 'Open' && selectedDispute.status !== 'UnderReview'}
+                    disabled={
+                      selectedDispute.status !== "Open" &&
+                      selectedDispute.status !== "UnderReview"
+                    }
                   />
                 </Grid>
               </Grid>
@@ -504,21 +679,30 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
         </DialogContent>
         <DialogActions className="px-6 pb-4">
           <Button onClick={() => setReviewDialogOpen(false)}>
-            {t('cancel', 'Cancel')}
+            {t("cancel", "Cancel")}
           </Button>
-          {selectedDispute && (selectedDispute.status === 'Open' || selectedDispute.status === 'UnderReview') && (
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={resolutionStatus === 'Refunded' ? <RefundIcon /> : <ResolveIcon />}
-              onClick={() => selectedDispute && handleResolveDispute(selectedDispute.id)}
-            >
-              {resolutionStatus === 'Refunded' 
-                ? t('admin.disputes.actions.refund', 'Issue Refund')
-                : t('admin.disputes.actions.resolve', 'Resolve Dispute')
-              }
-            </Button>
-          )}
+          {selectedDispute &&
+            (selectedDispute.status === "Open" ||
+              selectedDispute.status === "UnderReview") && (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={
+                  resolutionStatus === "Refunded" ? (
+                    <RefundIcon />
+                  ) : (
+                    <ResolveIcon />
+                  )
+                }
+                onClick={() =>
+                  selectedDispute && handleResolveDispute(selectedDispute.id)
+                }
+              >
+                {resolutionStatus === "Refunded"
+                  ? t("admin.disputes.actions.refund", "Issue Refund")
+                  : t("admin.disputes.actions.resolve", "Resolve Dispute")}
+              </Button>
+            )}
         </DialogActions>
       </Dialog>
 
@@ -526,11 +710,11 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ className }) => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       >
-        <Alert 
+        <Alert
           severity={snackbar.severity}
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         >
           {snackbar.message}
         </Alert>
