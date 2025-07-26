@@ -29,10 +29,12 @@ class SignalRService {
   private connection: HubConnection | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private usageCount = 0; // Reference count for connection usage
 
   constructor() {
     this.connection = new HubConnectionBuilder()
-      .withUrl('/notificationHub', {
+      .withUrl('https://localhost:5001/notificationHub', {
+        accessTokenFactory: () => localStorage.getItem('token') || '',
         withCredentials: true,
       })
       .withAutomaticReconnect({
@@ -75,6 +77,11 @@ class SignalRService {
       throw new Error('SignalR connection not initialized');
     }
 
+    if (this.connection.state !== 'Disconnected') {
+      console.log(`SignalR: Connection is already in state: ${this.connection.state}`);
+      return;
+    }
+
     try {
       await this.connection.start();
       console.log('SignalR: Connected successfully');
@@ -88,6 +95,24 @@ class SignalRService {
     if (this.connection) {
       await this.connection.stop();
       console.log('SignalR: Disconnected');
+    }
+  }
+
+  async acquire(): Promise<void> {
+    this.usageCount++;
+    if (!this.isConnected()) {
+      // Wait until the connection is fully Disconnected before starting
+      while (this.connection && this.connection.state === 'Disconnecting') {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      await this.start();
+    }
+  }
+
+  async release(): Promise<void> {
+    this.usageCount = Math.max(0, this.usageCount - 1);
+    if (this.usageCount === 0) {
+      await this.stop();
     }
   }
 

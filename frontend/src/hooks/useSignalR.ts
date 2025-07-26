@@ -20,6 +20,8 @@ export const useSignalR = () => {
 
     const initializeSignalR = async () => {
       try {
+        await signalRService.acquire(); // Use acquire instead of start
+
         // Set up event handlers - using the correct method names from signalRService
         signalRService.onNotificationReceived((notification) => {
           if (isSubscribed) {
@@ -50,9 +52,6 @@ export const useSignalR = () => {
           console.log("SignalR Test Response:", response);
         });
 
-        // Start the connection
-        await signalRService.start();
-
         if (isSubscribed) {
           dispatch(setSignalRConnectionStatus(true));
           console.log("SignalR connected and ready");
@@ -70,7 +69,7 @@ export const useSignalR = () => {
     // Cleanup function
     return () => {
       isSubscribed = false;
-      signalRService.stop();
+      signalRService.release(); // Use release instead of stop
       dispatch(setSignalRConnectionStatus(false));
     };
   }, [dispatch]);

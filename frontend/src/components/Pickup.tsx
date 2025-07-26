@@ -85,6 +85,7 @@ const Pickup: React.FC<PickupProps> = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
   const [formType, setFormType] = useState<"request" | "offer">("request");
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -118,29 +119,14 @@ const Pickup: React.FC<PickupProps> = () => {
   const handleRequestSubmit = async (data: any): Promise<void> => {
     try {
       const requestData: CreatePickupRequestData = {
-        flightNumber: data.flightNumber,
-        arrivalDate: data.arrivalDate,
-        arrivalTime: data.arrivalTime,
-        airport: data.airport,
-        destinationAddress: data.destinationAddress,
-        passengerName: data.passengerName,
-        passengerPhone: data.passengerPhone,
-        passengerCount: data.passengerCount,
-        hasLuggage: data.hasLuggage,
-        offeredAmount: data.offeredAmount,
-        specialRequests: data.specialRequests,
+        ...data,
+        userId: 1, // Add userId for backend validation (temporary, for testing)
       };
 
       // Use RTK Query mutation instead of manual fetch
       await createRequest(requestData).unwrap();
 
-      dispatch(
-        addNotification({
-          message: "Pickup request created successfully!",
-          type: "success",
-        })
-      );
-
+      showSnackbar("Pickup request created successfully!", "success");
       setShowCreateDialog(false);
     } catch (error) {
       console.error("Error creating pickup request:", error);
@@ -149,45 +135,18 @@ const Pickup: React.FC<PickupProps> = () => {
           ? error.message
           : "Error creating pickup request";
       showSnackbar(errorMessage, "error");
-
-      dispatch(
-        addNotification({
-          message: "Failed to create pickup request",
-          type: "error",
-        })
-      );
     }
   };
 
   const handleOfferSubmit = async (data: any): Promise<void> => {
     try {
-      // TODO: Implement offer creation using RTK Query when pickupApi is extended with offer creation
-      console.log("Offer data:", data);
-
-      dispatch(
-        addNotification({
-          message: "Pickup offer created successfully!",
-          type: "success",
-        })
-      );
-
+      showSnackbar("Pickup offer created successfully! (Mock implementation)", "success");
       setShowCreateDialog(false);
-      showSnackbar(
-        "Offer created successfully! (Mock implementation)",
-        "success"
-      );
     } catch (error) {
       console.error("Error creating offer:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error creating offer";
       showSnackbar(errorMessage, "error");
-
-      dispatch(
-        addNotification({
-          message: "Failed to create pickup offer",
-          type: "error",
-        })
-      );
     }
   };
 
@@ -329,23 +288,51 @@ const Pickup: React.FC<PickupProps> = () => {
                 }
           }
         />
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<ContactIcon />}
-          onClick={() => handleContactPassenger(request)}
-          sx={{
-            color: isDarkMode ? "#00BCD4" : "#0B3866",
-            borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
-            "&:hover": {
-              backgroundColor: isDarkMode
-                ? "rgba(0, 188, 212, 0.1)"
-                : "rgba(11, 56, 102, 0.1)",
-            },
-          }}
-        >
-          Contact
-        </Button>
+        <Box className="flex gap-2">
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<ContactIcon />}
+            onClick={() => handleContactPassenger(request)}
+            sx={{
+              color: isDarkMode ? "#00BCD4" : "#0B3866",
+              borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+              "&:hover": {
+                backgroundColor: isDarkMode
+                  ? "rgba(0, 188, 212, 0.1)"
+                  : "rgba(11, 56, 102, 0.1)",
+              },
+            }}
+          >
+            Contact
+          </Button>
+          {activeTab === 1 && !request.isMatched && (
+            <Button
+              variant={selectedRequestId === request.id ? "contained" : "outlined"}
+              size="small"
+              sx={{
+                color: selectedRequestId === request.id 
+                  ? "#fff" 
+                  : (isDarkMode ? "#00BCD4" : "#0B3866"),
+                backgroundColor: selectedRequestId === request.id 
+                  ? (isDarkMode ? "#00BCD4" : "#0B3866") 
+                  : "transparent",
+                borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                "&:hover": {
+                  backgroundColor: selectedRequestId === request.id 
+                    ? (isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)")
+                    : (isDarkMode ? "rgba(0, 188, 212, 0.1)" : "rgba(11, 56, 102, 0.1)"),
+                },
+              }}
+              onClick={() => selectedRequestId === request.id 
+                ? handleClearSelection() 
+                : handleSelectRequest(request.id)
+              }
+            >
+              {selectedRequestId === request.id ? "Selected" : "Select"}
+            </Button>
+          )}
+        </Box>
       </CardActions>
     </Card>
   );
@@ -470,9 +457,57 @@ const Pickup: React.FC<PickupProps> = () => {
         >
           Contact
         </Button>
+        {selectedRequestId && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handlePickupMatch(selectedRequestId, offer.id)}
+          >
+            Match
+          </Button>
+        )}
       </CardActions>
     </Card>
   );
+
+
+  const handlePickupMatch = async (requestId: number, offerId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://localhost:5001/api/pickup/match', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId, offerId }),
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        showSnackbar(error.message || 'Failed to match', 'error');
+        return;
+      }
+  
+      showSnackbar('Pickup match successful!', 'success');
+      setSelectedRequestId(null); // Clear selection after successful match
+      // Optionally refresh data here
+      refetchRequests();
+      refetchOffers();
+    } catch (error) {
+      showSnackbar('Error matching: ' + error, 'error');
+    }
+  };
+
+  const handleSelectRequest = (requestId: number) => {
+    setSelectedRequestId(requestId);
+    showSnackbar('Request selected. Now choose an offer to match.', 'info');
+  };
+
+  const handleClearSelection = () => {
+    setSelectedRequestId(null);
+    showSnackbar('Selection cleared.', 'info');
+  };
 
   // Early return for error state
   if (error) {
@@ -679,6 +714,22 @@ const Pickup: React.FC<PickupProps> = () => {
 
         {activeTab === 1 && (
           <Box>
+            {selectedRequestId && (
+              <Paper className="mb-4 p-3 bg-blue-50 dark:bg-blue-900">
+                <Box className="flex justify-between items-center">
+                  <Typography variant="body2" className="text-blue-800 dark:text-blue-200">
+                    Request selected. Choose an offer to match.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleClearSelection}
+                  >
+                    Clear Selection
+                  </Button>
+                </Box>
+              </Paper>
+            )}
             {isLoading && !offers.length ? (
               <Box className="flex justify-center items-center py-12">
                 <CircularProgress size={40} />
@@ -781,6 +832,7 @@ const Pickup: React.FC<PickupProps> = () => {
         autoHideDuration={2000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        sx={{ zIndex: 1400 }}
       >
         <Alert
           onClose={closeSnackbar}

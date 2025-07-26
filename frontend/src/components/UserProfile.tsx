@@ -19,6 +19,8 @@ import {
   Dialog,
   TextField,
   InputAdornment,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import {
   Person as PersonIcon,
@@ -42,6 +44,18 @@ import { z } from "zod";
 import SubmitVerification from "./forms/SubmitVerification";
 import { useTheme } from "../themes/ThemeProvider";
 import useIsDarkMode from "../themes/useIsDarkMode";
+import {
+  useUpdateFlightCompanionRequestMutation,
+  useDeleteFlightCompanionRequestMutation,
+  useUpdateFlightCompanionOfferMutation,
+  useDeleteFlightCompanionOfferMutation,
+  useUpdatePickupRequestMutation,
+  useDeletePickupRequestMutation,
+  useUpdatePickupOfferMutation,
+  useDeletePickupOfferMutation,
+} from '../store/api/flightCompanionApi';
+import FlightCompanionRequestForm from './forms/FlightCompanionRequestForm';
+import FlightCompanionOfferForm from './forms/FlightCompanionOfferForm';
 
 // TypeScript interfaces
 interface UserProfile {
@@ -210,6 +224,34 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     severity: "info",
   });
 
+  // Add state for user's requests and offers
+  const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [myOffers, setMyOffers] = useState<any[]>([]);
+  const [myPickupRequests, setMyPickupRequests] = useState<any[]>([]);
+  const [myPickupOffers, setMyPickupOffers] = useState<any[]>([]);
+  const [myReqOffLoading, setMyReqOffLoading] = useState<boolean>(false);
+  const [myReqOffError, setMyReqOffError] = useState<string | null>(null);
+
+  // Mutations for edit/delete
+  const [updateRequest, { isLoading: updatingRequest }] = useUpdateFlightCompanionRequestMutation();
+  const [deleteRequest, { isLoading: deletingRequest }] = useDeleteFlightCompanionRequestMutation();
+  const [updateOffer, { isLoading: updatingOffer }] = useUpdateFlightCompanionOfferMutation();
+  const [deleteOffer, { isLoading: deletingOffer }] = useDeleteFlightCompanionOfferMutation();
+  const [updatePickupRequest, { isLoading: updatingPickupRequest }] = useUpdatePickupRequestMutation();
+  const [deletePickupRequest, { isLoading: deletingPickupRequest }] = useDeletePickupRequestMutation();
+  const [updatePickupOffer, { isLoading: updatingPickupOffer }] = useUpdatePickupOfferMutation();
+  const [deletePickupOffer, { isLoading: deletingPickupOffer }] = useDeletePickupOfferMutation();
+
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editType, setEditType] = useState<'request' | 'offer' | 'pickupRequest' | 'pickupOffer' | null>(null);
+  const [editItem, setEditItem] = useState<any>(null);
+
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteType, setDeleteType] = useState<'request' | 'offer' | 'pickupRequest' | 'pickupOffer' | null>(null);
+  const [deleteItem, setDeleteItem] = useState<any>(null);
+
   // Redux Integration
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -296,6 +338,29 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     }
   };
 
+  // Fetch user's requests and offers
+  const fetchMyRequestsAndOffers = async () => {
+    try {
+      setMyReqOffLoading(true);
+      setMyReqOffError(null);
+      const response = await fetch("/api/user/my-requests-offers", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch requests/offers");
+      const data = await response.json();
+      setMyRequests(data.flightCompanionRequests || []);
+      setMyOffers(data.flightCompanionOffers || []);
+      setMyPickupRequests(data.pickupRequests || []);
+      setMyPickupOffers(data.pickupOffers || []);
+    } catch (error) {
+      setMyReqOffError("Could not load your requests/offers.");
+    } finally {
+      setMyReqOffLoading(false);
+    }
+  };
+
   // Event Handlers
   const handleEditToggle = (): void => {
     setIsEditing(!isEditing);
@@ -352,11 +417,79 @@ const UserProfile: React.FC<UserProfileProps> = () => {
     }
   };
 
+  // Edit handlers
+  const handleEdit = (type: 'request' | 'offer' | 'pickupRequest' | 'pickupOffer', item: any) => {
+    setEditType(type);
+    setEditItem(item);
+    setEditDialogOpen(true);
+  };
+  const handleEditClose = () => {
+    setEditDialogOpen(false);
+    setEditType(null);
+    setEditItem(null);
+  };
+  const handleEditSubmit = async (data: any) => {
+    try {
+      if (editType === 'request') {
+        await updateRequest({ id: editItem.id, data }).unwrap();
+        showSnackbar('Request updated!', 'success');
+      } else if (editType === 'offer') {
+        await updateOffer({ id: editItem.id, data }).unwrap();
+        showSnackbar('Offer updated!', 'success');
+      } else if (editType === 'pickupRequest') {
+        await updatePickupRequest({ id: editItem.id, data }).unwrap();
+        showSnackbar('Pickup request updated!', 'success');
+      } else if (editType === 'pickupOffer') {
+        await updatePickupOffer({ id: editItem.id, data }).unwrap();
+        showSnackbar('Pickup offer updated!', 'success');
+      }
+      handleEditClose();
+      fetchMyRequestsAndOffers();
+    } catch (error) {
+      showSnackbar('Failed to update.', 'error');
+    }
+  };
+  // Delete handlers
+  const handleDelete = (type: 'request' | 'offer' | 'pickupRequest' | 'pickupOffer', item: any) => {
+    setDeleteType(type);
+    setDeleteItem(item);
+    setDeleteDialogOpen(true);
+  };
+  const handleDeleteConfirm = async () => {
+    try {
+      if (deleteType === 'request') {
+        await deleteRequest(deleteItem.id).unwrap();
+        showSnackbar('Request deleted!', 'success');
+      } else if (deleteType === 'offer') {
+        await deleteOffer(deleteItem.id).unwrap();
+        showSnackbar('Offer deleted!', 'success');
+      } else if (deleteType === 'pickupRequest') {
+        await deletePickupRequest(deleteItem.id).unwrap();
+        showSnackbar('Pickup request deleted!', 'success');
+      } else if (deleteType === 'pickupOffer') {
+        await deletePickupOffer(deleteItem.id).unwrap();
+        showSnackbar('Pickup offer deleted!', 'success');
+      }
+      setDeleteDialogOpen(false);
+      setDeleteType(null);
+      setDeleteItem(null);
+      fetchMyRequestsAndOffers();
+    } catch (error) {
+      showSnackbar('Failed to delete.', 'error');
+    }
+  };
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setDeleteType(null);
+    setDeleteItem(null);
+  };
+
   // Effects
   useEffect(() => {
     if (isAuthenticated) {
       fetchProfile();
       fetchStats();
+      fetchMyRequestsAndOffers(); // fetch user's requests/offers
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
@@ -761,6 +894,145 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         </Grid>
       </Grid>
 
+      {/* My Requests/Offers Section */}
+      <Box className="my-8">
+        <Typography variant="h5" className="mb-4 font-bold">
+          My Flight Companion Requests
+        </Typography>
+        {myReqOffLoading ? (
+          <Box className="flex justify-center items-center py-4">
+            <CircularProgress size={28} />
+          </Box>
+        ) : myReqOffError ? (
+          <Alert severity="error">{myReqOffError}</Alert>
+        ) : myRequests.length === 0 ? (
+          <Typography>No requests found.</Typography>
+        ) : (
+          myRequests.map((req) => (
+            <Card key={req.id} className="mb-2">
+              <CardContent>
+                <Typography>
+                  {req.flightNumber} - {req.airline} ({req.departureAirport} → {req.arrivalAirport}) on {new Date(req.flightDate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Status: {req.isMatched ? "Matched" : "Open"}
+                </Typography>
+                <Box className="flex gap-2 mt-2">
+                  <Button size="small" variant="outlined" onClick={() => handleEdit('request', req)} disabled={updatingRequest}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete('request', req)} disabled={deletingRequest}>
+                    Delete
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+
+        <Typography variant="h5" className="mb-4 font-bold mt-8">
+          My Flight Companion Offers
+        </Typography>
+        {myReqOffLoading ? (
+          <Box className="flex justify-center items-center py-4">
+            <CircularProgress size={28} />
+          </Box>
+        ) : myReqOffError ? (
+          <Alert severity="error">{myReqOffError}</Alert>
+        ) : myOffers.length === 0 ? (
+          <Typography>No offers found.</Typography>
+        ) : (
+          myOffers.map((offer) => (
+            <Card key={offer.id} className="mb-2">
+              <CardContent>
+                <Typography>
+                  {offer.flightNumber} - {offer.airline} ({offer.departureAirport} → {offer.arrivalAirport}) on {new Date(offer.flightDate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Status: {offer.isAvailable ? "Available" : "Matched"}
+                </Typography>
+                <Box className="flex gap-2 mt-2">
+                  <Button size="small" variant="outlined" onClick={() => handleEdit('offer', offer)} disabled={updatingOffer}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete('offer', offer)} disabled={deletingOffer}>
+                    Delete
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+
+        <Typography variant="h5" className="mb-4 font-bold mt-8">
+          My Pickup Requests
+        </Typography>
+        {myReqOffLoading ? (
+          <Box className="flex justify-center items-center py-4">
+            <CircularProgress size={28} />
+          </Box>
+        ) : myReqOffError ? (
+          <Alert severity="error">{myReqOffError}</Alert>
+        ) : myPickupRequests.length === 0 ? (
+          <Typography>No pickup requests found.</Typography>
+        ) : (
+          myPickupRequests.map((req) => (
+            <Card key={req.id} className="mb-2">
+              <CardContent>
+                <Typography>
+                  {req.airport} on {new Date(req.arrivalDate).toLocaleDateString()} (Offered: ${req.offeredAmount})
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Status: {req.isMatched ? "Matched" : "Open"}
+                </Typography>
+                <Box className="flex gap-2 mt-2">
+                  <Button size="small" variant="outlined" onClick={() => handleEdit('pickupRequest', req)} disabled={updatingPickupRequest}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete('pickupRequest', req)} disabled={deletingPickupRequest}>
+                    Delete
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+
+        <Typography variant="h5" className="mb-4 font-bold mt-8">
+          My Pickup Offers
+        </Typography>
+        {myReqOffLoading ? (
+          <Box className="flex justify-center items-center py-4">
+            <CircularProgress size={28} />
+          </Box>
+        ) : myReqOffError ? (
+          <Alert severity="error">{myReqOffError}</Alert>
+        ) : myPickupOffers.length === 0 ? (
+          <Typography>No pickup offers found.</Typography>
+        ) : (
+          myPickupOffers.map((offer) => (
+            <Card key={offer.id} className="mb-2">
+              <CardContent>
+                <Typography>
+                  {offer.airport} (Base Rate: ${offer.baseRate})
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Status: {offer.isAvailable ? "Available" : "Matched"}
+                </Typography>
+                <Box className="flex gap-2 mt-2">
+                  <Button size="small" variant="outlined" onClick={() => handleEdit('pickupOffer', offer)} disabled={updatingPickupOffer}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete('pickupOffer', offer)} disabled={deletingPickupOffer}>
+                    Delete
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
+
       {/* Verification Dialog */}
       <Dialog
         open={showVerificationDialog}
@@ -802,6 +1074,79 @@ const UserProfile: React.FC<UserProfileProps> = () => {
         </Typography>
         <PaymentHistory />
       </Box>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onClose={handleEditClose} maxWidth="md" fullWidth>
+        <DialogTitle>Edit {editType === 'request' ? 'Request' : editType === 'offer' ? 'Offer' : editType === 'pickupRequest' ? 'Pickup Request' : 'Pickup Offer'}</DialogTitle>
+        <DialogContent>
+          {editType === 'request' && (
+            <FlightCompanionRequestForm
+              onSubmit={handleEditSubmit}
+              onCancel={handleEditClose}
+              loading={updatingRequest}
+              initialData={editItem}
+            />
+          )}
+          {editType === 'offer' && (
+            <FlightCompanionOfferForm
+              onSubmit={handleEditSubmit}
+              onCancel={handleEditClose}
+              loading={updatingOffer}
+              initialData={editItem}
+            />
+          )}
+          {editType === 'pickupRequest' && editItem && (
+            <Box component="form" onSubmit={e => { e.preventDefault(); handleEditSubmit({
+              airport: (e.target as any).airport.value,
+              arrivalDate: (e.target as any).arrivalDate.value,
+              offeredAmount: Number((e.target as any).offeredAmount.value),
+              additionalNotes: (e.target as any).additionalNotes.value,
+            }); }}>
+              <TextField name="airport" label="Airport" defaultValue={editItem.airport} fullWidth margin="normal" required />
+              <TextField name="arrivalDate" label="Arrival Date" type="datetime-local" defaultValue={editItem.arrivalDate?.slice(0,16)} fullWidth margin="normal" required InputLabelProps={{ shrink: true }} />
+              <TextField name="offeredAmount" label="Offered Amount" type="number" defaultValue={editItem.offeredAmount} fullWidth margin="normal" required />
+              <TextField name="additionalNotes" label="Additional Notes" defaultValue={editItem.additionalNotes} fullWidth margin="normal" />
+              <Box className="flex gap-2 mt-4">
+                <Button type="submit" variant="contained" color="primary" disabled={updatingPickupRequest}>Save</Button>
+                <Button onClick={handleEditClose} variant="outlined">Cancel</Button>
+              </Box>
+            </Box>
+          )}
+          {editType === 'pickupOffer' && editItem && (
+            <Box component="form" onSubmit={e => { e.preventDefault(); handleEditSubmit({
+              airport: (e.target as any).airport.value,
+              baseRate: Number((e.target as any).baseRate.value),
+              averageRating: Number((e.target as any).averageRating.value),
+              additionalInfo: (e.target as any).additionalInfo.value,
+            }); }}>
+              <TextField name="airport" label="Airport" defaultValue={editItem.airport} fullWidth margin="normal" required />
+              <TextField name="baseRate" label="Base Rate" type="number" defaultValue={editItem.baseRate} fullWidth margin="normal" required />
+              <TextField name="averageRating" label="Average Rating" type="number" defaultValue={editItem.averageRating} fullWidth margin="normal" required />
+              <TextField name="additionalInfo" label="Additional Info" defaultValue={editItem.additionalInfo} fullWidth margin="normal" />
+              <Box className="flex gap-2 mt-4">
+                <Button type="submit" variant="contained" color="primary" disabled={updatingPickupOffer}>Save</Button>
+                <Button onClick={handleEditClose} variant="outlined">Cancel</Button>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this {deleteType}?</Typography>
+          <Box className="flex gap-2 mt-4">
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained" disabled={deletingRequest || deletingOffer || updatingPickupRequest || updatingPickupOffer}>
+              Delete
+            </Button>
+            <Button onClick={handleDeleteCancel} variant="outlined">
+              Cancel
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };

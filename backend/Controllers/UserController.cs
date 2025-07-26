@@ -367,6 +367,43 @@ namespace NetworkingApp.Controllers
             }
         }
 
+        // GET: api/User/my-requests-offers
+        [HttpGet("my-requests-offers")]
+        [Authorize]
+        public async Task<ActionResult> GetMyRequestsAndOffers()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized();
+
+            var requests = await _context.FlightCompanionRequests
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            var offers = await _context.FlightCompanionOffers
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            var pickupRequests = await _context.PickupRequests
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            var pickupOffers = await _context.PickupOffers
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            return Ok(new {
+                flightCompanionRequests = requests,
+                flightCompanionOffers = offers,
+                pickupRequests = pickupRequests,
+                pickupOffers = pickupOffers
+            });
+        }
+
         private int? GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

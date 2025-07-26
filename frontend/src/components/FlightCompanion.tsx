@@ -34,6 +34,7 @@ import {
   useGetFlightCompanionRequestsQuery,
   useGetFlightCompanionOffersQuery,
   useCreateFlightCompanionRequestMutation,
+  useCreateFlightCompanionOfferMutation,
   type FlightCompanionRequest,
   type FlightCompanionOffer,
   type CreateFlightCompanionRequestData,
@@ -52,6 +53,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
   const [formType, setFormType] = useState<"request" | "offer">("request");
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -83,6 +85,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
 
   const [createRequest, { isLoading: createRequestLoading }] =
     useCreateFlightCompanionRequestMutation();
+  const [createOffer, { isLoading: createOfferLoading }] = useCreateFlightCompanionOfferMutation();
 
   // Loading and error states
   const isLoading = requestsLoading || offersLoading;
@@ -114,58 +117,31 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
       // Use RTK Query mutation instead of manual fetch
       await createRequest(requestData).unwrap();
 
-      dispatch(
-        addNotification({
-          message: "Flight companion request created successfully!",
-          type: "success",
-        })
-      );
-
+      showSnackbar("Flight companion request created successfully!", "success");
       setShowCreateForm(false);
     } catch (error) {
       console.error("Error creating request:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error creating request";
       showSnackbar(errorMessage, "error");
-
-      dispatch(
-        addNotification({
-          message: "Failed to create flight companion request",
-          type: "error",
-        })
-      );
     }
   };
 
   const handleOfferSubmit = async (data: any): Promise<void> => {
+    console.log("Offer form submitted with data:", data);
     try {
-      // TODO: Implement offer creation using RTK Query when API is ready
-      console.log("Offer data:", data);
-
-      dispatch(
-        addNotification({
-          message: "Flight companion offer created successfully!",
-          type: "success",
-        })
-      );
+      // Add userId for backend validation (temporary, for testing)
+      const offerData = { ...data, userId: 1 };
+      await createOffer(offerData).unwrap();
 
       setShowCreateForm(false);
-      showSnackbar(
-        "Offer created successfully! (Mock implementation)",
-        "success"
-      );
+      showSnackbar("Offer created successfully!", "success");
+      refetchOffers(); // Optionally refresh offers
     } catch (error) {
       console.error("Error creating offer:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error creating offer";
       showSnackbar(errorMessage, "error");
-
-      dispatch(
-        addNotification({
-          message: "Failed to create flight companion offer",
-          type: "error",
-        })
-      );
     }
   };
 
@@ -303,23 +279,51 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           color={request.isMatched ? "warning" : "success"}
           variant="outlined"
         />
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<ContactIcon />}
-          sx={{
-            color: isDarkMode ? "#00BCD4" : "#0B3866",
-            borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
-            "&:hover": {
-              backgroundColor: isDarkMode
-                ? "rgba(0, 188, 212, 0.1)"
-                : "rgba(11, 56, 102, 0.1)",
-            },
-          }}
-          onClick={() => handleContactTraveler(request)}
-        >
-          Contact
-        </Button>
+        <Box className="flex gap-2">
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<ContactIcon />}
+            sx={{
+              color: isDarkMode ? "#00BCD4" : "#0B3866",
+              borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+              "&:hover": {
+                backgroundColor: isDarkMode
+                  ? "rgba(0, 188, 212, 0.1)"
+                  : "rgba(11, 56, 102, 0.1)",
+              },
+            }}
+            onClick={() => handleContactTraveler(request)}
+          >
+            Contact
+          </Button>
+          {activeTab === 1 && !request.isMatched && (
+            <Button
+              variant={selectedRequestId === request.id ? "contained" : "outlined"}
+              size="small"
+              sx={{
+                color: selectedRequestId === request.id 
+                  ? "#fff" 
+                  : (isDarkMode ? "#00BCD4" : "#0B3866"),
+                backgroundColor: selectedRequestId === request.id 
+                  ? (isDarkMode ? "#00BCD4" : "#0B3866") 
+                  : "transparent",
+                borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                "&:hover": {
+                  backgroundColor: selectedRequestId === request.id 
+                    ? (isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)")
+                    : (isDarkMode ? "rgba(0, 188, 212, 0.1)" : "rgba(11, 56, 102, 0.1)"),
+                },
+              }}
+              onClick={() => selectedRequestId === request.id 
+                ? handleClearSelection() 
+                : handleSelectRequest(request.id)
+              }
+            >
+              {selectedRequestId === request.id ? "Selected" : "Select"}
+            </Button>
+          )}
+        </Box>
       </CardActions>
     </Card>
   );
@@ -395,9 +399,58 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         >
           Contact
         </Button>
+        {selectedRequestId && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleMatch(selectedRequestId, offer.id)}
+          >
+            Match
+          </Button>
+        )}
       </CardActions>
     </Card>
   );
+
+
+  const handleMatch = async (requestId: number, offerId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://localhost:5001/api/flightcompanion/match', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId, offerId }),
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        showSnackbar(error.message || 'Failed to match', 'error');
+        return;
+      }
+  
+      showSnackbar('Match successful!', 'success');
+      setSelectedRequestId(null); // Clear selection after successful match
+      // Optionally refresh data here
+      refetchRequests();
+      refetchOffers();
+    } catch (error) {
+      showSnackbar('Error matching: ' + error, 'error');
+    }
+  };
+
+  const handleSelectRequest = (requestId: number) => {
+    setSelectedRequestId(requestId);
+    showSnackbar('Request selected. Now choose an offer to match.', 'info');
+  };
+
+  const handleClearSelection = () => {
+    setSelectedRequestId(null);
+    showSnackbar('Selection cleared.', 'info');
+  };
+
 
   // Early return for error state
   if (error) {
@@ -563,6 +616,22 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
             {/* Offers Tab */}
             {activeTab === 1 && (
               <Box>
+                {selectedRequestId && (
+                  <Paper className="mb-4 p-3 bg-blue-50 dark:bg-blue-900">
+                    <Box className="flex justify-between items-center">
+                      <Typography variant="body2" className="text-blue-800 dark:text-blue-200">
+                        Request selected. Choose an offer to match.
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={handleClearSelection}
+                      >
+                        Clear Selection
+                      </Button>
+                    </Box>
+                  </Paper>
+                )}
                 {offers.length === 0 ? (
                   <Paper className="text-center py-12 bg-gray-50 dark:bg-gray-800">
                     <FlightIcon
@@ -629,7 +698,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
             <FlightCompanionOfferForm
               onSubmit={handleOfferSubmit}
               onCancel={() => setShowCreateForm(false)}
-              loading={false}
+              loading={createOfferLoading}
             />
           )}
         </DialogContent>
@@ -641,6 +710,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         autoHideDuration={2000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        sx={{ zIndex: 1400 }}
       >
         <Alert
           onClose={closeSnackbar}

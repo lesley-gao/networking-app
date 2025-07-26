@@ -67,9 +67,25 @@ export const flightCompanionApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['FlightCompanionRequest'],
     }),
+    createFlightCompanionOffer: builder.mutation<FlightCompanionOffer, Partial<FlightCompanionOffer>>({
+      query: (data) => ({
+        url: '/flightcompanion/offers',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['FlightCompanionOffer'],
+    }),
     getFlightCompanionRequest: builder.query<FlightCompanionRequest, number>({
       query: (id) => `/flightcompanion/requests/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'FlightCompanionRequest', id }],
+    }),
+    updateFlightCompanionRequest: builder.mutation<FlightCompanionRequest, { id: number; data: CreateFlightCompanionRequestData }>({
+      query: ({ id, data }) => ({
+        url: `/flightcompanion/requests/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['FlightCompanionRequest'],
     }),
     deleteFlightCompanionRequest: builder.mutation<void, number>({
       query: (id) => ({
@@ -78,6 +94,51 @@ export const flightCompanionApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['FlightCompanionRequest'],
     }),
+    updateFlightCompanionOffer: builder.mutation<FlightCompanionOffer, { id: number; data: Partial<FlightCompanionOffer> }>({
+      query: ({ id, data }) => ({
+        url: `/flightcompanion/offers/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['FlightCompanionOffer'],
+    }),
+    deleteFlightCompanionOffer: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/flightcompanion/offers/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FlightCompanionOffer'],
+    }),
+    updatePickupRequest: builder.mutation<any, { id: number; data: Partial<any> }>({
+      query: ({ id, data }) => ({
+        url: `/pickup/requests/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['PickupRequest'],
+    }),
+    deletePickupRequest: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/pickup/requests/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['PickupRequest'],
+    }),
+    updatePickupOffer: builder.mutation<any, { id: number; data: Partial<any> }>({
+      query: ({ id, data }) => ({
+        url: `/pickup/offers/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['PickupOffer'],
+    }),
+    deletePickupOffer: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/pickup/offers/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['PickupOffer'],
+    }),
   }),
 });
 
@@ -85,6 +146,14 @@ export const {
   useGetFlightCompanionRequestsQuery,
   useGetFlightCompanionOffersQuery,
   useCreateFlightCompanionRequestMutation,
+  useCreateFlightCompanionOfferMutation,
   useGetFlightCompanionRequestQuery,
   useDeleteFlightCompanionRequestMutation,
+  useUpdateFlightCompanionRequestMutation,
+  useUpdateFlightCompanionOfferMutation,
+  useDeleteFlightCompanionOfferMutation,
+  useUpdatePickupRequestMutation,
+  useDeletePickupRequestMutation,
+  useUpdatePickupOfferMutation,
+  useDeletePickupOfferMutation,
 } = flightCompanionApi;

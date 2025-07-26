@@ -128,6 +128,54 @@ namespace NetworkingApp.Controllers
             }
         }
 
+        // PUT: api/flightcompanion/requests/{id}
+        [HttpPut("requests/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateRequest(int id, [FromBody] CreateFlightCompanionRequestDto dto)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var request = await _context.FlightCompanionRequests.FindAsync(id);
+            if (request == null) return NotFound();
+            if (request.UserId != userId) return Forbid();
+
+            // Update fields
+            request.FlightNumber = dto.FlightNumber;
+            request.Airline = dto.Airline;
+            request.FlightDate = dto.FlightDate;
+            request.DepartureAirport = dto.DepartureAirport;
+            request.ArrivalAirport = dto.ArrivalAirport;
+            request.TravelerName = dto.TravelerName;
+            request.TravelerAge = dto.TravelerAge;
+            request.SpecialNeeds = dto.SpecialNeeds;
+            request.OfferedAmount = dto.OfferedAmount;
+            request.AdditionalNotes = dto.AdditionalNotes;
+            // Do not update IsActive, IsMatched, CreatedAt, MatchedOfferId
+
+            await _context.SaveChangesAsync();
+            return Ok(request);
+        }
+
+        // DELETE: api/flightcompanion/requests/{id}
+        [HttpDelete("requests/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteRequest(int id)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var request = await _context.FlightCompanionRequests.FindAsync(id);
+            if (request == null) return NotFound();
+            if (request.UserId != userId) return Forbid();
+
+            _context.FlightCompanionRequests.Remove(request);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         // 🆕 MISSING - GET: api/flightcompanion/offers
         [HttpGet("offers")]
         public async Task<ActionResult<IEnumerable<FlightCompanionOffer>>> GetOffers()
@@ -165,51 +213,86 @@ namespace NetworkingApp.Controllers
             return Ok(offer);
         }
 
-        // 🆕 MISSING - POST: api/flightcompanion/offers
+        // POST: api/flightcompanion/offers
         [HttpPost("offers")]
-        public async Task<ActionResult<FlightCompanionOffer>> CreateOffer(
-            [FromBody] FlightCompanionOffer offer)
+        public async Task<ActionResult<FlightCompanionOffer>> CreateOffer([FromBody] FlightCompanionOffer offer)
         {
-            try
+            // Extract user ID from authentication context, or use default for testing
+            int userId = 1; // Default for testing
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int authenticatedUserId))
             {
-                // Business logic validation
-                if (offer.FlightDate <= DateTime.UtcNow)
-                {
-                    throw ApiException.BadRequest(
-                        "Flight date must be in the future.", 
-                        $"Provided date: {offer.FlightDate}"
-                    );
-                }
-
-                if (offer.RequestedAmount < 0)
-                {
-                    throw ApiException.BadRequest(
-                        "Requested amount cannot be negative.", 
-                        $"Provided amount: {offer.RequestedAmount}"
-                    );
-                }
-
-                // Set default values
-                offer.CreatedAt = DateTime.UtcNow;
-                offer.IsAvailable = true;
-                offer.HelpedCount = 0;
-
-                _context.FlightCompanionOffers.Add(offer);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Created flight companion offer with ID {OfferId}", offer.Id);
-
-                return CreatedAtAction(
-                    nameof(GetOffer), 
-                    new { id = offer.Id }, 
-                    offer
-                );
+                userId = authenticatedUserId;
             }
-            catch (Exception ex) when (!(ex is ApiException))
+            offer.UserId = userId;
+
+            // Business logic validation
+            if (offer.FlightDate <= DateTime.UtcNow)
             {
-                _logger.LogError(ex, "Error creating flight companion offer");
-                throw; // Will be handled by middleware
+                return BadRequest("Flight date must be in the future.");
             }
+            if (offer.RequestedAmount < 0)
+            {
+                return BadRequest("Requested amount cannot be negative.");
+            }
+
+            // Set default values
+            offer.CreatedAt = DateTime.UtcNow;
+            offer.IsAvailable = true;
+            offer.HelpedCount = 0;
+
+            _context.FlightCompanionOffers.Add(offer);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetOffer), new { id = offer.Id }, offer);
+        }
+
+        // PUT: api/flightcompanion/offers/{id}
+        [HttpPut("offers/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateOffer(int id, [FromBody] FlightCompanionOffer dto)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var offer = await _context.FlightCompanionOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+            if (offer.UserId != userId) return Forbid();
+
+            // Update fields
+            offer.FlightNumber = dto.FlightNumber;
+            offer.Airline = dto.Airline;
+            offer.FlightDate = dto.FlightDate;
+            offer.DepartureAirport = dto.DepartureAirport;
+            offer.ArrivalAirport = dto.ArrivalAirport;
+            offer.AvailableServices = dto.AvailableServices;
+            offer.Languages = dto.Languages;
+            offer.RequestedAmount = dto.RequestedAmount;
+            offer.AdditionalInfo = dto.AdditionalInfo;
+            offer.HelpedCount = dto.HelpedCount;
+            // Do not update IsAvailable, CreatedAt, UserId
+
+            await _context.SaveChangesAsync();
+            return Ok(offer);
+        }
+
+        // DELETE: api/flightcompanion/offers/{id}
+        [HttpDelete("offers/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteOffer(int id)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var offer = await _context.FlightCompanionOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+            if (offer.UserId != userId) return Forbid();
+
+            _context.FlightCompanionOffers.Remove(offer);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         // 🆕 ADDITIONAL - GET: api/flightcompanion/match/{requestId}

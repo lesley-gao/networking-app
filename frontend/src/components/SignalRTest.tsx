@@ -14,6 +14,7 @@ const SignalRTest: React.FC = () => {
       setConnectionStatus('connecting');
       
       try {
+        await signalRService.acquire(); // Use acquire instead of start
         // Set up event handlers
         signalRService.onNotificationReceived((notification) => {
           console.log('Received notification:', notification);
@@ -30,8 +31,6 @@ const SignalRTest: React.FC = () => {
           setNotifications(prev => [...prev, { type: 'system', data: systemNotification, timestamp: new Date() }]);
         });
 
-        // Connect to hub
-        await signalRService.start();
         setConnectionStatus('connected');
         
         console.log('SignalR connected successfully');
@@ -45,7 +44,7 @@ const SignalRTest: React.FC = () => {
 
     // Cleanup on unmount
     return () => {
-      signalRService.stop();
+      signalRService.release(); // Use release instead of stop
     };
   }, []);
 

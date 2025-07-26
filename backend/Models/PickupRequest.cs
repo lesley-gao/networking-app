@@ -9,7 +9,7 @@ namespace NetworkingApp.Models
         public int Id { get; set; }
         
         public int UserId { get; set; }
-        public virtual User User { get; set; } = null!;
+        public virtual User? User { get; set; }
         
         [Required]
         [StringLength(100)]

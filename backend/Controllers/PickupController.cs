@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations; 
 using Microsoft.Extensions.Logging;
 using NetworkingApp.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace NetworkingApp.Controllers
 {
@@ -345,6 +347,88 @@ namespace NetworkingApp.Controllers
                 .Where(pr => pr.IsActive && pr.Airport.ToUpper() == airport.ToUpper())
                 .OrderBy(pr => pr.ArrivalDate)
                 .ToListAsync();
+        }
+
+        // PUT: api/pickup/requests/{id}
+        [HttpPut("requests/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateRequest(int id, [FromBody] PickupRequest dto)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var request = await _context.PickupRequests.FindAsync(id);
+            if (request == null) return NotFound();
+            if (request.UserId != userId) return Forbid();
+
+            // Update fields
+            request.Airport = dto.Airport;
+            request.ArrivalDate = dto.ArrivalDate;
+            request.OfferedAmount = dto.OfferedAmount;
+            // Do not update IsActive, IsMatched, CreatedAt, MatchedOfferId
+
+            await _context.SaveChangesAsync();
+            return Ok(request);
+        }
+
+        // DELETE: api/pickup/requests/{id}
+        [HttpDelete("requests/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteRequest(int id)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var request = await _context.PickupRequests.FindAsync(id);
+            if (request == null) return NotFound();
+            if (request.UserId != userId) return Forbid();
+
+            _context.PickupRequests.Remove(request);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // PUT: api/pickup/offers/{id}
+        [HttpPut("offers/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateOffer(int id, [FromBody] PickupOffer dto)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var offer = await _context.PickupOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+            if (offer.UserId != userId) return Forbid();
+
+            // Update fields
+            offer.Airport = dto.Airport;
+            offer.BaseRate = dto.BaseRate;
+            offer.AverageRating = dto.AverageRating;
+            // Do not update IsAvailable, CreatedAt, UserId
+
+            await _context.SaveChangesAsync();
+            return Ok(offer);
+        }
+
+        // DELETE: api/pickup/offers/{id}
+        [HttpDelete("offers/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteOffer(int id)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
+
+            var offer = await _context.PickupOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+            if (offer.UserId != userId) return Forbid();
+
+            _context.PickupOffers.Remove(offer);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 
