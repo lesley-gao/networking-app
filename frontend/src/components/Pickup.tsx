@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -18,6 +18,7 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  TextField,
 } from "@mui/material";
 import {
   LocalTaxi as TaxiIcon,
@@ -91,6 +92,22 @@ const Pickup: React.FC<PickupProps> = () => {
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
   const [formType, setFormType] = useState<"request" | "offer">("request");
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [searchFilters, setSearchFilters] = useState<{
+    airport: string;
+    flightNumber: string;
+  }>({
+    airport: "",
+    flightNumber: "",
+  });
+  const [searchParams, setSearchParams] = useState<{ airport?: string; flightNumber?: string } | null>(null);
+  const [driverSearchFilters, setDriverSearchFilters] = useState<{
+    airport: string;
+    vehicleType: string;
+  }>({
+    airport: "",
+    vehicleType: "",
+  });
+  const [driverSearchParams, setDriverSearchParams] = useState<{ airport?: string; vehicleType?: string } | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -534,6 +551,78 @@ const Pickup: React.FC<PickupProps> = () => {
     showSnackbar('Selection cleared.', 'info');
   };
 
+  // Search functionality
+  const handleSearch = () => {
+    // If both fields are empty, clear search and show all requests
+    if (!searchFilters.airport && !searchFilters.flightNumber) {
+      setSearchParams(null);
+      showSnackbar("Showing all requests", "info");
+      return;
+    }
+
+    // If at least one field has a value, perform search
+    setSearchParams({
+      airport: searchFilters.airport || undefined,
+      flightNumber: searchFilters.flightNumber || undefined,
+    });
+    showSnackbar(`Searching for requests...`, "info");
+  };
+
+  // Auto-clear search when both fields are empty
+  useEffect(() => {
+    if (!searchFilters.airport && !searchFilters.flightNumber && searchParams) {
+      setSearchParams(null);
+    }
+  }, [searchFilters.airport, searchFilters.flightNumber, searchParams]);
+
+  // Filter requests based on search criteria
+  const filteredRequests = searchParams 
+    ? requests.filter(request => {
+        const airportMatch = !searchParams.airport || 
+          request.airport.toLowerCase().includes(searchParams.airport.toLowerCase());
+        const flightMatch = !searchParams.flightNumber || 
+          request.flightNumber.toLowerCase().includes(searchParams.flightNumber.toLowerCase());
+        
+        return airportMatch && flightMatch;
+      })
+    : requests;
+
+  // Driver search functionality
+  const handleDriverSearch = () => {
+    // If both fields are empty, clear search and show all offers
+    if (!driverSearchFilters.airport && !driverSearchFilters.vehicleType) {
+      setDriverSearchParams(null);
+      showSnackbar("Showing all drivers", "info");
+      return;
+    }
+
+    // If at least one field has a value, perform search
+    setDriverSearchParams({
+      airport: driverSearchFilters.airport || undefined,
+      vehicleType: driverSearchFilters.vehicleType || undefined,
+    });
+    showSnackbar(`Searching for drivers...`, "info");
+  };
+
+  // Auto-clear driver search when both fields are empty
+  useEffect(() => {
+    if (!driverSearchFilters.airport && !driverSearchFilters.vehicleType && driverSearchParams) {
+      setDriverSearchParams(null);
+    }
+  }, [driverSearchFilters.airport, driverSearchFilters.vehicleType, driverSearchParams]);
+
+  // Filter offers based on search criteria
+  const filteredOffers = driverSearchParams 
+    ? offers.filter(offer => {
+        const airportMatch = !driverSearchParams.airport || 
+          offer.airport.toLowerCase().includes(driverSearchParams.airport.toLowerCase());
+        const vehicleMatch = !driverSearchParams.vehicleType || 
+          offer.vehicleType.toLowerCase().includes(driverSearchParams.vehicleType.toLowerCase());
+        
+        return airportMatch && vehicleMatch;
+      })
+    : offers;
+
   // Early return for error state
   if (error) {
     return (
@@ -647,47 +736,114 @@ const Pickup: React.FC<PickupProps> = () => {
         </Tabs>
       </Paper>
 
-      {/* Action Button */}
-      <Box className="text-center mb-8">
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<AddIcon />}
-          onClick={() =>
-            handleOpenCreateDialog(activeTab === 0 ? "request" : "offer")
-          }
-          sx={{
-            backgroundColor:
-              activeTab === 0
-                ? isDarkMode
-                  ? "#00BCD4"
-                  : "#0B3866"
-                : "#168046",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor:
-                activeTab === 0
-                  ? isDarkMode
-                    ? "rgba(0, 188, 212, 0.9)"
-                    : "rgba(11, 56, 102, 0.9)"
-                  : "rgba(22, 128, 70, 0.9)",
-            },
-          }}
-          className="px-8 py-3  my-3 text-white"
-        >
-          {activeTab === 0 ? "Request Pickup" : "Offer Service"}
-        </Button>
-      </Box>
-
       {/* Content */}
       <Box className="min-h-96">
         {activeTab === 0 && (
           <Box>
+            {/* Search Filters */}
+            <Paper className="mb-6 p-4" style={{
+              background: isDarkMode ? muiTheme.palette.background.paper : undefined,
+            }}>
+              <Typography variant="h6" className="mb-4">
+                Search for Requests to Help
+              </Typography>
+              <Grid container spacing={2} alignItems="end">
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="Airport"
+                    value={searchFilters.airport}
+                    onChange={(e) => setSearchFilters(prev => ({ ...prev, airport: e.target.value }))}
+                    placeholder="e.g., AKL"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="Flight Number"
+                    value={searchFilters.flightNumber}
+                    onChange={(e) => setSearchFilters(prev => ({ ...prev, flightNumber: e.target.value }))}
+                    placeholder="e.g., NZ289"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleSearch}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                      },
+                      height: "56px", // Match the default TextField height
+                    }}
+                  >
+                    Search Requests
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => {
+                      setSearchFilters({ airport: "", flightNumber: "" });
+                      setSearchParams(null);
+                      showSnackbar("Search cleared", "info");
+                    }}
+                    sx={{
+                      borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                      color: isDarkMode ? "#00BCD4" : "#0B3866",
+                      "&:hover": {
+                        borderColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                        backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.1)" : "rgba(11, 56, 102, 0.1)",
+                      },
+                      height: "56px", // Match the default TextField height
+                    }}
+                  >
+                    Clear Search
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Action Button */}
+            <Box className="text-center mb-8">
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() =>
+                  handleOpenCreateDialog(activeTab === 0 ? "request" : "offer")
+                }
+                sx={{
+                  backgroundColor:
+                    activeTab === 0
+                      ? isDarkMode
+                        ? "#00BCD4"
+                        : "#0B3866"
+                      : "#168046",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor:
+                      activeTab === 0
+                        ? isDarkMode
+                          ? "rgba(0, 188, 212, 0.9)"
+                          : "rgba(11, 56, 102, 0.9)"
+                        : "rgba(22, 128, 70, 0.9)",
+                  },
+                }}
+                className="px-8 py-3  my-3 text-white"
+              >
+                {activeTab === 0 ? "Request Pickup" : "Offer Service"}
+              </Button>
+            </Box>
+
             {isLoading && !requests.length ? (
               <Box className="flex justify-center items-center py-12">
                 <CircularProgress size={40} />
               </Box>
-            ) : requests.length === 0 ? (
+            ) : filteredRequests.length === 0 ? (
               <Paper
                 className="text-center py-12 bg-gray-50 dark:bg-gray-800"
                 style={{
@@ -707,18 +863,18 @@ const Pickup: React.FC<PickupProps> = () => {
                   variant="h6"
                   className="text-gray-600 dark:text-gray-300"
                 >
-                  No pickup requests yet
+                  {searchParams ? "No matching requests found" : "No pickup requests yet"}
                 </Typography>
                 <Typography
                   variant="body2"
                   className="text-gray-500 dark:text-gray-400 mt-2"
                 >
-                  Be the first to request a pickup!
+                  {searchParams ? "Try different search criteria" : "Be the first to request a pickup!"}
                 </Typography>
               </Paper>
             ) : (
               <Grid container spacing={3}>
-                {requests.map((request) => (
+                {filteredRequests.map((request) => (
                   <Grid
                     item
                     xs={12}
@@ -739,6 +895,93 @@ const Pickup: React.FC<PickupProps> = () => {
 
         {activeTab === 1 && (
           <Box>
+            {/* Search Filters */}
+            <Paper className="mb-6 p-4" style={{
+              background: isDarkMode ? muiTheme.palette.background.paper : undefined,
+            }}>
+              <Typography variant="h6" className="mb-4">
+                Search for Driver
+              </Typography>
+              <Grid container spacing={2} alignItems="end">
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="Airport"
+                    value={driverSearchFilters.airport}
+                    onChange={(e) => setDriverSearchFilters(prev => ({ ...prev, airport: e.target.value }))}
+                    placeholder="e.g., AKL"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="Vehicle Type"
+                    value={driverSearchFilters.vehicleType}
+                    onChange={(e) => setDriverSearchFilters(prev => ({ ...prev, vehicleType: e.target.value }))}
+                    placeholder="e.g., Sedan"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleDriverSearch}
+                    sx={{
+                      backgroundColor: "#168046",
+                      "&:hover": {
+                        backgroundColor: "rgba(22, 128, 70, 0.9)",
+                      },
+                      height: "56px", // Match the default TextField height
+                    }}
+                  >
+                    Search Drivers
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => {
+                      setDriverSearchFilters({ airport: "", vehicleType: "" });
+                      setDriverSearchParams(null);
+                      showSnackbar("Search cleared", "info");
+                    }}
+                    sx={{
+                      borderColor: "#168046",
+                      color: "#168046",
+                      "&:hover": {
+                        borderColor: "rgba(22, 128, 70, 0.9)",
+                        backgroundColor: "rgba(22, 128, 70, 0.1)",
+                      },
+                      height: "56px", // Match the default TextField height
+                    }}
+                  >
+                    Clear Search
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Action Button */}
+            <Box className="text-center mb-8">
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenCreateDialog("offer")}
+                sx={{
+                  backgroundColor: "#168046",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "rgba(22, 128, 70, 0.9)",
+                  },
+                }}
+                className="px-8 py-3  my-3 text-white"
+              >
+                Offer Service
+              </Button>
+            </Box>
+
             {selectedRequestId && (
               <Paper className="mb-4 p-3 bg-blue-50 dark:bg-blue-900">
                 <Box className="flex justify-between items-center">
@@ -759,7 +1002,7 @@ const Pickup: React.FC<PickupProps> = () => {
               <Box className="flex justify-center items-center py-12">
                 <CircularProgress size={40} />
               </Box>
-            ) : offers.length === 0 ? (
+            ) : filteredOffers.length === 0 ? (
               <Paper
                 className="text-center py-12 bg-gray-50 dark:bg-gray-800"
                 style={{
@@ -779,18 +1022,18 @@ const Pickup: React.FC<PickupProps> = () => {
                   variant="h6"
                   className="text-gray-600 dark:text-gray-300"
                 >
-                  No drivers available yet
+                  {driverSearchParams ? "No matching drivers found" : "No drivers available yet"}
                 </Typography>
                 <Typography
                   variant="body2"
                   className="text-gray-500 dark:text-gray-400 mt-2"
                 >
-                  Be the first to offer pickup services!
+                  {driverSearchParams ? "Try different search criteria" : "Be the first to offer pickup services!"}
                 </Typography>
               </Paper>
             ) : (
               <Grid container spacing={3}>
-                {offers.map((offer) => (
+                {filteredOffers.map((offer) => (
                   <Grid
                     item
                     xs={12}

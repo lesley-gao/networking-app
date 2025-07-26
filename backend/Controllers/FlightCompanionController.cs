@@ -67,6 +67,142 @@ namespace NetworkingApp.Controllers
             return Ok(request);
         }
 
+        // ✅ NEW - GET: api/flightcompanion/search-requests
+        [HttpGet("search-requests")]
+        public async Task<ActionResult<IEnumerable<FlightCompanionRequest>>> SearchRequests(
+            [FromQuery] string? flightNumber = null,
+            [FromQuery] string? departureAirport = null,
+            [FromQuery] string? arrivalAirport = null,
+            [FromQuery] DateTime? flightDate = null)
+        {
+            try
+            {
+                _logger.LogInformation("Searching flight companion requests with filters: FlightNumber={FlightNumber}, FlightDate={FlightDate}", 
+                    flightNumber, flightDate);
+
+                // First, let's test without Include to see if that's the issue
+                var query = _context.FlightCompanionRequests
+                    .Where(r => r.IsActive && !r.IsMatched);
+
+                // Apply search filters
+                if (!string.IsNullOrEmpty(flightNumber))
+                {
+                    query = query.Where(r => r.FlightNumber.ToLower().Contains(flightNumber.ToLower()));
+                }
+
+                if (!string.IsNullOrEmpty(departureAirport))
+                {
+                    query = query.Where(r => r.DepartureAirport.ToLower().Contains(departureAirport.ToLower()));
+                }
+
+                if (!string.IsNullOrEmpty(arrivalAirport))
+                {
+                    query = query.Where(r => r.ArrivalAirport.ToLower().Contains(arrivalAirport.ToLower()));
+                }
+
+                if (flightDate.HasValue)
+                {
+                    query = query.Where(r => r.FlightDate.Date == flightDate.Value.Date);
+                }
+
+                var requests = await query
+                    .OrderBy(r => r.FlightDate)
+                    .ThenBy(r => r.CreatedAt)
+                    .ToListAsync();
+
+                _logger.LogInformation("Found {Count} flight companion requests matching search criteria", requests.Count);
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching flight companion requests: {Message}", ex.Message);
+                return StatusCode(500, new { error = ex.Message, details = ex.ToString() });
+            }
+        }
+
+        // ✅ NEW - POST: api/flightcompanion/initiate-help
+        [HttpPost("initiate-help")]
+        [Authorize]
+        public async Task<ActionResult<InitiateHelpResponse>> InitiateHelp([FromBody] InitiateHelpRequest request)
+        {
+            try
+            {
+                // Get current user ID
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+
+                // Validate request exists and is available
+                var flightRequest = await _context.FlightCompanionRequests
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.Id == request.RequestId && r.IsActive && !r.IsMatched);
+
+                if (flightRequest == null)
+                {
+                    return NotFound("Flight companion request not found or already matched");
+                }
+
+                // Prevent self-helping
+                if (flightRequest.UserId == userId)
+                {
+                    return BadRequest("Cannot help with your own request");
+                }
+
+                // Create initial message
+                var message = new Message
+                {
+                    SenderId = userId.Value,
+                    ReceiverId = flightRequest.UserId,
+                    Content = request.InitialMessage,
+                    Type = "Text",
+                    RequestType = "FlightCompanion",
+                    RequestId = request.RequestId,
+                    ThreadId = GenerateThreadId(userId.Value, flightRequest.UserId),
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+
+                _context.Messages.Add(message);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User {UserId} initiated help for flight companion request {RequestId}", 
+                    userId, request.RequestId);
+
+                return Ok(new InitiateHelpResponse
+                {
+                    MessageId = message.Id,
+                    ThreadId = message.ThreadId,
+                    RequestId = request.RequestId,
+                    ReceiverId = flightRequest.UserId,
+                    Message = "Help request sent successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initiating help for flight companion request {RequestId}", request.RequestId);
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                return userId;
+            }
+            return null;
+        }
+
+        private string GenerateThreadId(int user1Id, int user2Id)
+        {
+            // Create a consistent thread ID regardless of who initiates
+            var sortedIds = new[] { user1Id, user2Id }.OrderBy(id => id).ToArray();
+            return $"thread_{sortedIds[0]}_{sortedIds[1]}";
+        }
+
         // ✅ EXISTING - POST: api/flightcompanion/requests
         [HttpPost("requests")]
         public async Task<ActionResult<FlightCompanionRequest>> CreateRequest(
@@ -396,6 +532,21 @@ namespace NetworkingApp.Controllers
             public int RequestId { get; set; }
         }
 
+        public class InitiateHelpRequest
+        {
+            public int RequestId { get; set; }
+            public string InitialMessage { get; set; } = string.Empty;
+        }
+
+        public class InitiateHelpResponse
+        {
+            public int MessageId { get; set; }
+            public string ThreadId { get; set; } = string.Empty;
+            public int RequestId { get; set; }
+            public int ReceiverId { get; set; }
+            public string Message { get; set; } = string.Empty;
+        }
+
         // TEMPORARY - GET: api/flightcompanion/test
         [HttpGet("test")]
         public async Task<ActionResult> TestEndpoint()
@@ -455,6 +606,12 @@ namespace NetworkingApp.Controllers
                     .Take(5)
                     .ToListAsync();
 
+                // Test 8: Test the exact search query without Include (case-insensitive)
+                var searchTest = await _context.FlightCompanionRequests
+                    .Where(r => r.IsActive && !r.IsMatched && r.FlightNumber.ToLower().Contains("sh999"))
+                    .Select(r => new { r.Id, r.FlightNumber, r.UserId })
+                    .ToListAsync();
+
                 return Ok(new
                 {
                     message = "*** UPDATED DIAGNOSTIC TESTS COMPLETED ***",
@@ -467,7 +624,8 @@ namespace NetworkingApp.Controllers
                     includeSuccessful,
                     includeError = includeException?.Message,
                     includeStackTrace = includeException?.StackTrace,
-                    sampleRequests
+                    sampleRequests,
+                    searchTest
                 });
             }
             catch (Exception ex)

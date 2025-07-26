@@ -17,6 +17,14 @@ export interface FlightCompanionRequest {
   isActive: boolean;
   isMatched: boolean;
   createdAt: string;
+  user?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    isVerified: boolean;
+    rating: number;
+  };
 }
 
 export interface FlightCompanionOffer {
@@ -34,6 +42,14 @@ export interface FlightCompanionOffer {
   isAvailable: boolean;
   helpedCount: number;
   createdAt: string;
+  user?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    isVerified: boolean;
+    rating: number;
+  };
 }
 
 export interface CreateFlightCompanionRequestData {
@@ -78,6 +94,15 @@ export const flightCompanionApi = baseApi.injectEndpoints({
     getFlightCompanionRequest: builder.query<FlightCompanionRequest, number>({
       query: (id) => `/flightcompanion/requests/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'FlightCompanionRequest', id }],
+    }),
+    searchFlightCompanionRequests: builder.query<FlightCompanionRequest[], { flightNumber?: string; flightDate?: string }>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.flightNumber) searchParams.append('flightNumber', params.flightNumber);
+        if (params.flightDate) searchParams.append('flightDate', params.flightDate);
+        return `/flightcompanion/search-requests?${searchParams.toString()}`;
+      },
+      providesTags: ['FlightCompanionRequest'],
     }),
     updateFlightCompanionRequest: builder.mutation<FlightCompanionRequest, { id: number; data: CreateFlightCompanionRequestData }>({
       query: ({ id, data }) => ({
@@ -148,6 +173,7 @@ export const {
   useCreateFlightCompanionRequestMutation,
   useCreateFlightCompanionOfferMutation,
   useGetFlightCompanionRequestQuery,
+  useSearchFlightCompanionRequestsQuery,
   useDeleteFlightCompanionRequestMutation,
   useUpdateFlightCompanionRequestMutation,
   useUpdateFlightCompanionOfferMutation,

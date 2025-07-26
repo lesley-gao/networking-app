@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -15,9 +15,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Snackbar,
   Alert,
   CircularProgress,
+  TextField,
 } from "@mui/material";
 import {
   Flight as FlightIcon,
@@ -35,6 +37,7 @@ import {
   useGetFlightCompanionOffersQuery,
   useCreateFlightCompanionRequestMutation,
   useCreateFlightCompanionOfferMutation,
+  useSearchFlightCompanionRequestsQuery,
   type FlightCompanionRequest,
   type FlightCompanionOffer,
   type CreateFlightCompanionRequestData,
@@ -54,6 +57,16 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
   const [formType, setFormType] = useState<"request" | "offer">("request");
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [searchFilters, setSearchFilters] = useState<{
+    flightNumber: string;
+    flightDate: string;
+  }>({
+    flightNumber: "",
+    flightDate: "",
+  });
+  const [showHelpDialog, setShowHelpDialog] = useState<boolean>(false);
+  const [selectedRequestForHelp, setSelectedRequestForHelp] = useState<FlightCompanionRequest | null>(null);
+  const [helpMessage, setHelpMessage] = useState<string>("");
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -270,6 +283,11 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
             variant="filled"
             className="font-semibold"
           />
+          {request.user && (
+            <Typography variant="body2" color="textSecondary">
+              by {request.user.firstName} {request.user.lastName}
+            </Typography>
+          )}
         </Box>
       </CardContent>
 
@@ -297,6 +315,22 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           >
             Contact
           </Button>
+          {activeTab === 0 && !request.isMatched && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<HelpIcon />}
+              sx={{
+                backgroundColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                "&:hover": {
+                  backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                },
+              }}
+              onClick={() => handleOfferHelp(request)}
+            >
+              Offer Help
+            </Button>
+          )}
           {activeTab === 1 && !request.isMatched && (
             <Button
               variant={selectedRequestId === request.id ? "contained" : "outlined"}
@@ -451,6 +485,122 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
     showSnackbar('Selection cleared.', 'info');
   };
 
+  // Search and Help functionality
+  const [searchParams, setSearchParams] = useState<{ flightNumber?: string; flightDate?: string } | null>(null);
+  const [helperSearchFilters, setHelperSearchFilters] = useState<{
+    flightNumber: string;
+    airport: string;
+  }>({
+    flightNumber: "",
+    airport: "",
+  });
+  const [helperSearchParams, setHelperSearchParams] = useState<{ flightNumber?: string; airport?: string } | null>(null);
+  
+  const { data: searchResults = [], isLoading: searchLoading } = useSearchFlightCompanionRequestsQuery(
+    searchParams || { flightNumber: "", flightDate: "" },
+    { skip: !searchParams }
+  );
+
+  const handleSearch = () => {
+    // If both fields are empty, clear search and show all requests
+    if (!searchFilters.flightNumber && !searchFilters.flightDate) {
+      setSearchParams(null);
+      showSnackbar("Showing all requests", "info");
+      return;
+    }
+
+    // If at least one field has a value, perform search
+    setSearchParams({
+      flightNumber: searchFilters.flightNumber || undefined,
+      flightDate: searchFilters.flightDate || undefined,
+    });
+    showSnackbar(`Searching for requests...`, "info");
+  };
+
+  const handleOfferHelp = (request: FlightCompanionRequest) => {
+    setSelectedRequestForHelp(request);
+    setShowHelpDialog(true);
+  };
+
+  const handleSendHelpMessage = async () => {
+    if (!selectedRequestForHelp || !helpMessage.trim()) return;
+
+    try {
+      const response = await fetch("/api/flightcompanion/initiate-help", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          requestId: selectedRequestForHelp.id,
+          initialMessage: helpMessage,
+        }),
+      });
+
+      if (response.ok) {
+        showSnackbar("Help message sent successfully!", "success");
+        setShowHelpDialog(false);
+        setHelpMessage("");
+        setSelectedRequestForHelp(null);
+      } else {
+        const error = await response.json();
+        showSnackbar(error.message || "Failed to send message", "error");
+      }
+    } catch (error) {
+      showSnackbar("Error sending help message", "error");
+    }
+  };
+
+  const handleCloseHelpDialog = () => {
+    setShowHelpDialog(false);
+    setHelpMessage("");
+    setSelectedRequestForHelp(null);
+  };
+
+  // Auto-clear search when both fields are empty
+  useEffect(() => {
+    if (!searchFilters.flightNumber && !searchFilters.flightDate && searchParams) {
+      setSearchParams(null);
+    }
+  }, [searchFilters.flightNumber, searchFilters.flightDate, searchParams]);
+
+  // Helper search functionality
+  const handleHelperSearch = () => {
+    // If both fields are empty, clear search and show all offers
+    if (!helperSearchFilters.flightNumber && !helperSearchFilters.airport) {
+      setHelperSearchParams(null);
+      showSnackbar("Showing all helpers", "info");
+      return;
+    }
+
+    // If at least one field has a value, perform search
+    setHelperSearchParams({
+      flightNumber: helperSearchFilters.flightNumber || undefined,
+      airport: helperSearchFilters.airport || undefined,
+    });
+    showSnackbar(`Searching for helpers...`, "info");
+  };
+
+  // Auto-clear helper search when both fields are empty
+  useEffect(() => {
+    if (!helperSearchFilters.flightNumber && !helperSearchFilters.airport && helperSearchParams) {
+      setHelperSearchParams(null);
+    }
+  }, [helperSearchFilters.flightNumber, helperSearchFilters.airport, helperSearchParams]);
+
+  // Filter offers based on search criteria
+  const filteredOffers = helperSearchParams 
+    ? offers.filter(offer => {
+        const airportMatch = !helperSearchParams.airport || 
+          offer.departureAirport.toLowerCase().includes(helperSearchParams.airport.toLowerCase());
+        const flightMatch = !helperSearchParams.flightNumber || 
+          offer.flightNumber.toLowerCase().includes(helperSearchParams.flightNumber.toLowerCase());
+        
+        return airportMatch && flightMatch;
+      })
+    : offers;
+
 
   // Early return for error state
   if (error) {
@@ -533,35 +683,6 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
         </Tabs>
       </Paper>
 
-      {/* Action Button */}
-      <Box className="text-center mb-8">
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<AddIcon />}
-          onClick={handleOpenForm}
-          sx={{
-            backgroundColor:
-              activeTab === 0
-                ? isDarkMode
-                  ? "#00BCD4"
-                  : "#0B3866"
-                : "#168046",
-            "&:hover": {
-              backgroundColor:
-                activeTab === 0
-                  ? isDarkMode
-                    ? "rgba(0, 188, 212, 0.9)"
-                    : "rgba(11, 56, 102, 0.9)"
-                  : "rgba(22, 128, 70, 0.9)",
-            },
-          }}
-          className="px-8 py-3 my-3 text-white"
-        >
-          {activeTab === 0 ? "Request Help" : "Offer to Help"}
-        </Button>
-      </Box>
-
       {/* Content */}
       <Box className="min-h-96">
         {isLoading && !requests.length && !offers.length ? (
@@ -573,7 +694,101 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
             {/* Requests Tab */}
             {activeTab === 0 && (
               <Box>
-                {requests.length === 0 ? (
+                {/* Search Filters */}
+                <Paper className="mb-6 p-4">
+                  <Typography variant="h6" className="mb-4">
+                    Search for Requests to Help
+                  </Typography>
+                  <Grid container spacing={2} alignItems="end">
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        label="Flight Number"
+                        value={searchFilters.flightNumber}
+                        onChange={(e) => setSearchFilters(prev => ({ ...prev, flightNumber: e.target.value }))}
+                        placeholder="e.g., NZ289"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Flight Date"
+                        value={searchFilters.flightDate}
+                        onChange={(e) => setSearchFilters(prev => ({ ...prev, flightDate: e.target.value }))}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        onClick={handleSearch}
+                        sx={{
+                          backgroundColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                          "&:hover": {
+                            backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                          },
+                          height: "56px", // Match the default TextField height
+                        }}
+                      >
+                        Search Requests
+                      </Button>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => {
+                          setSearchFilters({ flightNumber: "", flightDate: "" });
+                          setSearchParams(null);
+                          showSnackbar("Search cleared", "info");
+                        }}
+                        sx={{
+                          borderColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                          color: isDarkMode ? "#00BCD4" : "#0B3866",
+                          "&:hover": {
+                            borderColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                            backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.1)" : "rgba(11, 56, 102, 0.1)",
+                          },
+                          height: "56px", // Match the default TextField height
+                        }}
+                      >
+                        Clear Search
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Action Button */}
+                <Box className="text-center mb-8">
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenForm}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#00BCD4" : "#0B3866",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+                      },
+                    }}
+                    className="px-8 py-3 my-3 text-white"
+                  >
+                    Request Help
+                  </Button>
+                </Box>
+
+                {searchLoading && (
+                  <Box className="flex justify-center items-center py-12">
+                    <CircularProgress size={40} />
+                    <Typography variant="body1" className="ml-3">
+                      Searching for requests...
+                    </Typography>
+                  </Box>
+                )}
+
+                {!searchLoading && (searchParams ? searchResults : requests).length === 0 ? (
                   <Paper className="text-center py-12 bg-gray-50 dark:bg-gray-800">
                     <HelpIcon
                       sx={{ fontSize: 64 }}
@@ -583,18 +798,18 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                       variant="h6"
                       className="text-gray-600 dark:text-gray-300"
                     >
-                      No help requests yet
+                      {searchParams ? "No matching requests found" : "No help requests yet"}
                     </Typography>
                     <Typography
                       variant="body2"
                       className="text-gray-500 dark:text-gray-400 mt-2"
                     >
-                      Be the first to request help!
+                      {searchParams ? "Try different search criteria" : "Be the first to request help!"}
                     </Typography>
                   </Paper>
                 ) : (
                   <Grid container spacing={3}>
-                    {requests.map((request) => (
+                    {(searchParams ? searchResults : requests).map((request) => (
                       <Grid
                         item
                         xs={12}
@@ -616,6 +831,89 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
             {/* Offers Tab */}
             {activeTab === 1 && (
               <Box>
+                {/* Search Filters */}
+                <Paper className="mb-6 p-4">
+                  <Typography variant="h6" className="mb-4">
+                    Search for Helper
+                  </Typography>
+                  <Grid container spacing={2} alignItems="end">
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        label="Flight Number"
+                        value={helperSearchFilters.flightNumber}
+                        onChange={(e) => setHelperSearchFilters(prev => ({ ...prev, flightNumber: e.target.value }))}
+                        placeholder="e.g., NZ289"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        fullWidth
+                        label="Airport"
+                        value={helperSearchFilters.airport}
+                        onChange={(e) => setHelperSearchFilters(prev => ({ ...prev, airport: e.target.value }))}
+                        placeholder="e.g., AKL"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        onClick={handleHelperSearch}
+                        sx={{
+                          backgroundColor: "#168046",
+                          "&:hover": {
+                            backgroundColor: "rgba(22, 128, 70, 0.9)",
+                          },
+                          height: "56px", // Match the default TextField height
+                        }}
+                      >
+                        Search Helpers
+                      </Button>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => {
+                          setHelperSearchFilters({ flightNumber: "", airport: "" });
+                          setHelperSearchParams(null);
+                          showSnackbar("Search cleared", "info");
+                        }}
+                        sx={{
+                          borderColor: "#168046",
+                          color: "#168046",
+                          "&:hover": {
+                            borderColor: "rgba(22, 128, 70, 0.9)",
+                            backgroundColor: "rgba(22, 128, 70, 0.1)",
+                          },
+                          height: "56px", // Match the default TextField height
+                        }}
+                      >
+                        Clear Search
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Action Button */}
+                <Box className="text-center mb-8">
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenForm}
+                    sx={{
+                      backgroundColor: "#168046",
+                      "&:hover": {
+                        backgroundColor: "rgba(22, 128, 70, 0.9)",
+                      },
+                    }}
+                    className="px-8 py-3 my-3 text-white"
+                  >
+                    Offer to Help
+                  </Button>
+                </Box>
                 {selectedRequestId && (
                   <Paper className="mb-4 p-3 bg-blue-50 dark:bg-blue-900">
                     <Box className="flex justify-between items-center">
@@ -632,7 +930,7 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                     </Box>
                   </Paper>
                 )}
-                {offers.length === 0 ? (
+                {filteredOffers.length === 0 ? (
                   <Paper className="text-center py-12 bg-gray-50 dark:bg-gray-800">
                     <FlightIcon
                       sx={{ fontSize: 64 }}
@@ -642,18 +940,18 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
                       variant="h6"
                       className="text-gray-600 dark:text-gray-300"
                     >
-                      No helpers available yet
+                      {helperSearchParams ? "No matching helpers found" : "No helpers available yet"}
                     </Typography>
                     <Typography
                       variant="body2"
                       className="text-gray-500 dark:text-gray-400 mt-2"
                     >
-                      Be the first to offer help!
+                      {helperSearchParams ? "Try different search criteria" : "Be the first to offer help!"}
                     </Typography>
                   </Paper>
                 ) : (
                   <Grid container spacing={2}>
-                    {offers.map((offer) => (
+                    {filteredOffers.map((offer) => (
                       <Grid
                         item
                         xs={12}
@@ -673,6 +971,49 @@ const FlightCompanion: React.FC<FlightCompanionProps> = () => {
           </>
         )}
       </Box>
+
+      {/* OfferHelp Dialog */}
+      <Dialog
+        open={showHelpDialog}
+        onClose={handleCloseHelpDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Offer Help to {selectedRequestForHelp?.user?.firstName} {selectedRequestForHelp?.user?.lastName}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" style={{ marginBottom: '16px' }}>
+            Send a message to offer your help for Flight {selectedRequestForHelp?.flightNumber} 
+            from {selectedRequestForHelp?.departureAirport} to {selectedRequestForHelp?.arrivalAirport}.
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Your message"
+            value={helpMessage}
+            onChange={(e) => setHelpMessage(e.target.value)}
+            placeholder="Hi! I'd be happy to help you with your flight. I can assist with..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseHelpDialog}>Cancel</Button>
+          <Button
+            onClick={handleSendHelpMessage}
+            variant="contained"
+            disabled={!helpMessage.trim()}
+            sx={{
+              backgroundColor: isDarkMode ? "#00BCD4" : "#0B3866",
+              "&:hover": {
+                backgroundColor: isDarkMode ? "rgba(0, 188, 212, 0.9)" : "rgba(11, 56, 102, 0.9)",
+              },
+            }}
+          >
+            Send Message
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Create Request/Offer Dialog */}
       <Dialog
