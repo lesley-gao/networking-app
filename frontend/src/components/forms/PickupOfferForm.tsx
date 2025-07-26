@@ -25,8 +25,9 @@ const pickupOfferSchema = z.object({
   
   vehicleType: z
     .string()
-    .min(2, 'Vehicle type is required')
-    .max(50, 'Vehicle type must be less than 50 characters'),
+    .min(2, 'Vehicle type must be at least 2 characters')
+    .max(50, 'Vehicle type must be less than 50 characters')
+    .optional(),
   
   maxPassengers: z
     .number()
@@ -37,8 +38,9 @@ const pickupOfferSchema = z.object({
   
   serviceArea: z
     .string()
-    .min(5, 'Service area is required')
-    .max(200, 'Service area must be less than 200 characters'),
+    .min(5, 'Service area must be at least 5 characters')
+    .max(200, 'Service area must be less than 200 characters')
+    .optional(),
   
   baseRate: z
     .number()
@@ -158,7 +160,7 @@ export const PickupOfferForm: React.FC<PickupOfferFormProps> = ({
             name="vehicleType"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth required error={!!errors.vehicleType}>
+              <FormControl fullWidth error={!!errors.vehicleType}>
                 <InputLabel>Vehicle Type</InputLabel>
                 <Select
                   {...field}
@@ -230,7 +232,6 @@ export const PickupOfferForm: React.FC<PickupOfferFormProps> = ({
                 error={!!errors.serviceArea}
                 helperText={errors.serviceArea?.message}
                 fullWidth
-                required
               />
             )}
           />

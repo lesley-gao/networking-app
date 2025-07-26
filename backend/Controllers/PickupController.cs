@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using NetworkingApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using NetworkingApp.Models.DTOs;
 
 namespace NetworkingApp.Controllers
 {
@@ -156,7 +157,7 @@ namespace NetworkingApp.Controllers
 
         // POST: api/Pickup/offers
         [HttpPost("offers")]
-        public async Task<ActionResult<PickupOffer>> CreateOffer(PickupOffer offer)
+        public async Task<ActionResult<PickupOffer>> CreateOffer(CreatePickupOfferDto dto)
         {
             // Validate model state
             if (!ModelState.IsValid)
@@ -165,13 +166,13 @@ namespace NetworkingApp.Controllers
             }
 
             // Additional business validation
-            if (offer.BaseRate < 0)
+            if (dto.BaseRate < 0)
             {
                 ModelState.AddModelError("BaseRate", "Base rate cannot be negative.");
                 return BadRequest(ModelState);
             }
 
-            if (offer.MaxPassengers <= 0 || offer.MaxPassengers > 12)
+            if (dto.MaxPassengers <= 0 || dto.MaxPassengers > 12)
             {
                 ModelState.AddModelError("MaxPassengers", "Maximum passengers must be between 1 and 12.");
                 return BadRequest(ModelState);
@@ -179,17 +180,29 @@ namespace NetworkingApp.Controllers
 
             // Validate airport codes
             var validAirports = new[] { "AKL", "WLG", "CHC", "ZQN", "ROT" };
-            if (!validAirports.Contains(offer.Airport?.ToUpper()))
+            if (!validAirports.Contains(dto.Airport?.ToUpper()))
             {
                 ModelState.AddModelError("Airport", "Invalid airport code.");
                 return BadRequest(ModelState);
             }
 
-            // Set default values and timestamps
-            offer.CreatedAt = DateTime.UtcNow;
-            offer.IsAvailable = true;
-            offer.TotalPickups = 0;
-            offer.AverageRating = 0;
+            // Create the PickupOffer from the DTO
+            var offer = new PickupOffer
+            {
+                UserId = dto.UserId,
+                Airport = dto.Airport,
+                VehicleType = dto.VehicleType,
+                MaxPassengers = dto.MaxPassengers,
+                CanHandleLuggage = dto.CanHandleLuggage,
+                ServiceArea = dto.ServiceArea,
+                BaseRate = dto.BaseRate,
+                Languages = dto.Languages,
+                AdditionalServices = dto.AdditionalServices,
+                CreatedAt = DateTime.UtcNow,
+                IsAvailable = true,
+                TotalPickups = 0,
+                AverageRating = 0
+            };
 
             _context.PickupOffers.Add(offer);
             await _context.SaveChangesAsync();

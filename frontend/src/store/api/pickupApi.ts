@@ -80,6 +80,14 @@ export const pickupApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['PickupRequest'],
     }),
+    createPickupOffer: builder.mutation<PickupOffer, Partial<PickupOffer>>({
+      query: (data) => ({
+        url: '/pickup/offers',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['PickupOffer'],
+    }),
   }),
 });
 
@@ -89,4 +97,5 @@ export const {
   useCreatePickupRequestMutation,
   useGetPickupRequestQuery,
   useDeletePickupRequestMutation,
+  useCreatePickupOfferMutation,
 } = pickupApi;

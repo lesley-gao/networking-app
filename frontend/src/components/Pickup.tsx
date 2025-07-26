@@ -32,7 +32,7 @@ import {
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addNotification } from "../store/slices/uiSlice";
-import { selectIsAuthenticated } from "../store/slices/authSelectors";
+import { selectIsAuthenticated, selectAuthUser } from "../store/slices/authSelectors";
 import {
   useGetPickupRequestsQuery,
   useGetPickupOffersQuery,
@@ -40,6 +40,7 @@ import {
   type PickupRequest,
   type PickupOffer,
   type CreatePickupRequestData,
+  useCreatePickupOfferMutation, // <-- add this
 } from "../store/api/pickupApi";
 import PickupRequestForm from "./forms/PickupRequestForm";
 import PickupOfferForm from "./forms/PickupOfferForm";
@@ -54,6 +55,7 @@ const Pickup: React.FC<PickupProps> = () => {
   // Redux State
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectAuthUser);
 
   // Add theme and dark mode detection
   const { muiTheme } = useTheme();
@@ -76,6 +78,9 @@ const Pickup: React.FC<PickupProps> = () => {
 
   const [createRequest, { isLoading: createRequestLoading }] =
     useCreatePickupRequestMutation();
+
+  // Add the mutation hook
+  const [createOffer, { isLoading: createOfferLoading }] = useCreatePickupOfferMutation();
 
   // Loading and error states
   const isLoading = requestsLoading || offersLoading;
@@ -140,8 +145,28 @@ const Pickup: React.FC<PickupProps> = () => {
 
   const handleOfferSubmit = async (data: any): Promise<void> => {
     try {
-      showSnackbar("Pickup offer created successfully! (Mock implementation)", "success");
+      if (!currentUser?.id) {
+        showSnackbar("User not authenticated. Please log in.", "error");
+        return;
+      }
+
+      // Convert camelCase to PascalCase for C# backend
+      const offerData = {
+        userId: currentUser.id,
+        airport: data.airport,
+        vehicleType: data.vehicleType || null, // Handle empty string
+        maxPassengers: data.maxPassengers,
+        canHandleLuggage: data.canHandleLuggage,
+        serviceArea: data.serviceArea || null, // Handle empty string
+        baseRate: parseFloat(data.baseRate) || 0, // Ensure it's a number
+        languages: data.languages || null, // Handle empty string
+        additionalServices: data.additionalServices || null, // Handle empty string
+      };
+
+      await createOffer(offerData).unwrap();
+      showSnackbar("Pickup offer created successfully!", "success");
       setShowCreateDialog(false);
+      refetchOffers(); // Refresh the offers list
     } catch (error) {
       console.error("Error creating offer:", error);
       const errorMessage =
@@ -820,7 +845,7 @@ const Pickup: React.FC<PickupProps> = () => {
             <PickupOfferForm
               onSubmit={handleOfferSubmit}
               onCancel={() => setShowCreateDialog(false)}
-              loading={false}
+              loading={createOfferLoading}
             />
           )}
         </DialogContent>
